@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Mage War: Hero vs Bot (Updated)</title>
+    <style>
+        :root { --p1: #00d2ff; --bot: #ff4757; --warn: #ffa502; --freeze: #74b9ff; }
+        body { font-family: 'Segoe UI', sans-serif; background: #05070a; color: white; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; height: 100vh; justify-content: center; transition: background 0.5s; }
+        
+        /* Aura Efek */
+        body.active-p1 { background: radial-gradient(circle at 30%, #003a4d 0%, #05070a 60%); }
+        body.active-bot { background: radial-gradient(circle at 70%, #4d0000 0%, #05070a 60%); }
+
+        #event-banner { position: absolute; top: 20px; background: rgba(255, 255, 255, 0.1); padding: 10px 40px; border-radius: 50px; font-weight: bold; text-transform: uppercase; opacity: 0; z-index: 10; border: 2px solid transparent; }
+        .event-active { opacity: 1 !important; border-color: gold !important; box-shadow: 0 0 20px gold; }
+
+        #global-timer { font-size: 3.5rem; font-weight: 900; color: var(--warn); margin: 10px 0; z-index: 5; }
+        
+        .game-wrapper { display: flex; gap: 50px; position: relative; }
+
+        /* Card Styling */
+        .card { background: #11141d; border: 3px solid #222; border-radius: 20px; padding: 25px; width: 320px; transition: 0.5s; position: relative; z-index: 2; }
+        
+        /* Debuff Visual */
+        .frozen { border-color: var(--freeze) !important; box-shadow: 0 0 30px var(--freeze) !important; filter: saturate(0.5) brightness(1.2); }
+        .frozen-label { color: var(--freeze); font-weight: bold; display: block; text-align: center; margin-bottom: 5px; }
+
+        @keyframes pulse-p1 { 0%, 100% { box-shadow: 0 0 20px var(--p1); } 50% { box-shadow: 0 0 60px var(--p1); } }
+        @keyframes pulse-bot { 0%, 100% { box-shadow: 0 0 20px var(--bot); } 50% { box-shadow: 0 0 60px var(--bot); } }
+
+        .active-p1 #p1-card:not(.frozen) { border-color: var(--p1); animation: pulse-p1 2s infinite; transform: scale(1.05); }
+        .active-bot #bot-card:not(.frozen) { border-color: var(--bot); animation: pulse-bot 2s infinite; transform: scale(1.05); }
+        .active-p1 #bot-card, .active-bot #p1-card { opacity: 0.3; filter: grayscale(0.7); transform: scale(0.9); }
+
+        .bar-bg { height: 18px; background: #1e222d; border-radius: 9px; margin: 10px 0; overflow: hidden; border: 1px solid #333; position: relative; }
+        .hp-fill { background: linear-gradient(90deg, #ff416c, #ff4b2b); width: 100%; height: 100%; transition: 0.3s; }
+        .mana-fill { background: linear-gradient(90deg, #12c2e9, #c471ed); width: 20%; height: 100%; transition: 0.3s; }
+        .bar-text { position: absolute; width: 100%; text-align: center; font-size: 0.7rem; font-weight: bold; top: 1px; color: white; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .skill-box { position: relative; border-radius: 8px; overflow: hidden; background: #2d3436; height: 50px; }
+        button { width: 100%; height: 100%; border: none; background: transparent; color: white; font-weight: bold; cursor: pointer; z-index: 5; position: relative; font-size: 0.7rem; }
+        button:disabled { cursor: not-allowed; opacity: 0.2; }
+        .cd-text { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 900; color: white; z-index: 6; pointer-events: none; }
+        .cd-overlay { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); z-index: 1; transition: height linear; }
+
+        #log { background: #000; width: 690px; height: 100px; margin-top: 25px; padding: 15px; border-radius: 10px; border: 1px solid #333; overflow-y: auto; font-family: monospace; font-size: 0.85rem; color: #00ff00; }
+        .shake { animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-8px, 8px); } 50% { transform: translate(8px, -8px); } }
+        
+        /* Mobile Optimization */
+        @media screen and (max-width: 768px) {
+            body {
+                overflow-y: auto; /* Izinkan scroll jika layar sangat pendek */
+                justify-content: flex-start;
+                padding: 20px 0;
+            }
+
+            #global-timer {
+                font-size: 2.5rem;
+                margin: 5px 0;
+            }
+
+            .game-wrapper {
+                flex-direction: column; /* Susun atas bawah */
+                gap: 20px;
+                align-items: center;
+                width: 100%;
+            }
+
+            .card {
+                width: 90%; /* Lebar kartu hampir memenuhi layar */
+                max-width: 350px;
+                padding: 15px;
+            }
+
+            /* Penyesuaian Aura untuk Mobile */
+            body.active-p1 { 
+                background: radial-gradient(circle at center 25%, #003a4d 0%, #05070a 60%); 
+            }
+            body.active-bot { 
+                background: radial-gradient(circle at center 75%, #4d0000 0%, #05070a 60%); 
+            }
+
+            /* Ukuran Grid Skill lebih bersahabat untuk jempol */
+            .grid {
+                grid-template-columns: 1fr 1fr 1fr; /* 3 kolom agar tidak terlalu panjang ke bawah */
+                gap: 8px;
+            }
+
+            /* Skill terakhir (Ulti) dibuat melebar jika jumlahnya ganjil */
+            .skill-box:last-child {
+                grid-column: span 3;
+            }
+
+            #log {
+                width: 90%;
+                margin-bottom: 20px;
+            }
+
+            #event-banner {
+                font-size: 0.8rem;
+                padding: 5px 20px;
+            }
+        }
+
+    </style>
+</head>
+<body class="active-p1">
+
+    <div id="event-banner">EVENT ACTIVE</div>
+    <div id="global-timer">5.0</div>
+
+    <div class="game-wrapper" id="arena">
+        <div class="card" id="p1-card">
+            <div id="p1-debuff" class="frozen-label"></div>
+            <h2 style="color: var(--p1)">Qabil (YOU)</h2>
+            <div class="bar-bg"><div id="p1-hp" class="hp-fill"></div><div class="bar-text" id="p1-hp-t">100/100</div></div>
+            <div class="bar-bg"><div id="p1-mana" class="mana-fill"></div><div class="bar-text" id="p1-mana-t">30/100</div></div>
+            <div class="grid" id="p1-skills"></div>
+        </div>
+
+        <div class="card" id="bot-card">
+            <div id="bot-debuff" class="frozen-label"></div>
+            <h2 style="color: var(--bot)">Jovita (Bot)</h2>
+            <div class="bar-bg"><div id="bot-hp" class="hp-fill"></div><div class="bar-text" id="bot-hp-t">100/100</div></div>
+            <div class="bar-bg"><div id="bot-mana" class="mana-fill"></div><div class="bar-text" id="bot-mana-t">30/100</div></div>
+            <div class="grid" id="bot-skills"></div>
+        </div>
+    </div>
+
+    <div id="log">> Battle Start! Gunakan FREEZE untuk menghentikan musuh!</div>
+
+    <script>
+        const SKILLS = [
+            { id: 'strike', name: 'STRIKE', cost: 0, cd: 3000, color: '#555' },
+            { id: 'heal', name: 'HEAL', cost: 40, cd: 10000, color: '#27ae60' },
+            { id: 'freeze', name: 'FREEZE', cost: 50, cd: 30000, color: '#74b9ff' },
+            { id: 'shield', name: 'SHIELD', cost: 30, cd: 12000, color: '#2980b9' },
+            { id: 'ulti', name: 'ULTI', cost: 85, cd: 20000, color: '#c0392b' }
+        ];
+
+        let game = {
+            turn: 'p1', timer: 5.0, active: true,
+            event: { type: 'none', time: 0 },
+            p1: { hp: 100, mana: 30, shield: 0, debuff: 0, cds: { strike:0, heal:0, shield:0, ulti:0, freeze:0 } },
+            bot: { hp: 100, mana: 30, shield: 0, debuff: 0, cds: { strike:0, heal:0, shield:0, ulti:0, freeze:0 } }
+        };
+
+        function init() {
+            [ 'p1', 'bot' ].forEach(p => {
+                const cont = document.getElementById(`${p}-skills`);
+                SKILLS.forEach(s => {
+                    cont.innerHTML += `
+                        <div class="skill-box">
+                            <div id="${p}-${s.id}-txt" class="cd-text"></div>
+                            <button id="${p}-${s.id}-btn" onclick="useSkill('${s.id}', '${p}')" style="border-bottom: 3px solid ${s.color}">${s.name}</button>
+                            <div id="${p}-${s.id}-cd" class="cd-overlay"></div>
+                        </div>`;
+                });
+            });
+        }
+
+        setInterval(() => {
+            if (!game.active) return;
+            
+            // Check Debuff (Freeze)
+            if (game[game.turn].debuff > 0) {
+                game[game.turn].debuff -= 0.1;
+                if (game[game.turn].debuff <= 0) {
+                    game[game.turn].debuff = 0;
+                    document.getElementById(`${game.turn}-card`).classList.remove('frozen');
+                    document.getElementById(`${game.turn}-debuff`).innerText = "";
+                    log(`${game.turn.toUpperCase()} sudah tidak membeku!`);
+                    changeTurn(); // Giliran berakhir setelah freeze selesai
+                } else {
+                    document.getElementById(`${game.turn}-debuff`).innerText = "FROZEN (" + game[game.turn].debuff.toFixed(1) + "s)";
+                }
+            } else {
+                game.timer -= 0.1;
+                if (game.timer <= 0) changeTurn();
+            }
+
+            document.getElementById('global-timer').innerText = game.timer.toFixed(1);
+
+            // Regen Logic
+            let mR = 0.3, hR = 0;
+            if (game.event.time > 0) {
+                game.event.time -= 0.1;
+                if (game.event.type === 'MANA') mR = 1.2;
+                if (game.event.type === 'HEALTH') hR = 0.25;
+                if (game.event.time <= 0) document.getElementById('event-banner').className = '';
+            } else if (Math.random() < 0.003) startEvent();
+
+            ['p1', 'bot'].forEach(i => {
+                game[i].mana = Math.min(100, game[i].mana + mR);
+                game[i].hp = Math.min(100, game[i].hp + hR);
+            });
+            updateUI();
+        }, 100);
+
+        function startEvent() {
+            game.event.type = Math.random() > 0.5 ? 'MANA' : 'HEALTH';
+            game.event.time = 30;
+            const b = document.getElementById('event-banner');
+            b.innerText = `${game.event.type} BOOST ACTIVE!`;
+            b.className = 'event-active';
+            log(`!!! EVENT: ${game.event.type} BOOST DIMULAI !!!`);
+        }
+
+        function useSkill(sid, pid) {
+            if (pid !== game.turn || !game.active || game[pid].debuff > 0) return;
+            const s = SKILLS.find(x => x.id === sid);
+            const now = Date.now();
+            const opp = pid === 'p1' ? 'bot' : 'p1';
+
+            if (now < game[pid].cds[sid] || game[pid].mana < s.cost) return;
+
+            game[pid].mana -= s.cost;
+            game[pid].cds[sid] = now + s.cd;
+
+            if (sid === 'strike') {
+                let d = calc(10, 16, opp);
+                game[opp].hp -= d;
+                game[pid].mana = Math.min(100, game[pid].mana + 15);
+                log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP.`);
+            } else if (sid === 'heal') {
+                game[pid].hp = Math.min(100, game[pid].hp + 25);
+                log(`${pid.toUpperCase()} menggunakan Heal!`);
+            } else if (sid === 'shield') {
+                game[pid].shield = 2;
+                log(`${pid.toUpperCase()} mengaktifkan Shield!`);
+            } else if (sid === 'freeze') {
+                game[opp].debuff = 3.0; // Musuh beku 3 detik
+                document.getElementById(`${opp}-card`).classList.add('frozen');
+                log(`❄️ ${pid.toUpperCase()} membekukan ${opp.toUpperCase()}!`);
+            } else if (sid === 'ulti') {
+                let d = calc(35, 50, opp); // Damage Updated 35-50
+                game[opp].hp -= d;
+                document.getElementById('arena').classList.add('shake');
+                setTimeout(() => document.getElementById('arena').classList.remove('shake'), 300);
+                log(`💥 ${pid.toUpperCase()} ULTIMATE! ${opp.toUpperCase()} -${d} HP.`);
+            }
+
+            if (game[opp].hp <= 0) win(pid);
+            else changeTurn();
+        }
+
+        function changeTurn() {
+            game.turn = game.turn === 'p1' ? 'bot' : 'p1';
+            game.timer = 5.0;
+            document.body.className = `active-${game.turn}`;
+            if (game[game.turn].shield > 0) game[game.turn].shield--;
+
+            // Auto-skip jika sedang beku
+            if (game[game.turn].debuff > 0) return; 
+
+            if (game.turn === 'bot' && game.active) {
+                setTimeout(botAI, 1000);
+            }
+        }
+
+        function botAI() {
+            if (game.turn !== 'bot' || !game.active || game.bot.debuff > 0) return;
+            const now = Date.now();
+            
+            if (game.bot.mana >= 85 && now >= game.bot.cds['ulti']) return useSkill('ulti', 'bot');
+            if (game.bot.mana >= 50 && now >= game.bot.cds['freeze'] && Math.random() > 0.4) return useSkill('freeze', 'bot');
+            if (game.bot.hp < 40 && game.bot.mana >= 40 && now >= game.bot.cds['heal']) return useSkill('heal', 'bot');
+            if (game.bot.shield === 0 && game.bot.mana >= 30 && now >= game.bot.cds['shield']) return useSkill('shield', 'bot');
+            
+            useSkill('strike', 'bot');
+        }
+
+        function updateUI() {
+            const now = Date.now();
+            ['p1', 'bot'].forEach(p => {
+                document.getElementById(`${p}-hp`).style.width = game[p].hp + "%";
+                document.getElementById(`${p}-mana`).style.width = game[p].mana + "%";
+                document.getElementById(`${p}-hp-t`).innerText = Math.ceil(game[p].hp) + "/100";
+                document.getElementById(`${p}-mana-t`).innerText = Math.floor(game[p].mana) + "/100";
+                
+                SKILLS.forEach(s => {
+                    const btn = document.getElementById(`${p}-${s.id}-btn`);
+                    const over = document.getElementById(`${p}-${s.id}-cd`);
+                    const txt = document.getElementById(`${p}-${s.id}-txt`);
+                    const rem = game[p].cds[s.id] - now;
+                    
+                    if (rem > 0) {
+                        over.style.height = (rem / s.cd * 100) + "%";
+                        txt.innerText = (rem / 1000).toFixed(1);
+                        btn.disabled = true;
+                    } else {
+                        over.style.height = "0%"; txt.innerText = "";
+                        // Disable jika bukan giliran, atau mana kurang, atau sedang beku
+                        btn.disabled = (game.turn !== p || game[p].mana < s.cost || game[p].debuff > 0);
+                    }
+                });
+            });
+        }
+
+        function calc(min, max, t) {
+            let b = Math.floor(Math.random()*(max-min+1))+min;
+            return game[t].shield > 0 ? Math.floor(b*0.5) : b;
+        }
+
+        function log(m) {
+            const l = document.getElementById('log');
+            l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
+        }
+
+        function win(id) {
+            game.active = false;
+            alert(id === 'p1' ? "SELAMAT! KAMU MENANG!" : "DARK BOT MENGALAHKANMU!");
+            location.reload();
+        }
+
+        init();
+    </script>
+</body>
+</html>
