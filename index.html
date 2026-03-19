@@ -135,38 +135,42 @@
             body {
                 overflow-y: auto; 
                 justify-content: flex-start; 
-                padding: 10px 0; 
+                padding: 20px 0; 
             }
 
-            /* Mengecilkan banner & timer agar tidak makan tempat */
+            /* Banner tetap di paling atas */
             #event-banner { 
                 font-size: 0.7rem; 
-                padding: 5px 5px; 
+                padding: 5px 15px; 
                 top: 5px; 
             }
+
             #global-timer { 
                 font-size: 2.2rem; 
-                margin: 25px 0; 
+                margin: 40px 0 10px 0; /* Memberi ruang untuk banner */
             }
 
             .game-wrapper { 
-                margin-top: 50px;
+                display: flex;
                 flex-direction: column; 
-                gap: 25px; /* Jarak antar kartu dipersempit */
+                gap: 15px; 
                 align-items: center; 
                 width: 100%; 
             }
 
+            /* --- LOGIKA PENUKARAN POSISI --- */
+            #bot-card { order: 1; } /* Bot di urutan pertama (Atas) */
+            #p1-card { order: 2; }  /* Player di urutan kedua (Bawah) */
+
             .card { 
-                width: 85%; /* Sedikit lebih lebar agar muat 3 kolom skill */
-                max-width: 370px; 
+                width: 85%; 
+                max-width: 310px; 
                 padding: 12px; 
                 border-width: 2px;
             }
 
-            /* Header kartu (Nama Hero) dibuat lebih kecil */
             .card h2 { 
-                font-size: 1.1rem; 
+                font-size: 1rem; 
                 margin: 5px 0; 
             }
 
@@ -177,14 +181,15 @@
             }
 
             .skill-box { 
-                height: 50px; /* Tombol skill lebih slim */
+                height: 45px; 
             }
 
             button { 
-                font-size: 0.7rem; 
+                font-size: 0.65rem; 
             }
 
             #log { 
+                order: 3; /* Log berada di paling bawah setelah kartu player */
                 width: 85%; 
                 height: 80px; 
                 margin-top: 15px; 
