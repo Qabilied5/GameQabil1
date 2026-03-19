@@ -47,14 +47,149 @@
         #log { background: #000; width: 690px; height: 100px; margin-top: 25px; padding: 15px; border-radius: 10px; border: 1px solid #333; overflow-y: auto; font-family: monospace; font-size: 0.85rem; color: #00ff00; }
         .shake { animation: shake 0.3s; }
         @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-8px, 8px); } 50% { transform: translate(8px, -8px); } }
+
+        .shield-active {
+            border: 4px solid #2980b9 !important;
+            box-shadow: 0 0 20px #3498db;
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        /* Opsional: Tambahkan indikator teks shield di dalam kartu */
+        .shield-active::after {
+            content: "🛡️ SHIELD ACTIVE";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2980b9;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Fire Effect */
+        @keyframes fire-glow {
+            0% { box-shadow: 0 -10px 20px #e67e22, 0 0 15px #f1c40f; }
+            50% { box-shadow: 0 -20px 40px #d35400, 0 0 25px #e67e22; }
+            100% { box-shadow: 0 -10px 20px #e67e22, 0 0 15px #f1c40f; }
+        }
+
+        @keyframes fire-flicker {
+            0% { transform: scale(1) translateY(0); }
+            25% { transform: scale(1.01) translateY(-1px) rotate(0.5deg); }
+            50% { transform: scale(1) translateY(0) rotate(-0.5deg); }
+            75% { transform: scale(1.01) translateY(-1px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        .burning {
+            border-color: #e67e22 !important;
+            background: linear-gradient(to top, #11141d, #4d2600) !important; /* Gradien merah api */
+            animation: fire-glow 1.5s infinite alternate, fire-flicker 0.2s infinite !important;
+            position: relative;
+        }
+
+        /* Partikel Api (Opsional: Muncul di atas kartu) */
+        .burning::before {
+            content: "🔥";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px gold);
+            animation: fire-flicker 0.3s infinite;
+            z-index: 10;
+        }
+
+        @keyframes heal-glow {
+            0% { box-shadow: 0 0 20px #27ae60; border-color: #2ecc71; }
+            50% { box-shadow: 0 0 50px #2ecc71; border-color: #f1f2f6; }
+            100% { box-shadow: 0 0 20px #27ae60; border-color: #2ecc71; }
+        }
+
+        .healing-active {
+            animation: heal-glow 0.8s ease-in-out !important;
+            z-index: 10;
+        }
+
+        .heal-particle {
+            position: absolute;
+            color: #2ecc71;
+            font-size: 1.5rem;
+            pointer-events: none;
+            z-index: 100;
+            animation: fly-up 1s forwards ease-out;
+            text-shadow: 0 0 10px #27ae60;
+        }
+
+        @keyframes fly-up {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
         
         @media screen and (max-width: 768px) {
-            body { overflow-y: auto; justify-content: flex-start; padding: 20px 0; }
-            .game-wrapper { flex-direction: column; gap: 20px; align-items: center; width: 100%; }
-            .card { width: 70%; max-width: 350px; padding: 15px; }
-            .grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-            .skill-box:last-child { grid-column: span 1; }
-            #log { width: 90%; margin-bottom: 20px; }
+            body {
+                overflow-y: auto; 
+                justify-content: flex-start; 
+                padding: 10px 0; 
+            }
+
+            /* Mengecilkan banner & timer agar tidak makan tempat */
+            #event-banner { 
+                font-size: 0.7rem; 
+                padding: 5px 5px; 
+                top: 5px; 
+            }
+            #global-timer { 
+                font-size: 2.2rem; 
+                margin: 25px 0; 
+            }
+
+            .game-wrapper { 
+                margin-top: 50px;
+                flex-direction: column; 
+                gap: 25px; /* Jarak antar kartu dipersempit */
+                align-items: center; 
+                width: 100%; 
+            }
+
+            .card { 
+                width: 85%; /* Sedikit lebih lebar agar muat 3 kolom skill */
+                max-width: 370px; 
+                padding: 12px; 
+                border-width: 2px;
+            }
+
+            /* Header kartu (Nama Hero) dibuat lebih kecil */
+            .card h2 { 
+                font-size: 1.1rem; 
+                margin: 5px 0; 
+            }
+
+            .grid { 
+                grid-template-columns: 1fr 1fr 1fr; 
+                gap: 5px; 
+                margin-top: 10px; 
+            }
+
+            .skill-box { 
+                height: 50px; /* Tombol skill lebih slim */
+            }
+
+            button { 
+                font-size: 0.7rem; 
+            }
+
+            #log { 
+                width: 85%; 
+                height: 80px; 
+                margin-top: 15px; 
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -85,13 +220,13 @@
 
     <script>
         const SKILLS = [
-            { id: 'strike', name: 'STRIKE', cost: 0, cd: 3000, color: '#555' },
-            { id: 'heal', name: 'HEAL', cost: 40, cd: 10000, color: '#27ae60' },
-            { id: 'burning', name: 'BURNING', cost: 35, cd: 15000, color: '#e67e22' },
-            { id: 'vampire', name: 'VAMPIRE', cost: 45, cd: 12000, color: '#8e44ad' },
-            { id: 'shield', name: 'SHIELD', cost: 30, cd: 12000, color: '#2980b9' },
+            { id: 'strike', name: 'STRIKE', cost: 5, cd: 5000, color: '#555' },
+            { id: 'heal', name: 'HEAL', cost: 50, cd: 15000, color: '#27ae60' },
+            { id: 'burning', name: 'BURNING', cost: 45, cd: 20000, color: '#e67e22' },
+            { id: 'vampire', name: 'VAMPIRE', cost: 45, cd: 15000, color: '#8e44ad' },
+            { id: 'shield', name: 'SHIELD', cost: 20, cd: 12000, color: '#2980b9' },
             { id: 'freeze', name: 'FREEZE', cost: 50, cd: 30000, color: '#74b9ff' },
-            { id: 'ulti', name: 'ULTI', cost: 85, cd: 20000, color: '#c0392b' }
+            { id: 'ulti', name: 'ULTI', cost: 65, cd: 30000, color: '#c0392b' }
         ];
 
         let game = {
@@ -203,16 +338,31 @@
                 log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP.`);
             } else if (sid === 'heal') {
                 game[pid].hp = Math.min(100, game[pid].hp + 25);
-                log(`${pid.toUpperCase()} menggunakan Heal!`);
+                
+                // --- EFEK VISUAL HEAL ---
+                const card = document.getElementById(`${pid}-card`);
+                card.classList.add('healing-active');
+                
+                // Munculkan partikel "+" hijau
+                for(let i=0; i<5; i++) {
+                    createHealParticle(pid);
+                }
+
+                // Hapus class animasi setelah 800ms agar bisa dipicu lagi nanti
+                setTimeout(() => card.classList.remove('healing-active'), 800);
+                
+                log(`${pid.toUpperCase()} menggunakan Heal! (+25 HP)`);
             } else if (sid === 'burning') {
                 game[opp].burn = 6.0;
                 log(`🔥 ${pid.toUpperCase()} membakar ${opp.toUpperCase()} selama 6 detik!`);
             } else if (sid === 'vampire') {
-                let d = 15;
-                if (game[opp].shield > 0) d = 7;
+                let baseDamage = 20;
+                // Cek jika musuh punya shield, potong 50%
+                let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.5) : baseDamage;
+                
                 game[opp].hp -= d;
-                game[pid].hp = Math.min(100, game[pid].hp + 30);
-                log(`🦇 ${pid.toUpperCase()} Vampire! Sedot ${d} HP & Heal 30 HP.`);
+                game[pid].hp = Math.min(100, game[pid].hp + 20);
+                log(`🦇 ${pid.toUpperCase()} Vampire! Sedot ${d} HP & Heal 20 HP.`);
             } else if (sid === 'shield') {
                 game[pid].shield = 2;
                 log(`${pid.toUpperCase()} mengaktifkan Shield!`);
@@ -243,17 +393,69 @@
 
         function botAI() {
             if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+            
             const now = Date.now();
             const b = game.bot;
+            const p = game.p1;
             
-            if (b.mana >= 85 && now >= b.cds['ulti']) return useSkill('ulti', 'bot');
-            if (b.mana >= 50 && now >= b.cds['freeze'] && Math.random() > 0.4) return useSkill('freeze', 'bot');
-            if (b.hp < 50 && b.mana >= 45 && now >= b.cds['vampire']) return useSkill('vampire', 'bot');
-            if (b.mana >= 35 && now >= b.cds['burning'] && game.p1.burn <= 0) return useSkill('burning', 'bot');
-            if (b.hp < 40 && b.mana >= 40 && now >= b.cds['heal']) return useSkill('heal', 'bot');
-            if (b.shield === 0 && b.mana >= 30 && now >= b.cds['shield']) return useSkill('shield', 'bot');
+            const canUse = (id) => {
+                const s = SKILLS.find(x => x.id === id);
+                return b.mana >= s.cost && now >= b.cds[id];
+            };
+
+            let decision = null;
+
+            // --- 1. INSTING AGRESIF: ULTI OVERFLOW ---
+            // Jika mana bot 65 atau lebih, prioritaskan ULTI untuk damage besar
+            if (b.mana >= 65 && canUse('ulti')) {
+                decision = 'ulti';
+            }
+
+            // --- 2. STRATEGI CUSTOM: MANA COUNTER ---
+            // Jika Mana Player > 70%, Bot waspada
+            if (!decision && p.mana >= 70) {
+                if (canUse('freeze') && p.freeze <= 0) {
+                    decision = 'freeze';
+                } else if (canUse('heal') && b.hp < 100) {
+                    decision = 'heal';
+                }
+            }
+
+            // --- 3. STRATEGI UTAMA BERDASARKAN HP ---
+
+            if (!decision && b.hp < 50) {
+                // KONDISI DARAH DI BAWAH 50% (PRIORITAS SURVIVAL)
+                if (canUse('heal')) {
+                    decision = 'heal'; 
+                } else if (canUse('vampire')) {
+                    decision = 'vampire'; 
+                } else if (canUse('strike')) {
+                    decision = 'strike'; 
+                }
+            } 
             
-            useSkill('strike', 'bot');
+            if (!decision && b.hp >= 50) {
+                // KONDISI DARAH DI ATAS 50% (PRIORITAS BURNING)
+                if (p.burn <= 0 && canUse('burning')) {
+                    decision = 'burning'; 
+                } else if (canUse('vampire') && b.hp < 95) {
+                    decision = 'vampire'; 
+                } else if (canUse('strike')) {
+                    decision = 'strike';
+                }
+            }
+
+            // --- 4. FALLBACK / FINISHER ---
+            if (!decision) {
+                if (canUse('strike')) decision = 'strike';
+            }
+
+            // --- EKSEKUSI ---
+            if (decision) {
+                useSkill(decision, 'bot');
+            } else {
+                changeTurn();
+            }
         }
 
         function updateUI() {
@@ -263,6 +465,13 @@
                 document.getElementById(`${p}-mana`).style.width = game[p].mana + "%";
                 document.getElementById(`${p}-hp-t`).innerText = Math.ceil(Math.max(0, game[p].hp)) + "/100";
                 document.getElementById(`${p}-mana-t`).innerText = Math.floor(game[p].mana) + "/100";
+
+                const card = document.getElementById(`${p}-card`);
+                if (game[p].shield > 0) {
+                    card.classList.add('shield-active');
+                } else {
+                    card.classList.remove('shield-active');
+                }
                 
                 SKILLS.forEach(s => {
                     const btn = document.getElementById(`${p}-${s.id}-btn`);
@@ -298,6 +507,27 @@
                 alert(id === 'p1' ? "SELAMAT! KAMU MENANG!" : "DARK BOT MENGALAHKANMU!");
                 location.reload();
             }, 100);
+        }
+
+        function createHealParticle(pid) {
+            const card = document.getElementById(`${pid}-card`);
+            const rect = card.getBoundingClientRect();
+            const p = document.createElement('div');
+            
+            p.className = 'heal-particle';
+            p.innerText = '+';
+            
+            // Posisi acak di sekitar kartu
+            const x = rect.left + Math.random() * rect.width;
+            const y = rect.top + Math.random() * (rect.height / 2);
+            
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            
+            document.body.appendChild(p);
+            
+            // Hapus elemen dari DOM setelah animasi selesai
+            setTimeout(() => p.remove(), 1000);
         }
 
         init();
