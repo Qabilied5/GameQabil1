@@ -130,6 +130,56 @@
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
         }
+
+        /* ULTI VISUAL */
+
+        .ulti-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            animation: flash-anim 0.5s ease-out;
+        }
+
+        @keyframes flash-anim {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        /* Shockwave Ring */
+        .shockwave {
+            position: absolute;
+            border: 5px solid #ff4757;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99;
+            animation: wave-anim 0.6s ease-out forwards;
+        }
+
+        @keyframes wave-anim {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 500px; height: 500px; opacity: 0; margin-left: -250px; margin-top: -250px; }
+        }
+
+        /* Angka Damage Melayang */
+        .dmg-popup {
+            position: absolute;
+            color: #ff4757;
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px black, 0 0 20px red;
+            pointer-events: none;
+            z-index: 1001;
+            animation: dmg-fly 0.8s forwards ease-out;
+        }
+
+        @keyframes dmg-fly {
+            0% { transform: scale(0.5) translateY(0); opacity: 1; }
+            50% { transform: scale(1.5) translateY(-50px); }
+            100% { transform: scale(1) translateY(-120px); opacity: 0; }
+        }
         
         @media screen and (max-width: 768px) {
             body {
@@ -377,10 +427,42 @@
                 log(`❄️ ${pid.toUpperCase()} membekukan ${opp.toUpperCase()}!`);
             } else if (sid === 'ulti') {
                 let d = calc(35, 50, opp);
+                
+                // --- DRAMATIC ULTI EFFECTS ---
+                
+                // 1. Flash Layar
+                const flash = document.createElement('div');
+                flash.className = 'ulti-flash';
+                document.body.appendChild(flash);
+                setTimeout(() => flash.remove(), 500);
+
+                // 2. Shockwave dari kartu penyerang
+                const card = document.getElementById(`${pid}-card`);
+                const rect = card.getBoundingClientRect();
+                const wave = document.createElement('div');
+                wave.className = 'shockwave';
+                wave.style.left = (rect.left + rect.width/2) + 'px';
+                wave.style.top = (rect.top + rect.height/2) + 'px';
+                document.body.appendChild(wave);
+                setTimeout(() => wave.remove(), 600);
+
+                // 3. Damage Popup di kartu musuh
+                const oppCard = document.getElementById(`${opp}-card`);
+                const oppRect = oppCard.getBoundingClientRect();
+                const popup = document.createElement('div');
+                popup.className = 'dmg-popup';
+                popup.innerText = `-${d}`;
+                popup.style.left = (oppRect.left + oppRect.width/2 - 30) + 'px';
+                popup.style.top = (oppRect.top + oppRect.height/2) + 'px';
+                document.body.appendChild(popup);
+                setTimeout(() => popup.remove(), 800);
+
+                // Eksekusi damage & shake
                 game[opp].hp -= d;
                 document.getElementById('arena').classList.add('shake');
-                setTimeout(() => document.getElementById('arena').classList.remove('shake'), 300);
-                log(`💥 ${pid.toUpperCase()} ULTIMATE! ${opp.toUpperCase()} -${d} HP.`);
+                setTimeout(() => document.getElementById('arena').classList.remove('shake'), 500);
+                
+                log(`💥 ULTIMATE: ${pid.toUpperCase()} Menghancurkan ${opp.toUpperCase()} sebesar ${d} HP!`);
             }
 
             if (game[opp].hp <= 0) win(pid);
