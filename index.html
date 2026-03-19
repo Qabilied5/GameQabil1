@@ -70,6 +70,17 @@
             font-weight: bold;
         }
 
+        .shield-hit {
+            animation: shield-pulse 0.3s ease-out;
+            box-shadow: 0 0 40px #3498db !important;
+        }
+
+        @keyframes shield-pulse {
+            0% { transform: scale(1.02); }
+            50% { transform: scale(1.1); border-color: #fff; }
+            100% { transform: scale(1.02); }
+        }
+
         /* Fire Effect */
         @keyframes fire-glow {
             0% { box-shadow: 0 -10px 20px #e67e22, 0 0 15px #f1c40f; }
@@ -181,6 +192,141 @@
             100% { transform: scale(1) translateY(-120px); opacity: 0; }
         }
         
+        /* Strike Effect */
+
+        .strike-effect {
+            position: absolute;
+            width: 200px;
+            height: 40px;
+            background: white;
+            box-shadow: 0 0 20px white, 0 0 40px var(--p1);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transform-origin: center;
+            border-radius: 50%;
+            animation: strike-anim 0.3s ease-out forwards;
+        }
+
+        @keyframes strike-anim {
+            0% { transform: scaleX(0) rotate(var(--rot)) skewX(-45deg); opacity: 1; }
+            50% { transform: scaleX(1.2) rotate(var(--rot)) skewX(-45deg); opacity: 1; }
+            100% { transform: scaleX(1) rotate(var(--rot)) skewX(-45deg); opacity: 0; }
+        }
+
+        /* Guncangan ringan khusus Strike */
+        .shake-lite {
+            animation: shake-lite-anim 0.2s ease-in-out;
+        }
+
+        @keyframes shake-lite-anim {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Efek Guncangan Layar yang lebih kuat */
+        .heavy-shake {
+            animation: heavy-shake-anim 0.2s 2;
+        }
+
+        /* VAMPIRE EFFECT (HEAVY) */
+
+        /* Aura untuk pengguna Vampire */
+        .vampire-active {
+            animation: vampire-glow 1s ease-in-out !important;
+            z-index: 10;
+        }
+
+        @keyframes vampire-glow {
+            0% { box-shadow: 0 0 20px #8e44ad; border-color: #9b59b6; }
+            50% { box-shadow: 0 0 60px #2c3e50, 0 0 30px #8e44ad; border-color: white; }
+            100% { box-shadow: 0 0 20px #8e44ad; border-color: #8e44ad; }
+        }
+
+        /* Partikel Energi yang berpindah */
+        .vamp-orb {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #ff4757, #8e44ad);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1500;
+            box-shadow: 0 0 15px #8e44ad;
+            animation: vamp-travel 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        @keyframes vamp-travel {
+            0% { transform: translate(0, 0) scale(1.5); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0.5); opacity: 0.5; }
+        }
+
+        /* Efek Layar Menggelap */
+        .vamp-dim {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 0, 30, 0.4);
+            pointer-events: none;
+            z-index: 1400;
+            opacity: 0;
+            animation: vamp-dim-anim 1s ease-out;
+        }
+
+        @keyframes vamp-dim-anim {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes heavy-shake-anim {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-3px, -2px) rotate(-1deg); }
+            20% { transform: translate(-5px, 0px) rotate(1deg); }
+            30% { transform: translate(5px, 2px) rotate(0deg); }
+            40% { transform: translate(3px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-5px, 1px) rotate(0deg); }
+            70% { transform: translate(5px, 1px) rotate(-1deg); }
+            80% { transform: translate(-3px, -1px) rotate(1deg); }
+            90% { transform: translate(3px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Partikel Percikan */
+        .strike-spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #ff4757;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1002;
+            box-shadow: 0 0 10px #ff4757;
+            animation: spark-fly 0.5s ease-out forwards;
+        }
+
+        @keyframes spark-fly {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* Flash Merah saat terkena Strike */
+        .hit-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.2);
+            pointer-events: none;
+            z-index: 2000;
+            opacity: 0;
+            animation: hit-flash-anim 0.2s ease-out;
+        }
+
+        @keyframes hit-flash-anim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         @media screen and (max-width: 768px) {
             body {
                 overflow-y: auto; 
@@ -256,7 +402,7 @@
     <div class="game-wrapper" id="arena">
         <div class="card" id="p1-card">
             <div id="p1-debuff" class="debuff-label"></div>
-            <h2 style="color: var(--p1)">Qabil (YOU)</h2>
+            <h2 style="color: var(--p1)">YOU</h2>
             <div class="bar-bg"><div id="p1-hp" class="hp-fill"></div><div class="bar-text" id="p1-hp-t">100/100</div></div>
             <div class="bar-bg"><div id="p1-mana" class="mana-fill"></div><div class="bar-text" id="p1-mana-t">30/100</div></div>
             <div class="grid" id="p1-skills"></div>
@@ -264,23 +410,23 @@
 
         <div class="card" id="bot-card">
             <div id="bot-debuff" class="debuff-label"></div>
-            <h2 style="color: var(--bot)">Jovita (Bot)</h2>
+            <h2 style="color: var(--bot)">Jovita (Enemy)</h2>
             <div class="bar-bg"><div id="bot-hp" class="hp-fill"></div><div class="bar-text" id="bot-hp-t">100/100</div></div>
             <div class="bar-bg"><div id="bot-mana" class="mana-fill"></div><div class="bar-text" id="bot-mana-t">30/100</div></div>
             <div class="grid" id="bot-skills"></div>
         </div>
     </div>
 
-    <div id="log">> Battle Start! Gunakan BURNING untuk damage berkala!</div>
+    <div id="log">> Battle Start! Gunakan BURNING untuk damage berkala!<br>> Vampire Menyerang dan menyerap darah musuh</div>
 
     <script>
         const SKILLS = [
             { id: 'strike', name: 'STRIKE', cost: 5, cd: 5000, color: '#555' },
-            { id: 'heal', name: 'HEAL', cost: 50, cd: 15000, color: '#27ae60' },
+            { id: 'heal', name: 'HEAL', cost: 50, cd: 13000, color: '#27ae60' },
             { id: 'burning', name: 'BURNING', cost: 45, cd: 20000, color: '#e67e22' },
             { id: 'vampire', name: 'VAMPIRE', cost: 45, cd: 15000, color: '#8e44ad' },
-            { id: 'shield', name: 'SHIELD', cost: 20, cd: 12000, color: '#2980b9' },
-            { id: 'freeze', name: 'FREEZE', cost: 50, cd: 30000, color: '#74b9ff' },
+            { id: 'shield', name: 'SHIELD', cost: 20, cd: 10000, color: '#2980b9' },
+            { id: 'freeze', name: 'FREEZE', cost: 15, cd: 30000, color: '#74b9ff' },
             { id: 'ulti', name: 'ULTI', cost: 65, cd: 30000, color: '#c0392b' }
         ];
 
@@ -347,7 +493,7 @@
             if (game.event.time > 0) {
                 game.event.time -= 0.1;
                 if (game.event.type === 'MANA') mR = 1.2;
-                if (game.event.type === 'HEALTH') hR = 0.25;
+                if (game.event.type === 'HEALTH') hR = 0.35;
                 if (game.event.time <= 0) document.getElementById('event-banner').className = '';
             } else if (Math.random() < 0.003) startEvent();
 
@@ -390,6 +536,10 @@
                 let d = calc(10, 16, opp);
                 game[opp].hp -= d;
                 game[pid].mana = Math.min(100, game[pid].mana + 15);
+                
+                // PANGGIL VISUAL DI SINI
+                createStrikeVisual(opp); 
+                
                 log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP.`);
             } else if (sid === 'heal') {
                 game[pid].hp = Math.min(100, game[pid].hp + 25);
@@ -410,17 +560,40 @@
             } else if (sid === 'burning') {
                 game[opp].burn = 6.0;
                 log(`🔥 ${pid.toUpperCase()} membakar ${opp.toUpperCase()} selama 6 detik!`);
+            } else if (sid === 'shield') {
+                // Memberikan 2 poin shield (akan berkurang tiap turn)
+                game[pid].shield = 2; 
+                
+                // Efek Visual Instan saat diaktifkan
+                const card = document.getElementById(`${pid}-card`);
+                card.style.transition = "all 0.3s ease";
+                card.style.transform = "scale(1.1)";
+                
+                // Partikel pelindung sederhana (opsional)
+                for(let i=0; i<3; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'heal-particle'; // Kita pinjam class heal tapi ganti warna di bawah
+                    p.innerText = '🛡️';
+                    p.style.left = (card.getBoundingClientRect().left + Math.random() * 100) + 'px';
+                    p.style.top = (card.getBoundingClientRect().top) + 'px';
+                    p.style.color = "#3498db";
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 1000);
+                }
+
+                setTimeout(() => card.style.transform = "scale(1.02)", 300);
+                
+                log(`🛡️ ${pid.toUpperCase()} Mengaktifkan Pelindung (75% Damage Reduction)!`);
             } else if (sid === 'vampire') {
                 let baseDamage = 20;
-                // Cek jika musuh punya shield, potong 50%
-                let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.5) : baseDamage;
+                // Ubah 0.5 menjadi 0.25 untuk pengurangan 75%
+                let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.25) : baseDamage;
                 
                 game[opp].hp -= d;
                 game[pid].hp = Math.min(100, game[pid].hp + 20);
+
+                createVampireVisual(pid, opp); 
                 log(`🦇 ${pid.toUpperCase()} Vampire! Sedot ${d} HP & Heal 20 HP.`);
-            } else if (sid === 'shield') {
-                game[pid].shield = 2;
-                log(`${pid.toUpperCase()} mengaktifkan Shield!`);
             } else if (sid === 'freeze') {
                 game[opp].freeze = 3.0;
                 document.getElementById(`${opp}-card`).classList.add('frozen');
@@ -580,7 +753,8 @@
 
         function calc(min, max, t) {
             let b = Math.floor(Math.random()*(max-min+1))+min;
-            return game[t].shield > 0 ? Math.floor(b*0.5) : b;
+            // Mengurangi 75% damage (hanya 25% yang masuk)
+            return game[t].shield > 0 ? Math.floor(b * 0.25) : b;
         }
 
         function log(m) {
@@ -591,30 +765,119 @@
         function win(id) {
             game.active = false;
             setTimeout(() => {
-                alert(id === 'p1' ? "SELAMAT! KAMU MENANG!" : "DARK BOT MENGALAHKANMU!");
+                alert(id === 'p1' ? "SELAMAT! KAMU MENANG!" : "JOVITA JAHAT MENGALAHKANMU!");
                 location.reload();
             }, 100);
         }
 
         function createHealParticle(pid) {
-            const card = document.getElementById(`${pid}-card`);
-            const rect = card.getBoundingClientRect();
-            const p = document.createElement('div');
+                    const card = document.getElementById(`${pid}-card`);
+                    const rect = card.getBoundingClientRect();
+                    const p = document.createElement('div');
+                    
+                    p.className = 'heal-particle';
+                    p.innerText = '+';
+                    
+                    // Posisi acak di sekitar kartu
+                    const x = rect.left + Math.random() * rect.width;
+                    const y = rect.top + Math.random() * (rect.height / 2);
+                    
+                    p.style.left = x + 'px';
+                    p.style.top = y + 'px';
+                    
+                    document.body.appendChild(p);
+                    
+                    // Hapus elemen dari DOM setelah animasi selesai
+                    setTimeout(() => p.remove(), 1000);
+                }
+
+            function createStrikeVisual(targetPid) {
+                const card = document.getElementById(`${targetPid}-card`);
+                const arena = document.getElementById('arena');
+                const rect = card.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                // 1. Flash Merah di seluruh layar
+                const flash = document.createElement('div');
+                flash.className = 'hit-flash';
+                document.body.appendChild(flash);
+                setTimeout(() => flash.remove(), 200);
+
+                // 2. Guncangan Arena (Bukan cuma kartu)
+                arena.classList.add('heavy-shake');
+                setTimeout(() => arena.classList.remove('heavy-shake'), 400);
+
+                // 3. Tambahkan Efek Sabetan (Strike Effect yang tadi)
+                const strike = document.createElement('div');
+                strike.className = 'strike-effect'; // Pastikan class dari jawaban sebelumnya masih ada
+                strike.style.left = (centerX - 100) + 'px';
+                strike.style.top = (centerY - 20) + 'px';
+                strike.style.setProperty('--rot', `${Math.random() * 360}deg`);
+                document.body.appendChild(strike);
+                setTimeout(() => strike.remove(), 300);
+
+                // 4. Ledakan Partikel "Darah/Percikan"
+                for (let i = 0; i < 12; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'strike-spark';
+                    
+                    // Arah ledakan acak
+                    const tx = (Math.random() - 0.5) * 200;
+                    const ty = (Math.random() - 0.5) * 200;
+                    
+                    spark.style.left = centerX + 'px';
+                    spark.style.top = centerY + 'px';
+                    spark.style.setProperty('--tx', `${tx}px`);
+                    spark.style.setProperty('--ty', `${ty}px`);
+                    
+                    document.body.appendChild(spark);
+                    setTimeout(() => spark.remove(), 500);
+                }
+        }
+
+        // VAMPIRE EFFECT  (HEAVY)
+
+        function createVampireVisual(sourcePid, targetPid) {
+            const sourceCard = document.getElementById(`${sourcePid}-card`);
+            const targetCard = document.getElementById(`${targetPid}-card`);
             
-            p.className = 'heal-particle';
-            p.innerText = '+';
-            
-            // Posisi acak di sekitar kartu
-            const x = rect.left + Math.random() * rect.width;
-            const y = rect.top + Math.random() * (rect.height / 2);
-            
-            p.style.left = x + 'px';
-            p.style.top = y + 'px';
-            
-            document.body.appendChild(p);
-            
-            // Hapus elemen dari DOM setelah animasi selesai
-            setTimeout(() => p.remove(), 1000);
+            const sRect = sourceCard.getBoundingClientRect();
+            const tRect = targetCard.getBoundingClientRect();
+
+            // 1. Efek Layar Menggelap
+            const dim = document.createElement('div');
+            dim.className = 'vamp-dim';
+            document.body.appendChild(dim);
+            setTimeout(() => dim.remove(), 1000);
+
+            // 2. Aura pada Pengguna
+            sourceCard.classList.add('vampire-active');
+            setTimeout(() => sourceCard.classList.remove('vampire-active'), 1000);
+
+            // 3. Kirim "Orbs" dari Musuh ke Pengguna
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const orb = document.createElement('div');
+                    orb.className = 'vamp-orb';
+                    
+                    // Titik awal (tengah kartu musuh dengan sedikit acak)
+                    const startX = tRect.left + tRect.width / 2 + (Math.random() - 0.5) * 50;
+                    const startY = tRect.top + tRect.height / 2 + (Math.random() - 0.5) * 50;
+                    
+                    // Hitung jarak ke kartu tujuan
+                    const dx = (sRect.left + sRect.width / 2) - startX;
+                    const dy = (sRect.top + sRect.height / 2) - startY;
+
+                    orb.style.left = startX + 'px';
+                    orb.style.top = startY + 'px';
+                    orb.style.setProperty('--dx', `${dx}px`);
+                    orb.style.setProperty('--dy', `${dy}px`);
+
+                    document.body.appendChild(orb);
+                    setTimeout(() => orb.remove(), 800);
+                }, i * 100); // Orbs muncul bergantian
+            }
         }
 
         init();
