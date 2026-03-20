@@ -541,12 +541,16 @@
             if (sid === 'strike') {
                 let d = calc(10, 16, opp);
                 game[opp].hp -= d;
-                game[pid].mana = Math.min(100, game[pid].mana + 15);
+
+                // LOGIKA BARU: Cek jika yang memukul adalah player ('p1')
+                // Jika iya, beri mana 25 (lebih besar), jika bot beri 15.
+                let manaGain = (pid === 'p1') ? 25 : 15; 
+                game[pid].mana = Math.min(100, game[pid].mana + manaGain);
                 
                 createStrikeVisual(opp); 
                 
-                log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP.`);
-           } else if (sid === 'heal') {
+                log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP. (+${manaGain} Mana)`);
+            } else if (sid === 'heal') {
                 // 1. Tentukan batas HP maksimal dan jumlah heal berdasarkan siapa yang pakai
                 const isBot = (pid === 'bot');
                 const maxHP = isBot ? 200 : 100;
