@@ -392,6 +392,57 @@
                 font-size: 0.75rem;
             }
         }
+
+        /* Mana Event Visual Efek */
+
+        @keyframes mana-glow-pulse {
+            0% { box-shadow: 0 0 5px #12c2e9; filter: brightness(1); }
+            50% { box-shadow: 0 0 20px #c471ed, 0 0 30px #12c2e9; filter: brightness(1.5); }
+            100% { box-shadow: 0 0 5px #12c2e9; filter: brightness(1); }
+        }
+
+        /* Efek Getar Halus */
+        @keyframes mana-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(1px); }
+            75% { transform: translateX(-1px); }
+        }
+
+        /* Class yang akan dipasang saat MANA BOOST aktif */
+        .mana-boost-active {
+            animation: mana-glow-pulse 1s infinite ease-in-out, mana-shake 0.1s infinite;
+            border: 1px solid white !important;
+        }
+
+        @keyframes mana-shaking-violent {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-2px, -1px); }
+            20% { transform: translate(-1px, 1px); }
+            30% { transform: translate(2px, 0px); }
+            40% { transform: translate(1px, -1px); }
+            50% { transform: translate(-1px, 1px); }
+            60% { transform: translate(-2px, 0px); }
+            70% { transform: translate(2px, 1px); }
+            80% { transform: translate(1px, -1px); }
+            90% { transform: translate(-1px, 0px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* Animasi cahaya yang berpendar (Glow) */
+        @keyframes mana-glow-bright {
+            0%, 100% { box-shadow: 0 0 10px #12c2e9, inset 0 0 5px white; filter: brightness(1.2); }
+            50% { box-shadow: 0 0 25px #c471ed, 0 0 40px #12c2e9, inset 0 0 15px white; filter: brightness(1.8); }
+        }
+
+        /* Class Gabungan untuk diaplikasikan saat MANA BOOST */
+        .mana-shaking-active {
+            animation: 
+                mana-shaking-violent 0.1s infinite, 
+                mana-glow-bright 0.6s infinite ease-in-out;
+            border: 1px solid #fff !important;
+            z-index: 10;
+        }
+
     </style>
 </head>
 <body class="active-p1">
@@ -490,12 +541,31 @@
 
             // Regen Logic
             let mR = 0.3, hR = 0;
+
             if (game.event.time > 0) {
                 game.event.time -= 0.1;
-                if (game.event.type === 'MANA') mR = 1.2;
-                if (game.event.type === 'HEALTH') hR = 0.35;
-                if (game.event.time <= 0) document.getElementById('event-banner').className = '';
-            } else if (Math.random() < 0.003) startEvent();
+                
+                if (game.event.type === 'MANA') {
+                    mR = 1.2;
+                    // Tambahkan efek getar ke semua bar mana (P1 dan Bot)
+                    document.querySelectorAll('.mana-fill').forEach(el => {
+                        el.classList.add('mana-shaking-active');
+                    });
+                }
+                
+                if (game.event.type === 'HEALTH') hR = 0.25;
+
+                // Jika waktu habis, hapus banner dan hapus efek getar
+                if (game.event.time <= 0) {
+                    document.getElementById('event-banner').className = '';
+                    document.querySelectorAll('.mana-fill').forEach(el => {
+                        el.classList.remove('mana-shaking-active');
+                    });
+                }
+                
+            } else if (Math.random() < 0.01) { // --> 003 Normal 
+                startEvent();
+            }
 
             ['p1', 'bot'].forEach(i => {
                 // Tentukan batas maksimal HP: Bot 200, Player 100
@@ -519,11 +589,24 @@
         }
 
         function startEvent() {
-            game.event.type = Math.random() > 0.5 ? 'MANA' : 'HEALTH';
+            // 1. Tentukan Tipe (Contoh 60% MANA, 40% HEALTH)
+            game.event.type = Math.random() > 0.35 ? 'MANA' : 'HEALTH';
+            
+            // 2. Set Durasi
             game.event.time = 30;
+            
+            // 3. Update Banner
             const b = document.getElementById('event-banner');
             b.innerText = `${game.event.type} BOOST ACTIVE!`;
             b.className = 'event-active';
+
+            // 4. Picu Efek Visual Segera
+            if (game.event.type === 'MANA') {
+                document.querySelectorAll('.mana-fill').forEach(el => {
+                    el.classList.add('mana-shaking-active');
+                });
+            }
+
             log(`!!! EVENT: ${game.event.type} BOOST DIMULAI !!!`);
         }
 
