@@ -554,7 +554,7 @@
                 // 1. Tentukan batas HP maksimal dan jumlah heal berdasarkan siapa yang pakai
                 const isBot = (pid === 'bot');
                 const maxHP = isBot ? 200 : 100;
-                const healAmount = isBot ? 50 : 25; // Bot dapat 50 HP karena total darahnya lebih besar
+                const healAmount = isBot ? 40 : 25; // Bot dapat 50 HP karena total darahnya lebih besar
 
                 // 2. Terapkan penambahan HP dengan batas yang sesuai
                 game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
