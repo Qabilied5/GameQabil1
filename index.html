@@ -443,6 +443,23 @@
             z-index: 10;
         }
 
+        @keyframes pulse-out {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        .heavy-shake {
+            animation: heavy-shake-anim 0.1s infinite;
+        }
+
+        @keyframes heavy-shake-anim {
+            0% { transform: translate(5px, 5px); }
+            25% { transform: translate(-5px, -5px); }
+            50% { transform: translate(-8px, 2px); }
+            75% { transform: translate(8px, -2px); }
+            100% { transform: translate(0, 0); }
+        }
+
     </style>
 </head>
 <body class="active-p1">
@@ -478,7 +495,18 @@
             { id: 'vampire', name: 'VAMPIRE', cost: 45, cd: 15000, color: '#8e44ad' },
             { id: 'shield', name: 'SHIELD', cost: 20, cd: 10000, color: '#2980b9' },
             { id: 'freeze', name: 'FREEZE', cost: 15, cd: 30000, color: '#74b9ff' },
-            { id: 'ulti', name: 'ULTI', cost: 65, cd: 30000, color: '#c0392b' }
+            { id: 'ulti', name: 'ULTI', cost: 65, cd: 30000, color: '#c0392b' },
+            { 
+                id: 'super_punch', 
+                name: 'SUPER PUNCH', 
+                cost: 30,           // Biaya mana/stamina (bisa disesuaikan)
+                cd: 15000,          // Cooldown 15 detik
+                color: '#f1c40f',    // Warna kuning emas
+                damage: 15, 
+                healPerHit: 5, 
+                hits: 3, 
+                interval: 2000      // Jeda 2 detik (2000ms)
+            }
         ];
 
         let game = {
@@ -734,6 +762,9 @@
                 setTimeout(() => document.getElementById('arena').classList.remove('shake'), 500);
                 
                 log(`💥 ULTIMATE: ${pid.toUpperCase()} Menghancurkan ${opp.toUpperCase()} sebesar ${d} HP!`);
+            } else if (sid === 'super_punch') {
+                executeSuperPunch(pid, opp);
+                log(`👊 ${pid.toUpperCase()} Menggunakan SUPER PUNCH! (3x Serangan Beruntun)`);
             }
 
             if (game[opp].hp <= 0) win(pid);
@@ -760,68 +791,59 @@
             let targetSkill = null;
             let waitTime = 0;
 
-            // --- 0. ANTI-EXECUTION SHIELD (NEW PRIORITY!) ---
-            // Jika Mana Player > 55 (hampir Ulti) DAN Darah Bot kritis (< 50%)
-            // Bot akan fokus SHIELD daripada memukul, karena Strike bisa memicu kekalahan.
-            if (p.mana >= 55 && b.hp < 50 && b.shield <= 0) {
-                if (getRemCD('shield') < 4) {
-                    targetSkill = 'shield';
-                    // Hitung mana untuk Shield (butuh 20 mana)
-                    const manaNeeded = 20 - b.mana;
-                    const manaWait = Math.max(0, (manaNeeded / 3) * 1000);
-                    waitTime = Math.max(manaWait, getRemCD('shield') * 1000);
-                    log("BOT: 'Aku harus berlindung sebelum kamu Ulti!'");
-                }
-                // Jika Shield sedang CD lama, Bot akan "pasrah" menunggu Mana/CD Heal di bawah
-            }
-
-            // --- 1. KILLER INSTINCT ---
-            if (!targetSkill && p.hp < 40 && p.shield <= 0 && b.mana > 55 && getRemCD('ulti') < 4) {
-                targetSkill = 'ulti';
-                const manaNeeded = 65 - b.mana;
-                waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('ulti') * 1000);
-            } 
-
-            // --- 2. SUPER SURVIVAL MODE (Heal/Vampire) ---
-            else if (!targetSkill && b.hp < 50) {
-                if (getRemCD('heal') < 4) {
-                    targetSkill = 'heal';
-                    const manaNeeded = 50 - b.mana;
-                    waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('heal') * 1000);
-                } 
-                else if (getRemCD('vampire') < 4 && b.mana >= 30) { 
-                    targetSkill = 'vampire';
-                    const manaNeeded = 45 - b.mana;
-                    waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('vampire') * 1000);
-                }
-                else {
-                    // Jika Mana/CD terlalu jauh untuk Heal/Vampire, Bot DIAM sampai akhir turn
-                    // Menunggu Mana untuk Shield atau sekadar menghindari Strike sia-sia
-                    targetSkill = (b.mana >= 20 && getRemCD('shield') === 0) ? 'shield' : 'strike';
-                    waitTime = (game.timer - 0.7) * 1000;
-                }
-            }
-
-            // --- 3. ANTI-SHIELD ---
-            if (!targetSkill && p.shield > 0) {
-                if (getRemCD('freeze') === 0 && b.mana >= 15 && p.freeze <= 0) {
-                    targetSkill = 'freeze';
-                } else if (getRemCD('burning') === 0 && b.mana >= 45 && p.burn <= 0) {
-                    targetSkill = 'burning';
-                } else {
-                    targetSkill = 'strike';
-                    waitTime = (game.timer - 0.7) * 1000;
-                }
-            }
-
-            // --- 4. DEFAULT SMART SHIELD (General Protection) ---
-            if (!targetSkill && p.mana >= 55 && b.shield <= 0 && getRemCD('shield') < 4) {
+            // --- 1. EMERGENCY DEFENSE (Prioritas Tertinggi) ---
+            // Jika Player mau Ulti & Bot sekarat, WAJIB pasang Shield.
+            if (p.mana >= 55 && b.hp < 50 && b.shield <= 0 && getRemCD('shield') < 2) {
                 targetSkill = 'shield';
                 const manaNeeded = 20 - b.mana;
                 waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('shield') * 1000);
+                log("BOT: 'Bahaya! Aku harus berlindung!'");
             }
 
-            // --- 5. OFFENSE ---
+            // --- 2. SURVIVAL MODE (Peka HP < 50%) ---
+            // Bot akan mencoba Heal, jika CD baru gunakan Super Punch (Lifesteal)
+            else if (!targetSkill && b.hp < 50) {
+                if (getRemCD('heal') < 1.5 && b.mana >= 40) {
+                    targetSkill = 'heal';
+                    waitTime = getRemCD('heal') * 1000;
+                } 
+                else if (getRemCD('super_punch') === 0 && b.mana >= 30) {
+                    targetSkill = 'super_punch'; // Serang sambil isi darah sedikit
+                    waitTime = 300;
+                }
+                else if (getRemCD('vampire') < 1.5 && b.mana >= 30) {
+                    targetSkill = 'vampire';
+                    waitTime = getRemCD('vampire') * 1000;
+                }
+            }
+
+            // --- 3. KILLER INSTINCT (Finishing) ---
+            else if (!targetSkill && p.hp < 45 && p.shield <= 0) {
+                if (b.mana >= 65 && getRemCD('ulti') < 1) {
+                    targetSkill = 'ulti';
+                } else if (b.mana >= 30 && getRemCD('super_punch') === 0) {
+                    targetSkill = 'super_punch'; // Super Punch cukup kuat untuk finishing
+                }
+            }
+
+            // --- 4. ANTI-SHIELD & HARASSMENT ---
+            // Jangan biarkan player nyaman dengan Shield
+            else if (!targetSkill && p.shield > 0) {
+                if (getRemCD('freeze') === 0 && b.mana >= 15) {
+                    targetSkill = 'freeze';
+                } else {
+                    targetSkill = 'strike'; // Pecahkan shield dengan strike biasa
+                    waitTime = 1000; 
+                }
+            }
+
+            // --- 5. AGGRESSIVE COMBO (HP Aman) ---
+            else if (!targetSkill && b.mana >= 45 && getRemCD('super_punch') === 0) {
+                targetSkill = 'super_punch';
+                waitTime = 500;
+            }
+
+            // --- 6. DEFAULT ACTION ---
             if (!targetSkill) {
                 targetSkill = (b.mana >= 65 && getRemCD('ulti') < 1) ? 'ulti' : 'strike';
                 waitTime = 0;
@@ -836,15 +858,13 @@
                 
                 const s = SKILLS.find(x => x.id === targetSkill);
                 
-                // Eksekusi skill utama jika siap
                 if (targetSkill && s && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
                     useSkill(targetSkill, 'bot');
                 } 
-                // FALLBACK: Hanya Strike jika HP Bot masih aman ATAU Mana Player rendah.
-                // Jika HP Bot tipis dan Player mau Ulti, bot lebih baik diam (Skip Turn) daripada Strike.
                 else if (b.mana >= 5 && Date.now() >= b.cds['strike']) {
-                    if (b.hp < 30 && p.mana >= 60) {
-                        log("BOT: 'Menahan diri... Strike hanya akan membuatku kalah cepat.'");
+                    // Logika menahan diri agar tidak asal pukul jika kondisi tidak menguntungkan
+                    if (b.hp < 25 && p.mana >= 60 && targetSkill === 'strike') {
+                        log("BOT: 'Sabar... satu langkah salah dan aku tamat.'");
                         changeTurn();
                     } else {
                         useSkill('strike', 'bot');
@@ -1025,7 +1045,111 @@
             }
         }
 
+        function executeSuperPunch(pid, opp) {
+            let hitsDone = 0;
+            const s = SKILLS.find(x => x.id === 'super_punch');
+
+            function performPunch() {
+                if (!game.active) return;
+
+                // Hitung Damage (Otomatis cek Shield di sini)
+                let d = calc(s.damage, s.damage, opp); 
+                game[opp].hp -= d;
+
+                // Heal Pengguna
+                const maxHP = (pid === 'bot') ? 200 : 100;
+                game[pid].hp = Math.min(maxHP, game[pid].hp + s.healPerHit);
+
+                // --- VISUAL RUSUH ---
+                createSuperPunchVisual(opp); 
+                createHealParticle(pid);
+                
+                // Log per pukulan
+                log(`👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!`);
+
+                if (game[opp].hp <= 0) {
+                    win(pid);
+                    return true; // Hentikan jika musuh mati
+                }
+                updateUI();
+                return false;
+            }
+
+            // Pukulan pertama
+            performPunch();
+            hitsDone++;
+
+            // Interval untuk pukulan 2 dan 3
+            const punchTimer = setInterval(() => {
+                if (hitsDone >= 3 || !game.active) {
+                    clearInterval(punchTimer);
+                    return;
+                }
+                
+                const isDead = performPunch();
+                if (isDead) clearInterval(punchTimer);
+                
+                hitsDone++;
+            }, s.interval);
+        }
+
+        function createSuperPunchVisual(targetPid) {
+            const card = document.getElementById(`${targetPid}-card`);
+            const arena = document.getElementById('arena');
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // 1. Flash Kuning (Warna Super Punch)
+            const flash = document.createElement('div');
+            flash.className = 'hit-flash';
+            flash.style.background = 'rgba(241, 196, 15, 0.4)'; // Warna kuning transparan
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 150);
+
+            // 2. Getaran Gila (Heavy Shake)
+            arena.classList.add('heavy-shake');
+            // Kita biarkan getaran sedikit lebih lama dari strike biasa
+            setTimeout(() => arena.classList.remove('heavy-shake'), 500);
+
+            // 3. Efek Ledakan Pukulan (Besar)
+            const impact = document.createElement('div');
+            impact.style.position = 'fixed';
+            impact.style.left = (centerX - 50) + 'px';
+            impact.style.top = (centerY - 50) + 'px';
+            impact.style.width = '100px';
+            impact.style.height = '100px';
+            impact.style.border = '5px solid #f1c40f';
+            impact.style.borderRadius = '50%';
+            impact.style.animation = 'pulse-out 0.3s ease-out forwards';
+            impact.style.pointerEvents = 'none';
+            impact.style.zIndex = '9999';
+            document.body.appendChild(impact);
+            setTimeout(() => impact.remove(), 300);
+
+            // 4. Partikel Emas Berhamburan (Lebih Banyak)
+            for (let i = 0; i < 20; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'strike-spark';
+                spark.style.background = '#f1c40f'; // Warna emas
+                spark.style.boxShadow = '0 0 10px #f1c40f';
+                
+                const tx = (Math.random() - 0.5) * 400; // Jangkauan lebih luas
+                const ty = (Math.random() - 0.5) * 400;
+                
+                spark.style.left = centerX + 'px';
+                spark.style.top = centerY + 'px';
+                spark.style.setProperty('--tx', `${tx}px`);
+                spark.style.setProperty('--ty', `${ty}px`);
+                
+                document.body.appendChild(spark);
+                setTimeout(() => spark.remove(), 600);
+            }
+        }
+        
         init();
+
+
     </script>
 </body>
 </html>
