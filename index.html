@@ -510,6 +510,15 @@
     <div id="log">> Battle Start! Gunakan BURNING untuk damage berkala!<br>> Vampire Menyerang dan menyerap darah musuh</div>
 
     <script>
+
+        const strikeSound = new Audio('/audio/STRIKE-SOUND EFFECT.mp3');
+        strikeSound.preload = 'auto';
+        strikeSound.volume = 0.6;
+        
+        const ultiSound = new Audio('/audio/ULTIMATE - SOUND EFFECT.mp3');
+        ultiSound.preload = 'auto';
+        ultiSound.volume = 1.0;
+
         const SKILLS = [
             { id: 'strike', name: 'STRIKE', cost: 5, cd: 5000, color: '#555' },
             { id: 'heal', name: 'HEAL', cost: 50, cd: 13000, color: '#27ae60' },
@@ -675,6 +684,14 @@
                 let d = calc(10, 16, opp);
                 game[opp].hp -= d;
 
+                strikeSound.currentTime = 0; // Mulai dari awal
+                strikeSound.play();
+
+                setTimeout(() => {
+                    strikeSound.pause();
+                    strikeSound.currentTime = 0; 
+                }, 2000);
+
                 // LOGIKA BARU: Cek jika yang memukul adalah player ('p1')
                 // Jika iya, beri mana 25 (lebih besar), jika bot beri 15.
                 let manaGain = (pid === 'p1') ? 25 : 15; 
@@ -749,8 +766,16 @@
             } else if (sid === 'ulti') {
                 let d = calc(35, 50, opp);
                 
+                ultiSound.currentTime = 0;
+                ultiSound.play();
+
+                setTimeout(() => {
+                    ultiSound.pause();
+                    ultiSound.currentTime = 0; 
+                }, 2000);
+
+
                 // --- DRAMATIC ULTI EFFECTS ---
-                
                 // 1. Flash Layar
                 const flash = document.createElement('div');
                 flash.className = 'ulti-flash';
