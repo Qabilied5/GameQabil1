@@ -434,7 +434,7 @@
             turn: 'p1', timer: 5.0, active: true,
             event: { type: 'none', time: 0 },
             p1: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, cds: {} },
-            bot: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, cds: {} }
+            bot: { hp: 200, mana: 40, shield: 0, freeze: 0, burn: 0, cds: {} }
         };
 
         // Init CDs
@@ -498,8 +498,14 @@
             } else if (Math.random() < 0.003) startEvent();
 
             ['p1', 'bot'].forEach(i => {
+                // Tentukan batas maksimal HP: Bot 200, Player 100
+                const maxHP = (i === 'bot') ? 200 : 100;
+
+                // Tambah mana (tetap max 100)
                 game[i].mana = Math.min(100, game[i].mana + mR);
-                game[i].hp = Math.min(100, game[i].hp + hR);
+
+                // Tambah HP dengan batas maxHP yang sesuai
+                game[i].hp = Math.min(maxHP, game[i].hp + hR);
             });
             updateUI();
         }, 100);
@@ -537,26 +543,31 @@
                 game[opp].hp -= d;
                 game[pid].mana = Math.min(100, game[pid].mana + 15);
                 
-                // PANGGIL VISUAL DI SINI
                 createStrikeVisual(opp); 
                 
                 log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP.`);
-            } else if (sid === 'heal') {
-                game[pid].hp = Math.min(100, game[pid].hp + 25);
+           } else if (sid === 'heal') {
+                // 1. Tentukan batas HP maksimal dan jumlah heal berdasarkan siapa yang pakai
+                const isBot = (pid === 'bot');
+                const maxHP = isBot ? 200 : 100;
+                const healAmount = isBot ? 50 : 25; // Bot dapat 50 HP karena total darahnya lebih besar
+
+                // 2. Terapkan penambahan HP dengan batas yang sesuai
+                game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
                 
                 // --- EFEK VISUAL HEAL ---
                 const card = document.getElementById(`${pid}-card`);
                 card.classList.add('healing-active');
                 
-                // Munculkan partikel "+" hijau
+                // Munculkan partikel "+" Heal
                 for(let i=0; i<5; i++) {
                     createHealParticle(pid);
                 }
 
-                // Hapus class animasi setelah 800ms agar bisa dipicu lagi nanti
                 setTimeout(() => card.classList.remove('healing-active'), 800);
                 
-                log(`${pid.toUpperCase()} menggunakan Heal! (+25 HP)`);
+                // Log pesan dengan jumlah heal yang dinamis
+                log(`${pid.toUpperCase()} menggunakan Heal! (+${healAmount} HP)`);
             } else if (sid === 'burning') {
                 game[opp].burn = 6.0;
                 log(`🔥 ${pid.toUpperCase()} membakar ${opp.toUpperCase()} selama 6 detik!`);
@@ -569,7 +580,7 @@
                 card.style.transition = "all 0.3s ease";
                 card.style.transform = "scale(1.1)";
                 
-                // Partikel pelindung sederhana (opsional)
+                // Partikel Shield
                 for(let i=0; i<3; i++) {
                     const p = document.createElement('div');
                     p.className = 'heal-particle'; // Kita pinjam class heal tapi ganti warna di bawah
@@ -657,70 +668,102 @@
             const b = game.bot;
             const p = game.p1;
             const now = Date.now();
-            
             const getRemCD = (id) => Math.max(0, (b.cds[id] - now) / 1000);
 
             let targetSkill = null;
             let waitTime = 0;
 
-            // --- 0. LOGIKA KILLER INSTINCT (NEW!) ---
-            // Jika HP Player < 50, tidak ada Shield, dan Mana Bot sudah lumayan ( > 55)
-            // Bot akan menunggu Mana regen sampai 65 untuk ULTI
-            if (p.hp < 50 && p.shield <= 0 && b.mana > 55 && getRemCD('ulti') < 4) {
+            // --- 0. ANTI-EXECUTION SHIELD (NEW PRIORITY!) ---
+            // Jika Mana Player > 55 (hampir Ulti) DAN Darah Bot kritis (< 50%)
+            // Bot akan fokus SHIELD daripada memukul, karena Strike bisa memicu kekalahan.
+            if (p.mana >= 55 && b.hp < 50 && b.shield <= 0) {
+                if (getRemCD('shield') < 4) {
+                    targetSkill = 'shield';
+                    // Hitung mana untuk Shield (butuh 20 mana)
+                    const manaNeeded = 20 - b.mana;
+                    const manaWait = Math.max(0, (manaNeeded / 3) * 1000);
+                    waitTime = Math.max(manaWait, getRemCD('shield') * 1000);
+                    log("BOT: 'Aku harus berlindung sebelum kamu Ulti!'");
+                }
+                // Jika Shield sedang CD lama, Bot akan "pasrah" menunggu Mana/CD Heal di bawah
+            }
+
+            // --- 1. KILLER INSTINCT ---
+            if (!targetSkill && p.hp < 40 && p.shield <= 0 && b.mana > 55 && getRemCD('ulti') < 4) {
                 targetSkill = 'ulti';
-                
-                // Hitung berapa mana lagi yang dibutuhkan untuk sampai 65
                 const manaNeeded = 65 - b.mana;
-                // Karena regen mana adalah 0.3 per 0.1 detik (atau 3 per detik)
-                // Maka waktu tunggu dalam milidetik adalah:
-                const manaWaitTime = (manaNeeded / 3) * 1000;
-                
-                // Gabungkan dengan waktu tunggu Cooldown (pilih yang paling lama)
-                waitTime = Math.max(manaWaitTime, getRemCD('ulti') * 1000);
-                
-                // Tambahkan log gertakan (opsional)
-                if (b.mana < 65) log("BOT: 'Aku melihat celah... tunggu sebentar lagi...'");
-            }
-            // --- 1. LOGIKA SMART SHIELD (ANTISIPASI ULTI PLAYER) ---
-            else if (p.mana >= 55 && b.shield <= 0 && getRemCD('shield') < 4) {
-                targetSkill = 'shield';
-                waitTime = getRemCD('shield') * 1000;
+                waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('ulti') * 1000);
             } 
-            // --- 2. LOGIKA EMERGENCY HEAL ---
-            else if (b.hp < 70 && getRemCD('heal') < 4) {
-                targetSkill = 'heal';
-                waitTime = getRemCD('heal') * 1000;
+
+            // --- 2. SUPER SURVIVAL MODE (Heal/Vampire) ---
+            else if (!targetSkill && b.hp < 50) {
+                if (getRemCD('heal') < 4) {
+                    targetSkill = 'heal';
+                    const manaNeeded = 50 - b.mana;
+                    waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('heal') * 1000);
+                } 
+                else if (getRemCD('vampire') < 4 && b.mana >= 30) { 
+                    targetSkill = 'vampire';
+                    const manaNeeded = 45 - b.mana;
+                    waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('vampire') * 1000);
+                }
+                else {
+                    // Jika Mana/CD terlalu jauh untuk Heal/Vampire, Bot DIAM sampai akhir turn
+                    // Menunggu Mana untuk Shield atau sekadar menghindari Strike sia-sia
+                    targetSkill = (b.mana >= 20 && getRemCD('shield') === 0) ? 'shield' : 'strike';
+                    waitTime = (game.timer - 0.7) * 1000;
+                }
             }
-            // --- 3. LOGIKA VAMPIRE ---
-            else if (b.hp < 85 && getRemCD('vampire') < 4) {
-                targetSkill = 'vampire';
-                waitTime = getRemCD('vampire') * 1000;
+
+            // --- 3. ANTI-SHIELD ---
+            if (!targetSkill && p.shield > 0) {
+                if (getRemCD('freeze') === 0 && b.mana >= 15 && p.freeze <= 0) {
+                    targetSkill = 'freeze';
+                } else if (getRemCD('burning') === 0 && b.mana >= 45 && p.burn <= 0) {
+                    targetSkill = 'burning';
+                } else {
+                    targetSkill = 'strike';
+                    waitTime = (game.timer - 0.7) * 1000;
+                }
             }
-            // --- 4. DEFAULT ATTACK ---
-            else {
-                targetSkill = (b.mana >= 65 && getRemCD('ulti') === 0) ? 'ulti' : 'strike';
+
+            // --- 4. DEFAULT SMART SHIELD (General Protection) ---
+            if (!targetSkill && p.mana >= 55 && b.shield <= 0 && getRemCD('shield') < 4) {
+                targetSkill = 'shield';
+                const manaNeeded = 20 - b.mana;
+                waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('shield') * 1000);
+            }
+
+            // --- 5. OFFENSE ---
+            if (!targetSkill) {
+                targetSkill = (b.mana >= 65 && getRemCD('ulti') < 1) ? 'ulti' : 'strike';
                 waitTime = 0;
             }
 
-            // Tentukan finalWait (Maksimal sisa 0.5s turn)
+            // --- EKSEKUSI ---
             const maxWaitAllowed = (game.timer - 0.5) * 1000;
             const finalWait = Math.max(0, Math.min(waitTime, maxWaitAllowed));
 
             setTimeout(() => {
                 if (game.turn !== 'bot' || !game.active) return;
-
+                
                 const s = SKILLS.find(x => x.id === targetSkill);
                 
-                // Eksekusi skill jika mana cukup (hasil nunggu regen) dan CD aman
-                if (targetSkill && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
+                // Eksekusi skill utama jika siap
+                if (targetSkill && s && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
                     useSkill(targetSkill, 'bot');
-                } else {
-                    // Jika tetap tidak cukup (mungkin karena timer keburu habis), gunakan Strike
-                    if (b.mana >= 5 && Date.now() >= b.cds['strike']) {
-                        useSkill('strike', 'bot');
-                    } else {
+                } 
+                // FALLBACK: Hanya Strike jika HP Bot masih aman ATAU Mana Player rendah.
+                // Jika HP Bot tipis dan Player mau Ulti, bot lebih baik diam (Skip Turn) daripada Strike.
+                else if (b.mana >= 5 && Date.now() >= b.cds['strike']) {
+                    if (b.hp < 30 && p.mana >= 60) {
+                        log("BOT: 'Menahan diri... Strike hanya akan membuatku kalah cepat.'");
                         changeTurn();
+                    } else {
+                        useSkill('strike', 'bot');
                     }
+                } else {
+                    changeTurn();
                 }
             }, finalWait);
         }
@@ -728,9 +771,17 @@
         function updateUI() {
             const now = Date.now();
             ['p1', 'bot'].forEach(p => {
-                document.getElementById(`${p}-hp`).style.width = Math.max(0, game[p].hp) + "%";
+                // Tentukan HP Maksimal masing-masing
+                const maxHP = (p === 'bot') ? 200 : 100; 
+                
+                // Hitung persentase (HP saat ini / HP Maksimal * 100)
+                const hpPercent = (game[p].hp / maxHP) * 100;
+                
+                document.getElementById(`${p}-hp`).style.width = Math.max(0, hpPercent) + "%";
                 document.getElementById(`${p}-mana`).style.width = game[p].mana + "%";
-                document.getElementById(`${p}-hp-t`).innerText = Math.ceil(Math.max(0, game[p].hp)) + "/100";
+                
+                // Update teks label HP (misal: 150/200)
+                document.getElementById(`${p}-hp-t`).innerText = Math.ceil(Math.max(0, game[p].hp)) + "/" + maxHP;
                 document.getElementById(`${p}-mana-t`).innerText = Math.floor(game[p].mana) + "/100";
 
                 const card = document.getElementById(`${p}-card`);
