@@ -1125,9 +1125,9 @@
                 // 2. Heal Pengguna (Bot & Player tetap dapat Heal)
                 const maxHP = (pid === 'bot') ? 200 : 100;
 
-                let healAmount = (pid === 'p1') ? 10 : s.healPerHit;
+                let healAmount = (pid === 'p1') ? 7 : s.healPerHit;
                 
-                game[pid].hp = Math.min(maxHP, game[pid].hp + s.healPerHit);
+                game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
 
                 // 3. LOGIKA MANA KHUSUS PLAYER 1
                 let manaText = "";
