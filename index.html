@@ -653,69 +653,76 @@
 
         function botAI() {
             if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
-            
-            const now = Date.now();
+
             const b = game.bot;
             const p = game.p1;
+            const now = Date.now();
             
-            const canUse = (id) => {
-                const s = SKILLS.find(x => x.id === id);
-                return b.mana >= s.cost && now >= b.cds[id];
-            };
+            const getRemCD = (id) => Math.max(0, (b.cds[id] - now) / 1000);
 
-            let decision = null;
+            let targetSkill = null;
+            let waitTime = 0;
 
-            // --- 1. INSTING AGRESIF: ULTI OVERFLOW ---
-            // Jika mana bot 65 atau lebih, prioritaskan ULTI untuk damage besar
-            if (b.mana >= 65 && canUse('ulti')) {
-                decision = 'ulti';
+            // --- 0. LOGIKA KILLER INSTINCT (NEW!) ---
+            // Jika HP Player < 50, tidak ada Shield, dan Mana Bot sudah lumayan ( > 55)
+            // Bot akan menunggu Mana regen sampai 65 untuk ULTI
+            if (p.hp < 50 && p.shield <= 0 && b.mana > 55 && getRemCD('ulti') < 4) {
+                targetSkill = 'ulti';
+                
+                // Hitung berapa mana lagi yang dibutuhkan untuk sampai 65
+                const manaNeeded = 65 - b.mana;
+                // Karena regen mana adalah 0.3 per 0.1 detik (atau 3 per detik)
+                // Maka waktu tunggu dalam milidetik adalah:
+                const manaWaitTime = (manaNeeded / 3) * 1000;
+                
+                // Gabungkan dengan waktu tunggu Cooldown (pilih yang paling lama)
+                waitTime = Math.max(manaWaitTime, getRemCD('ulti') * 1000);
+                
+                // Tambahkan log gertakan (opsional)
+                if (b.mana < 65) log("BOT: 'Aku melihat celah... tunggu sebentar lagi...'");
             }
-
-            // --- 2. STRATEGI CUSTOM: MANA COUNTER ---
-            // Jika Mana Player > 70%, Bot waspada
-            if (!decision && p.mana >= 70) {
-                if (canUse('freeze') && p.freeze <= 0) {
-                    decision = 'freeze';
-                } else if (canUse('heal') && b.hp < 100) {
-                    decision = 'heal';
-                }
-            }
-
-            // --- 3. STRATEGI UTAMA BERDASARKAN HP ---
-
-            if (!decision && b.hp < 50) {
-                // KONDISI DARAH DI BAWAH 50% (PRIORITAS SURVIVAL)
-                if (canUse('heal')) {
-                    decision = 'heal'; 
-                } else if (canUse('vampire')) {
-                    decision = 'vampire'; 
-                } else if (canUse('strike')) {
-                    decision = 'strike'; 
-                }
+            // --- 1. LOGIKA SMART SHIELD (ANTISIPASI ULTI PLAYER) ---
+            else if (p.mana >= 55 && b.shield <= 0 && getRemCD('shield') < 4) {
+                targetSkill = 'shield';
+                waitTime = getRemCD('shield') * 1000;
             } 
-            
-            if (!decision && b.hp >= 50) {
-                // KONDISI DARAH DI ATAS 50% (PRIORITAS BURNING)
-                if (p.burn <= 0 && canUse('burning')) {
-                    decision = 'burning'; 
-                } else if (canUse('vampire') && b.hp < 95) {
-                    decision = 'vampire'; 
-                } else if (canUse('strike')) {
-                    decision = 'strike';
+            // --- 2. LOGIKA EMERGENCY HEAL ---
+            else if (b.hp < 70 && getRemCD('heal') < 4) {
+                targetSkill = 'heal';
+                waitTime = getRemCD('heal') * 1000;
+            }
+            // --- 3. LOGIKA VAMPIRE ---
+            else if (b.hp < 85 && getRemCD('vampire') < 4) {
+                targetSkill = 'vampire';
+                waitTime = getRemCD('vampire') * 1000;
+            }
+            // --- 4. DEFAULT ATTACK ---
+            else {
+                targetSkill = (b.mana >= 65 && getRemCD('ulti') === 0) ? 'ulti' : 'strike';
+                waitTime = 0;
+            }
+
+            // Tentukan finalWait (Maksimal sisa 0.5s turn)
+            const maxWaitAllowed = (game.timer - 0.5) * 1000;
+            const finalWait = Math.max(0, Math.min(waitTime, maxWaitAllowed));
+
+            setTimeout(() => {
+                if (game.turn !== 'bot' || !game.active) return;
+
+                const s = SKILLS.find(x => x.id === targetSkill);
+                
+                // Eksekusi skill jika mana cukup (hasil nunggu regen) dan CD aman
+                if (targetSkill && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
+                    useSkill(targetSkill, 'bot');
+                } else {
+                    // Jika tetap tidak cukup (mungkin karena timer keburu habis), gunakan Strike
+                    if (b.mana >= 5 && Date.now() >= b.cds['strike']) {
+                        useSkill('strike', 'bot');
+                    } else {
+                        changeTurn();
+                    }
                 }
-            }
-
-            // --- 4. FALLBACK / FINISHER ---
-            if (!decision) {
-                if (canUse('strike')) decision = 'strike';
-            }
-
-            // --- EKSEKUSI ---
-            if (decision) {
-                useSkill(decision, 'bot');
-            } else {
-                changeTurn();
-            }
+            }, finalWait);
         }
 
         function updateUI() {
