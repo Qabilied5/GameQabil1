@@ -511,11 +511,11 @@
 
     <script>
 
-        const strikeSound = new Audio('/audio/STRIKE-SOUND EFFECT.mp3');
+        const strikeSound = new Audio('/audio/StrikeSound.mp3');
         strikeSound.preload = 'auto';
         strikeSound.volume = 0.6;
         
-        const ultiSound = new Audio('/audio/ULTIMATE - SOUND EFFECT.mp3');
+        const ultiSound = new Audio('/audio/UltimateSound.mp3');
         ultiSound.preload = 'auto';
         ultiSound.volume = 1.0;
 
@@ -1124,12 +1124,15 @@
 
                 // 2. Heal Pengguna (Bot & Player tetap dapat Heal)
                 const maxHP = (pid === 'bot') ? 200 : 100;
+
+                let healAmount = (pid === 'p1') ? 10 : s.healPerHit;
+                
                 game[pid].hp = Math.min(maxHP, game[pid].hp + s.healPerHit);
 
                 // 3. LOGIKA MANA KHUSUS PLAYER 1
                 let manaText = "";
                 if (pid === 'p1') {
-                    game[pid].mana = Math.min(100, game[pid].mana + 7);
+                    game[pid].mana = Math.min(100, game[pid].mana + 8);
                     manaText = " (+7 Mana)";
                 }
 
