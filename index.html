@@ -147,16 +147,19 @@
         .ulti-flash {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
+            /* Kilatan Putih Lembut */
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 100%);
             z-index: 1000;
             pointer-events: none;
             opacity: 0;
-            animation: flash-anim 0.5s ease-out;
+            /* Durasi sedikit lebih lama agar transisinya halus */
+            animation: flash-anim 0.7s ease-out;
         }
 
         @keyframes flash-anim {
-            0% { opacity: 0.8; }
-            100% { opacity: 0; }
+            0% { opacity: 0; }
+            10% { opacity: 1; } /* Kilatan mencapai puncak dengan cepat */
+            100% { opacity: 0; } /* Menghilang perlahan */
         }
 
         /* Shockwave Ring */
@@ -443,8 +446,27 @@
             z-index: 10;
         }
 
+        .punch-text {
+            position: fixed;
+            font-weight: 900;
+            font-size: 28px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5), 0 0 20px #f39c12;
+            pointer-events: none;
+            z-index: 10000;
+            font-style: italic;
+            animation: punch-float 0.8s ease-out forwards;
+        }
+
+        @keyframes punch-float {
+            0% { transform: scale(0.5) translateY(0); opacity: 0; }
+            20% { transform: scale(1.2) translateY(-20px); opacity: 1; }
+            100% { transform: scale(1) translateY(-100px); opacity: 0; }
+        }
+
+        /* Animasi lingkaran impact kuning */
         @keyframes pulse-out {
-            0% { transform: scale(0.5); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             100% { transform: scale(2.5); opacity: 0; }
         }
 
@@ -733,10 +755,9 @@
                 const flash = document.createElement('div');
                 flash.className = 'ulti-flash';
                 document.body.appendChild(flash);
-                setTimeout(() => flash.remove(), 500);
-
-                // 2. Shockwave dari kartu penyerang
+                setTimeout(() => flash.remove(), 700);
                 const card = document.getElementById(`${pid}-card`);
+
                 const rect = card.getBoundingClientRect();
                 const wave = document.createElement('div');
                 wave.className = 'shockwave';
@@ -827,12 +848,32 @@
             }
 
             // --- 4. ANTI-SHIELD & HARASSMENT ---
-            // Jangan biarkan player nyaman dengan Shield
             else if (!targetSkill && p.shield > 0) {
+                // 4a. Frezze dlu
                 if (getRemCD('freeze') === 0 && b.mana >= 15) {
                     targetSkill = 'freeze';
-                } else {
-                    targetSkill = 'strike'; // Pecahkan shield dengan strike biasa
+                } 
+                // 4b. Jika Freeze CD, cek Burning
+                else if (b.mana >= 45) {
+                    const burnCD = getRemCD('burning');
+                    
+                    if (burnCD === 0) {
+                        targetSkill = 'burning';
+                    } 
+                    // Jika CD Burning dikit lagi (di bawah 4 detik), BOT pilih MENUNGGU
+                    else if (burnCD < 4) {
+                        targetSkill = 'burning';
+                        waitTime = burnCD * 1000; // Tunggu sampai CD selesai
+                        log("BOT: 'Tunggu sebentar... panasnya sedang dikumpulkan!'");
+                    }
+                    else {
+                        targetSkill = 'strike';
+                        waitTime = 1000;
+                    }
+                }
+                // 4c. Default ke Strike jika mana tidak cukup untuk status
+                else {
+                    targetSkill = 'strike';
                     waitTime = 1000; 
                 }
             }
@@ -1052,24 +1093,31 @@
             function performPunch() {
                 if (!game.active) return;
 
-                // Hitung Damage (Otomatis cek Shield di sini)
+                // 1. Hitung Damage (Cek Shield)
                 let d = calc(s.damage, s.damage, opp); 
                 game[opp].hp -= d;
 
-                // Heal Pengguna
+                // 2. Heal Pengguna (Bot & Player tetap dapat Heal)
                 const maxHP = (pid === 'bot') ? 200 : 100;
                 game[pid].hp = Math.min(maxHP, game[pid].hp + s.healPerHit);
 
-                // --- VISUAL RUSUH ---
+                // 3. LOGIKA MANA KHUSUS PLAYER 1
+                let manaText = "";
+                if (pid === 'p1') {
+                    game[pid].mana = Math.min(100, game[pid].mana + 7);
+                    manaText = " (+7 Mana)";
+                }
+
+                // --- VISUAL & LOG ---
                 createSuperPunchVisual(opp); 
                 createHealParticle(pid);
                 
-                // Log per pukulan
-                log(`👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!`);
+                // Log akan otomatis menyesuaikan apakah ada teks "+7 Mana" atau tidak
+                log(`👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!${manaText}`);
 
                 if (game[opp].hp <= 0) {
                     win(pid);
-                    return true; // Hentikan jika musuh mati
+                    return true; 
                 }
                 updateUI();
                 return false;
@@ -1100,19 +1148,28 @@
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
 
-            // 1. Flash Kuning (Warna Super Punch)
+            // --- 1. TEKS "SUPER PUNCH!" ---
+            const txt = document.createElement('div');
+            txt.className = 'punch-text';
+            txt.innerText = 'SUPER PUNCH!';
+            // Posisi teks sedikit acak agar jika muncul beruntun tidak menumpuk sempurna
+            txt.style.left = (centerX - 80 + (Math.random() * 40)) + 'px';
+            txt.style.top = (centerY - 50) + 'px';
+            document.body.appendChild(txt);
+            setTimeout(() => txt.remove(), 800);
+
+            // 2. Flash Kuning
             const flash = document.createElement('div');
             flash.className = 'hit-flash';
-            flash.style.background = 'rgba(241, 196, 15, 0.4)'; // Warna kuning transparan
+            flash.style.background = 'rgba(241, 196, 15, 0.4)'; 
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 150);
 
-            // 2. Getaran Gila (Heavy Shake)
+            // 3. Getaran Gila
             arena.classList.add('heavy-shake');
-            // Kita biarkan getaran sedikit lebih lama dari strike biasa
             setTimeout(() => arena.classList.remove('heavy-shake'), 500);
 
-            // 3. Efek Ledakan Pukulan (Besar)
+            // 4. Efek Ledakan Pukulan (Lingkaran)
             const impact = document.createElement('div');
             impact.style.position = 'fixed';
             impact.style.left = (centerX - 50) + 'px';
@@ -1127,21 +1184,18 @@
             document.body.appendChild(impact);
             setTimeout(() => impact.remove(), 300);
 
-            // 4. Partikel Emas Berhamburan (Lebih Banyak)
+            // 5. Partikel Emas
             for (let i = 0; i < 20; i++) {
                 const spark = document.createElement('div');
                 spark.className = 'strike-spark';
-                spark.style.background = '#f1c40f'; // Warna emas
+                spark.style.background = '#f1c40f';
                 spark.style.boxShadow = '0 0 10px #f1c40f';
-                
-                const tx = (Math.random() - 0.5) * 400; // Jangkauan lebih luas
+                const tx = (Math.random() - 0.5) * 400;
                 const ty = (Math.random() - 0.5) * 400;
-                
                 spark.style.left = centerX + 'px';
                 spark.style.top = centerY + 'px';
                 spark.style.setProperty('--tx', `${tx}px`);
                 spark.style.setProperty('--ty', `${ty}px`);
-                
                 document.body.appendChild(spark);
                 setTimeout(() => spark.remove(), 600);
             }
