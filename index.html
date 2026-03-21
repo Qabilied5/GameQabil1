@@ -704,7 +704,7 @@
                 // 1. Tentukan batas HP maksimal dan jumlah heal berdasarkan siapa yang pakai
                 const isBot = (pid === 'bot');
                 const maxHP = isBot ? 200 : 100;
-                const healAmount = isBot ? 40 : 25; // Bot dapat 50 HP karena total darahnya lebih besar
+                const healAmount = isBot ? 45 : 30;
 
                 // 2. Terapkan penambahan HP dengan batas yang sesuai
                 game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
@@ -838,17 +838,24 @@
             let waitTime = 0;
 
             // --- 1. EMERGENCY DEFENSE (Prioritas Tertinggi) ---
+            const pSuperPunchCD = (p.cds['super_punch'] - now) / 1000;
+            if (pSuperPunchCD > 9.5 && b.shield <= 0 && getRemCD('shield') < 0.5) {
+                targetSkill = 'shield';
+                waitTime = 0; // Langsung bereaksi tanpa tunggu
+                log("BOT: 'Mengaktifkan Perisai!'");
+            }
+            
             // Jika Player mau Ulti & Bot sekarat, WAJIB pasang Shield.
-            if (p.mana >= 55 && b.hp < 50 && b.shield <= 0 && getRemCD('shield') < 2) {
+            if (p.mana >= 55 && b.hp < 55 && b.shield <= 0 && getRemCD('shield') < 2) {
                 targetSkill = 'shield';
                 const manaNeeded = 20 - b.mana;
                 waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('shield') * 1000);
                 log("BOT: 'Bahaya! Aku harus berlindung!'");
             }
 
-            // --- 2. SURVIVAL MODE (Peka HP < 50%) ---
+            // --- 2. SURVIVAL MODE (HP < 100%) ---
             // Bot akan mencoba Heal, jika CD baru gunakan Super Punch (Lifesteal)
-            else if (!targetSkill && b.hp < 50) {
+            else if (!targetSkill && b.hp < 100) {
                 if (getRemCD('heal') < 1.5 && b.mana >= 40) {
                     targetSkill = 'heal';
                     waitTime = getRemCD('heal') * 1000;
@@ -864,7 +871,7 @@
             }
 
             // --- 3. KILLER INSTINCT (Finishing) ---
-            else if (!targetSkill && p.hp < 45 && p.shield <= 0) {
+            else if (!targetSkill && p.hp < 100 && p.shield <= 0) {
                 if (b.mana >= 65 && getRemCD('ulti') < 1) {
                     targetSkill = 'ulti';
                 } else if (b.mana >= 30 && getRemCD('super_punch') === 0) {
@@ -886,10 +893,9 @@
                         targetSkill = 'burning';
                     } 
                     // Jika CD Burning dikit lagi (di bawah 4 detik), BOT pilih MENUNGGU
-                    else if (burnCD < 4) {
+                    else if (burnCD < 4.5) {
                         targetSkill = 'burning';
                         waitTime = burnCD * 1000; // Tunggu sampai CD selesai
-                        log("BOT: 'Tunggu sebentar... panasnya sedang dikumpulkan!'");
                     }
                     else {
                         targetSkill = 'strike';
