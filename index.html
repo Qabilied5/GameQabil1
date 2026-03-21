@@ -129,12 +129,18 @@
 
         .heal-particle {
             position: absolute;
-            color: #2ecc71;
+            color: #00ff88; /* Hijau Neon */
+            font-weight: bold;
             font-size: 1.5rem;
             pointer-events: none;
-            z-index: 100;
-            animation: fly-up 1s forwards ease-out;
-            text-shadow: 0 0 10px #27ae60;
+            z-index: 1000;
+            text-shadow: 0 0 10px #00ff88, 0 0 20px #fff;
+            animation: fly-up-fade 1s forwards ease-out;
+        }
+
+        @keyframes fly-up-fade {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
         }
 
         @keyframes fly-up {
@@ -330,6 +336,38 @@
             100% { opacity: 0; }
         }
 
+        button:disabled {
+            cursor: not-allowed;
+            filter: grayscale(1) brightness(0.5);
+            opacity: 0.3;
+            position: relative;
+        }
+
+        /* Tambahkan teks "LOCKED" kecil di atas tombol yang mati (opsional) */
+        button:disabled::before {
+            content: "HP < 30%";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #ff4757;
+            white-space: nowrap;
+        }
+
+        .ready-to-use {
+            animation: alert-flash 0.5s infinite alternate !important;
+            filter: grayscale(0) brightness(1.2) !important;
+            opacity: 1 !important;
+            border: 2px solid white !important;
+            box-shadow: 0 0 15px #ff4757;
+        }
+
+        @keyframes alert-flash {
+            from { background: #2ecc71; transform: scale(1); }
+            to { background: #ffffff; transform: scale(1.1); color: #000; }
+        }
+
         @media screen and (max-width: 768px) {
             body {
                 overflow-y: auto; 
@@ -482,6 +520,140 @@
             100% { transform: translate(0, 0); }
         }
 
+        /* --- VISUAL SUPER HEAL --- */
+        /* 1. Efek Kartu Menyala Hijau Neon */
+        .super-healing-active {
+            background: rgba(0, 255, 136, 0.5) !important; 
+            
+            border: 3px solid #00ff88 !important;
+            
+            /* Glow Neon Luar Hijau */
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8) !important;
+            
+            /* Sedikit pembesaran kartu */
+            transform: scale(1.03);
+            z-index: 10;
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+
+        /* 2. Efek Background Berputar (Healing Aura) */
+        .super-healing-active::before {
+            content: '';
+            position: absolute;
+            /* Buat kotak aura JAUH lebih besar dari kartu */
+            top: -150%; 
+            left: -150%;
+            width: 400%;
+            height: 400%;
+            
+            /* Gradien Kerucut (seperti kipas berputar) */
+            background: conic-gradient(
+                from 0deg at 50% 50%,
+                rgba(0, 255, 136, 0) 0deg,
+                rgba(0, 255, 136, 0.6) 180deg, /* Warna aura */
+                rgba(0, 255, 136, 0) 360deg
+            );
+            
+            /* Animasi putar */
+            animation: super-heal-rotate 2s linear infinite;
+            z-index: -1; /* Di belakang konten kartu (teks, HP bar) */
+        }
+
+        @keyframes super-heal-rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 3. Partikel Hijau Super */
+        .super-heal-particle {
+            position: absolute;
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 1.8rem;
+            pointer-events: none;
+            z-index: 1000;
+            text-shadow: 0 0 15px #00ff88, 0 0 30px #fff;
+            animation: super-fly 1.2s forwards cubic-bezier(0.12, 0.82, 0.32, 1);
+        }
+
+        @keyframes healing-pulse {
+            from { filter: brightness(1) saturate(1); transform: scale(1.02); }
+            to { filter: brightness(1.3) saturate(1.5); transform: scale(1.04); }
+        }
+
+        @keyframes super-fly {
+            0% { 
+                transform: translate(0, 0) scale(1) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { opacity: 1; }
+            100% { 
+                /* Menyebar lebih jauh dan acak */
+                transform: translate(var(--dx), var(--dy)) scale(1.8) rotate(var(--rot)); 
+                opacity: 0; 
+            }
+        }
+
+        .super-healing-active .hp-fill {
+            /* Gradien: Hijau Zamrud ke Hijau Neon ke Putih */
+            background: linear-gradient(90deg, #00b894, #00ff88, #ffffff) !important;
+            
+            /* Glow Berlapis Hijau & Putih */
+            box-shadow: 
+                0 0 20px #fff, 
+                0 0 40px #00ff88, 
+                0 0 60px rgba(0, 255, 136, 0.6) !important;
+
+            /* Tiga Animasi Sekaligus: Breathing, Shaking, dan Flash (Kedap-kedip) */
+            animation: 
+                hp-breathing-green 0.8s infinite alternate ease-in-out, 
+                hp-shake 0.1s infinite,
+                hp-flash-white 0.4s infinite alternate !important;
+            
+            transition: none !important;
+            filter: brightness(1.3);
+        }
+
+        @keyframes hp-shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes hp-breathing {
+            0% { 
+                filter: brightness(1.1) saturate(1.2);
+                box-shadow: 0 0 10px #ff4757, 0 0 20px #ffa502;
+            }
+            100% { 
+                filter: brightness(1.8) saturate(2);
+                box-shadow: 0 0 30px #fff, 0 0 60px #ffa502, 0 0 90px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        @keyframes hp-breathing-green {
+            0% { 
+                filter: brightness(1.2) saturate(1.5);
+                box-shadow: 0 0 15px #00ff88, 0 0 30px rgba(0, 255, 136, 0.4);
+            }
+            100% { 
+                filter: brightness(2) saturate(2);
+                box-shadow: 0 0 35px #fff, 0 0 70px #00ff88, 0 0 100px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        @keyframes hp-flash-white {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; } /* Efek kedip halus */
+            100% { filter: brightness(3); } /* Kilatan putih tajam */
+        }
+
+        .super-healing-active .bar-bg:first-child {
+            border: 2px solid #fff !important;
+            box-shadow: 0 0 15px #00ff88;
+            animation: hp-shake 0.1s infinite linear;
+        }
+
     </style>
 </head>
 <body class="active-p1">
@@ -500,7 +672,7 @@
 
         <div class="card" id="bot-card">
             <div id="bot-debuff" class="debuff-label"></div>
-            <h2 style="color: var(--bot)">Jovita (Enemy)</h2>
+            <h2 style="color: var(--bot)">Jovita (Smart Bot V3)</h2>
             <div class="bar-bg"><div id="bot-hp" class="hp-fill"></div><div class="bar-text" id="bot-hp-t">100/100</div></div>
             <div class="bar-bg"><div id="bot-mana" class="mana-fill"></div><div class="bar-text" id="bot-mana-t">30/100</div></div>
             <div class="grid" id="bot-skills"></div>
@@ -537,14 +709,23 @@
                 healPerHit: 5, 
                 hits: 3, 
                 interval: 2000      // Jeda 2 detik (2000ms)
+            },
+            { 
+                id: 'super_heal', 
+                name: 'SUPER HEAL', 
+                cost: 10, 
+                cd: 60000,
+                color: '#00ff88', 
+                duration: 7, // Durasi heal 7 detik
+                percent: 0.9  // 85% dari Max HP
             }
         ];
 
         let game = {
             turn: 'p1', timer: 5.0, active: true,
             event: { type: 'none', time: 0 },
-            p1: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, cds: {} },
-            bot: { hp: 200, mana: 40, shield: 0, freeze: 0, burn: 0, cds: {} }
+            p1: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} },
+            bot: { hp: 200, mana: 40, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} }
         };
 
         // Init CDs
@@ -596,6 +777,33 @@
                 updateDebuffLabel(p);
             });
 
+            // Logic Super Heal (Regen Berkala)
+            ['p1', 'bot'].forEach(p => {
+                const maxHP = (p === 'bot') ? 200 : 100;
+
+                if (game[p].sHeal > 0) {
+                    game[p].sHeal -= 0.1;
+                    
+                    let healPerTick = (maxHP * 0.7) / 100;
+                    game[p].hp = Math.min(maxHP, game[p].hp + healPerTick);
+
+                    // Buat partikel hijau kecil berjatuhan (opsional tapi bagus untuk kontras)
+                    for (let i = 0; i < 2; i++) { // Membuat 2 partikel sekaligus per tick
+                        setTimeout(() => createHealParticle(p), i * 30);
+                    }
+                    
+                    // --- AKTIFKAN VISUAL SUPER HEAL ---
+                    // Ini akan memicu CSS di atas
+                    document.getElementById(`${p}-card`).classList.add('super-healing-active');
+
+                    if (game[p].sHeal <= 0) {
+                        game[p].sHeal = 0;
+                        // Hapus visual saat durasi habis
+                        document.getElementById(`${p}-card`).classList.remove('super-healing-active');
+                    }
+                }
+            });
+
             document.getElementById('global-timer').innerText = game.timer.toFixed(1);
 
             // Regen Logic
@@ -639,12 +847,27 @@
             updateUI();
         }, 100);
 
+        // function updateDebuffLabel(p) {
+        //     let txt = "";
+        //     if (game[p].freeze > 0) txt += `❄️ FROZEN (${game[p].freeze.toFixed(1)}s) `;
+        //     if (game[p].burn > 0) txt += `🔥 BURNING (${game[p].burn.toFixed(1)}s)`;
+        //     document.getElementById(`${p}-debuff`).innerText = txt;
+        //     document.getElementById(`${p}-debuff`).style.color = game[p].freeze > 0 ? "var(--freeze)" : "var(--burn)";
+        // }
+
         function updateDebuffLabel(p) {
             let txt = "";
             if (game[p].freeze > 0) txt += `❄️ FROZEN (${game[p].freeze.toFixed(1)}s) `;
-            if (game[p].burn > 0) txt += `🔥 BURNING (${game[p].burn.toFixed(1)}s)`;
-            document.getElementById(`${p}-debuff`).innerText = txt;
-            document.getElementById(`${p}-debuff`).style.color = game[p].freeze > 0 ? "var(--freeze)" : "var(--burn)";
+            if (game[p].burn > 0) txt += `🔥 BURNING (${game[p].burn.toFixed(1)}s) `;
+            if (game[p].sHeal > 0) txt += `✨ REGEN (${game[p].sHeal.toFixed(1)}s)`; // Tambahkan ini
+            
+            const el = document.getElementById(`${p}-debuff`);
+            el.innerText = txt;
+            
+            // Atur warna label: Prioritas Freeze > Burn > Regen
+            if (game[p].freeze > 0) el.style.color = "var(--freeze)";
+            else if (game[p].burn > 0) el.style.color = "var(--burn)";
+            else if (game[p].sHeal > 0) el.style.color = "#00ff88";
         }
 
         function startEvent() {
@@ -704,7 +927,7 @@
                 // 1. Tentukan batas HP maksimal dan jumlah heal berdasarkan siapa yang pakai
                 const isBot = (pid === 'bot');
                 const maxHP = isBot ? 200 : 100;
-                const healAmount = isBot ? 45 : 30;
+                const healAmount = isBot ? 40 : 30;
 
                 // 2. Terapkan penambahan HP dengan batas yang sesuai
                 game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
@@ -811,6 +1034,18 @@
             } else if (sid === 'super_punch') {
                 executeSuperPunch(pid, opp);
                 log(`👊 ${pid.toUpperCase()} Menggunakan SUPER PUNCH! (3x Serangan Beruntun)`);
+            } else if (sid === 'super_heal') {
+                const s = SKILLS.find(x => x.id === 'super_heal');
+                game[pid].sHeal = s.duration; // Set durasi 10 detik
+                
+                // Efek visual awal (ledakan partikel banyak)
+                for(let i=0; i<15; i++) {
+                    setTimeout(() => createHealParticle(pid), i * 50);
+                }
+
+                createSuperHealVisual(pid);
+
+                log(`✨ ${pid.toUpperCase()} mengaktifkan SUPER HEAL! (Regen 70% HP selama 10 detik)`);
             }
 
             if (game[opp].hp <= 0) win(pid);
@@ -841,8 +1076,12 @@
             const pSuperPunchCD = (p.cds['super_punch'] - now) / 1000;
             if (pSuperPunchCD > 9.5 && b.shield <= 0 && getRemCD('shield') < 0.5) {
                 targetSkill = 'shield';
-                waitTime = 0; // Langsung bereaksi tanpa tunggu
+                waitTime = 0;
                 log("BOT: 'Mengaktifkan Perisai!'");
+            } else if (!targetSkill && b.hp < 30 && getRemCD('super_heal') === 0 && b.mana >= 50) {
+                targetSkill = 'super_heal';
+                waitTime = 200; // Eksekusi cepat karena kritis
+                log("BOT: 'Darahku sekarat! Aktifkan Super Heal!'");
             }
             
             // Jika Player mau Ulti & Bot sekarat, WAJIB pasang Shield.
@@ -950,19 +1189,17 @@
         function updateUI() {
             const now = Date.now();
             ['p1', 'bot'].forEach(p => {
-                // Tentukan HP Maksimal masing-masing
+                // 1. Deklarasi HP Maksimal
                 const maxHP = (p === 'bot') ? 200 : 100; 
-                
-                // Hitung persentase (HP saat ini / HP Maksimal * 100)
                 const hpPercent = (game[p].hp / maxHP) * 100;
-                
+
+                // 2. Update Visual Bar & Teks
                 document.getElementById(`${p}-hp`).style.width = Math.max(0, hpPercent) + "%";
                 document.getElementById(`${p}-mana`).style.width = game[p].mana + "%";
-                
-                // Update teks label HP (misal: 150/200)
                 document.getElementById(`${p}-hp-t`).innerText = Math.ceil(Math.max(0, game[p].hp)) + "/" + maxHP;
                 document.getElementById(`${p}-mana-t`).innerText = Math.floor(game[p].mana) + "/100";
 
+                // 3. Update Shield Visual
                 const card = document.getElementById(`${p}-card`);
                 if (game[p].shield > 0) {
                     card.classList.add('shield-active');
@@ -970,6 +1207,7 @@
                     card.classList.remove('shield-active');
                 }
                 
+                // 4. Update Semua Tombol Skill
                 SKILLS.forEach(s => {
                     const btn = document.getElementById(`${p}-${s.id}-btn`);
                     const over = document.getElementById(`${p}-${s.id}-cd`);
@@ -977,12 +1215,42 @@
                     const rem = game[p].cds[s.id] - now;
                     
                     if (rem > 0) {
+                        // KONDISI: SEDANG COOLDOWN
                         over.style.height = (rem / s.cd * 100) + "%";
                         txt.innerText = (rem / 1000).toFixed(1);
                         btn.disabled = true;
+                        if(s.id === 'super_heal') btn.classList.remove('ready-to-use');
                     } else {
-                        over.style.height = "0%"; txt.innerText = "";
-                        btn.disabled = (game.turn !== p || game[p].mana < s.cost || game[p].freeze > 0);
+                        // KONDISI: TIDAK COOLDOWN
+                        over.style.height = "0%"; 
+                        txt.innerText = "";
+
+                        // --- LOGIKA KHUSUS LOCK SUPER HEAL 30% ---
+                        if (s.id === 'super_heal') {
+                            if (hpPercent < 30) { 
+                                // Jika HP di bawah 30%, cek Mana, Turn, dan Status Freeze
+                                btn.disabled = (game.turn !== p || game[p].mana < s.cost || game[p].freeze > 0);
+                                
+                                if (!btn.disabled) {
+                                    btn.classList.add('ready-to-use');
+                                } else {
+                                    btn.classList.remove('ready-to-use');
+                                }
+                            } else {
+                                // HP MASIH TINGGI (LOCK AKTIF)
+                                btn.disabled = true;
+                                btn.innerText = "SUPER HEAL < 30HP"; // Tampilkan syarat di tombol
+                                btn.classList.remove('ready-to-use');
+                                
+                                // Opsional: Beri warna merah sedikit agar terlihat sebagai peringatan
+                                btn.style.fontSize = "10px";
+                            }
+                        } else {
+                            // SKILL LAIN TETAP NORMAL
+                            btn.disabled = (game.turn !== p || game[p].mana < s.cost || game[p].freeze > 0);
+                            btn.innerText = s.name;
+                            btn.style.fontSize = ""; // Reset font size
+                        }
                     }
                 });
             });
@@ -1232,6 +1500,48 @@
                 spark.style.setProperty('--ty', `${ty}px`);
                 document.body.appendChild(spark);
                 setTimeout(() => spark.remove(), 600);
+            }
+        }
+
+        function createSuperHealVisual(pid) {
+            const card = document.getElementById(`${pid}-card`);
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // 1. Flash Layar Hijau Lembut (Soft Flash)
+            const flash = document.createElement('div');
+            flash.className = 'hit-flash'; // Gunakan class flash yang sudah ada
+            flash.style.background = 'rgba(0, 255, 136, 0.3)'; 
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 250);
+
+            // 2. Ledakan Partikel Super
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'super-heal-particle';
+                    
+                    // Simbol acak: Plus, Hati, atau Kilauan
+                    const symbols = ['+', '💖', '✨', '🌿'];
+                    p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                    
+                    // Tentukan arah ledakan acak
+                    const angle = Math.random() * Math.PI * 2; // 0 hingga 360 derajat
+                    const dist = 100 + Math.random() * 150; // Jarak sebaran
+                    const dx = Math.cos(angle) * dist + 'px';
+                    const dy = Math.sin(angle) * dist + 'px';
+                    const rot = (Math.random() - 0.5) * 360 + 'deg';
+
+                    p.style.left = centerX + 'px';
+                    p.style.top = centerY + 'px';
+                    p.style.setProperty('--dx', dx);
+                    p.style.setProperty('--dy', dy);
+                    p.style.setProperty('--rot', rot);
+
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 1200);
+                }, i * 30); // Muncul berurutan cepat
             }
         }
         
