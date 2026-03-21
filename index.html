@@ -1060,41 +1060,19 @@
             if (game[game.turn].freeze > 0) return; 
             if (game.turn === 'bot' && game.active) setTimeout(botAI, 1000);
         }
-
+        
         function botAI() {
             if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
-
+            
             const b = game.bot;
             const p = game.p1;
             const now = Date.now();
             const getRemCD = (id) => Math.max(0, (b.cds[id] - now) / 1000);
-
+            
             let targetSkill = null;
             let waitTime = 0;
-
-            // --- 1. EMERGENCY DEFENSE (Prioritas Tertinggi) ---
-            const pSuperPunchCD = (p.cds['super_punch'] - now) / 1000;
-            if (pSuperPunchCD > 9.5 && b.shield <= 0 && getRemCD('shield') < 0.5) {
-                targetSkill = 'shield';
-                waitTime = 0;
-                log("BOT: 'Mengaktifkan Perisai!'");
-            } else if (!targetSkill && b.hp < 30 && getRemCD('super_heal') === 0 && b.mana >= 50) {
-                targetSkill = 'super_heal';
-                waitTime = 200; // Eksekusi cepat karena kritis
-                log("BOT: 'Darahku sekarat! Aktifkan Super Heal!'");
-            }
             
-            // Jika Player mau Ulti & Bot sekarat, WAJIB pasang Shield.
-            if (p.mana >= 55 && b.hp < 55 && b.shield <= 0 && getRemCD('shield') < 2) {
-                targetSkill = 'shield';
-                const manaNeeded = 20 - b.mana;
-                waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('shield') * 1000);
-                log("BOT: 'Bahaya! Aku harus berlindung!'");
-            }
-
-            // --- 2. SURVIVAL MODE (HP < 100%) ---
-            // Bot akan mencoba Heal, jika CD baru gunakan Super Punch (Lifesteal)
-            else if (!targetSkill && b.hp < 100) {
+            if (!targetSkill && b.hp < 100) {
                 if (getRemCD('heal') < 1.5 && b.mana >= 40) {
                     targetSkill = 'heal';
                     waitTime = getRemCD('heal') * 1000;
@@ -1106,6 +1084,31 @@
                 else if (getRemCD('vampire') < 1.5 && b.mana >= 30) {
                     targetSkill = 'vampire';
                     waitTime = getRemCD('vampire') * 1000;
+                }
+            }
+            
+            else if (b.hp < 30 && getRemCD('super_heal') === 0 && b.mana >= 9) {
+                targetSkill = 'super_heal';
+                waitTime = 100; // Sangat cepat
+                log("BOT: 'Gawat! Heal dulu!'");
+            }
+
+            // --- 2. EMERGENCY DEFENSE (Sekarang jadi Prioritas Kedua) ---
+            else if (!targetSkill) {
+                const pSuperPunchCD = (p.cds['super_punch'] - now) / 1000;
+                
+                // Reaksi terhadap Super Punch lawan
+                if (pSuperPunchCD > 9.5 && b.shield <= 0 && getRemCD('shield') < 0.5) {
+                    targetSkill = 'shield';
+                    waitTime = 0;
+                    log("BOT: 'Mengaktifkan Perisai!'");
+                }
+                // Reaksi terhadap kemungkinan Ulti lawan
+                else if (p.mana >= 55 && b.hp < 55 && b.shield <= 0 && getRemCD('shield') < 2) {
+                    targetSkill = 'shield';
+                    const manaNeeded = 20 - b.mana;
+                    waitTime = Math.max((manaNeeded / 3) * 1000, getRemCD('shield') * 1000);
+                    log("BOT: 'Bahaya! Aku harus berlindung!'");
                 }
             }
 
