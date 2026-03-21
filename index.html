@@ -872,7 +872,7 @@
 
         function startEvent() {
             // 1. Tentukan Tipe (Contoh 60% MANA, 40% HEALTH)
-            game.event.type = Math.random() > 0.35 ? 'MANA' : 'HEALTH';
+            game.event.type = Math.random() > 0.3 ? 'MANA' : 'HEALTH';
             
             // 2. Set Durasi
             game.event.time = 30;
@@ -927,7 +927,7 @@
                 // 1. Tentukan batas HP maksimal dan jumlah heal berdasarkan siapa yang pakai
                 const isBot = (pid === 'bot');
                 const maxHP = isBot ? 200 : 100;
-                const healAmount = isBot ? 40 : 30;
+                const healAmount = isBot ? 50 : 30;
 
                 // 2. Terapkan penambahan HP dengan batas yang sesuai
                 game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
@@ -1061,170 +1061,104 @@
             if (game.turn === 'bot' && game.active) setTimeout(botAI, 1000);
         }
         
-        function botAI() {
-            if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+function botAI() {
+    if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
 
-            const b = game.bot;
-            const p = game.p1;
-            const now = Date.now();
-            
-            // Fungsi pembantu
-            const getRemCD = (id) => Math.max(0, (b.cds[id] - now) / 1000);
-            const pUltiCD = (p.cds['ulti'] - now) / 1000; // VARIABEL PENTING AGAR TIDAK ERROR
-            const pSuperPunchCD = (p.cds['super_punch'] - now) / 1000;
+    const b = game.bot;
+    const p = game.p1;
+    const now = Date.now();
+    
+    const getRemCD = (id) => Math.max(0, (b.cds[id] - now) / 1000);
+    const pSuperCD = (p.cds['super_punch'] - now) / 1000;
 
-            let targetSkill = null;
-            let waitTime = 0;
+    let targetSkill = null;
+    let waitTime = 50; 
 
-            // --- 1. EMERGENCY HEAL (HP < 30) ---
-            if (b.hp < 30 && getRemCD('super_heal') === 0 && b.mana >= 9) {
-                targetSkill = 'super_heal';
-                waitTime = 100;
-                log("BOT: 'Gawat! Heal dulu!'");
-            }
-
-            // --- 2. ANTI-SHIELD (Logika Bully) ---
-            else if (!targetSkill && p.shield > 0 && (b.hp > 70 || p.hp < 70)) {
-                if (getRemCD('freeze') === 0 && b.mana >= 15) {
-                    targetSkill = 'freeze';
-                } else if (getRemCD('burning') === 0 && b.mana >= 45) {
-                    targetSkill = 'burning';
-                }
-            }
-
-            // --- 4. AGGRESSIVE COMBO (HP Sehat > 100) ---
-            else if (!targetSkill && b.hp >= 100 && p.hp > 80) {
-                // A. Bekukan lawan jika punya mana
-                if (getRemCD('burning') === 0 && b.mana >= 45) {
-                    targetSkill = 'burning';
-                    log("BOT: 'Rasakan api ini!'");
-                }
-                else if (getRemCD('super_punch') === 0 && b.mana >= 30) {
-                    targetSkill = 'super_punch';
-                }
-                // D. Curi HP lawan dengan Vampire (untuk menjaga HP tetap penuh)
-                else if (getRemCD('vampire') < 0.5 && b.mana >= 35) {
-                    targetSkill = 'vampire';
-                    waitTime = getRemCD('vampire') * 1000;
-                }
-            }
-
-            // --- 5. KILLER INSTINCT ---
-            if (!targetSkill && p.hp < 55 && p.shield <= 0) {
-                const ultiCost = 65;
-                const manaNeeded = ultiCost - b.mana;
-                const ultiCD = getRemCD('ulti');
-
-                // KONDISI 1: ULTI READY & MANA CUKUP -> INSTANT TEMBAK!
-                if (ultiCD === 0 && b.mana >= ultiCost) {
-                    targetSkill = 'ulti';
-                    waitTime = 0; // Tidak ada delay sama sekali
-                    log("BOT: 'Darahmu kritis! Terimalah ULTIMATE-ku sekarang!'");
-                } 
-                
-                // KONDISI 2: ULTI SEDANG CD TAPI SEBENTAR LAGI (< 4.8s) & MANA CUKUP
-                else if (b.mana >= ultiCost && ultiCD > 0 && ultiCD < 4.8) {
-                    targetSkill = 'ulti';
-                    waitTime = ultiCD * 1000; // Tunggu pas sesuai sisa CD-nya
-                    log(`BOT: 'Sabar... aku pukul dalam ${ultiCD.toFixed(1)}s!'`);
-                }
-
-                // KONDISI 3: MANA BELUM CUKUP (BUTUH REGEN) -> TUNGGU DI DETIK TERAKHIR
-                else if (ultiCD < 4.8 && manaNeeded <= 20) {
-                    targetSkill = 'ulti';
-                    waitTime = 4800; 
-                    log("BOT: 'Sabar... sedikit lagi mana cukup untuk Ulti mematikan!'");
-                }
-            } else if (!targetSkill && p.hp < 70 && p.shield <= 0 && p.burn > 0){
-                const ultiCost = 65;
-                const manaNeeded = ultiCost - b.mana;
-
-                if (getRemCD('ulti') < 4.8) {
-                    if (b.mana >= ultiCost) {
-                        targetSkill = 'ulti';
-                        waitTime = 500;
-                    } 
-                    // KUNCI DI SINI: Jika mana belum cukup, JANGAN langsung strike. 
-                    // Tunggu sampai detik terakhir (4.8s) supaya mana penuh untuk Ulti.
-                    else if (manaNeeded <= 15) { 
-                        targetSkill = 'ulti';
-                        waitTime = 4800; 
-                        log("BOT: 'Manaku hampir cukup... sebentar lagi kamu tamat!'");
-                    }
-                }
-                
-                if (!targetSkill) {
-                    if (b.mana >= 30 && getRemCD('super_punch') === 0) {
-                        targetSkill = 'super_punch';
-                    } else if (getRemCD('strike') < 4.8) {
-                        targetSkill = 'strike';
-                        waitTime = getRemCD('strike') * 1000;
-                    }
-                }
-            }
-
-            // --- 3. EMERGENCY DEFENSE (Deteksi Ulti/Super Punch Lawan) ---
-            else if (!targetSkill) {
-                const pUltiReady = (p.mana >= 50 && pUltiCD <= 0);
-                const pSuperReady = (p.mana >= 30 && pSuperPunchCD <= 0);
-
-                // 1. ANTISIPASI ULTI: Jika Player READY Ulti & Mana Cukup
-                if (pUltiReady && b.hp < 100 && b.shield <= 0 && getRemCD('shield') < 0.5) {
-                    targetSkill = 'shield';
-                    log("BOT: 'Aku tahu kamu mau Ulti! Shield ON!'");
-                } 
-                
-                // 2. ANTISIPASI SUPER PUNCH: Jika Player READY Super Punch & Mana Cukup
-                // Bot hanya pasang shield jika HP-nya sudah di bawah 150 (tidak boros di awal)
-                else if (pSuperReady && b.hp < 150 && b.shield <= 0 && getRemCD('shield') < 0.5) {
-                    targetSkill = 'shield';
-                    log("BOT: 'Hati-hati, aku tahu kamu siap memukul keras!'");
-                }
-            }
-
-            // --- 4. REGULAR HEAL / SUSTAIN ---
-            if (!targetSkill && b.hp < 100) {
-                if (getRemCD('heal') < 1.5 && b.mana >= 40) {
-                    targetSkill = 'heal';
-                    waitTime = getRemCD('heal') * 1000;
-                } 
-                else if (getRemCD('vampire') < 1.5 && b.mana >= 35) {
-                    targetSkill = 'vampire';
-                    waitTime = getRemCD('vampire') * 1000;
-                }
-                else if (getRemCD('super_punch') === 0 && b.mana >= 30) {
-                    targetSkill = 'super_punch'; 
-                    waitTime = 300;
-                }
-            }
-
-            // --- EKSEKUSI ---
-            const maxWaitAllowed = (game.timer - 0.5) * 1000;
-            const finalWait = Math.max(0, Math.min(waitTime, maxWaitAllowed));
-
-            setTimeout(() => {
-                if (game.turn !== 'bot' || !game.active) return;
-                
-                const s = SKILLS.find(x => x.id === targetSkill);
-                
-                if (targetSkill && s && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
-                    useSkill(targetSkill, 'bot');
-                } 
-                else if (b.mana >= 5 && Date.now() >= b.cds['strike']) {
-                    if (b.hp < 25 && p.mana >= 60 && targetSkill === 'strike') {
-                        log("BOT: 'Sabar... satu langkah salah dan aku tamat.'");
-                        changeTurn();
-                    } else {
-                        useSkill('strike', 'bot');
-                    }
-                } else {
-                    changeTurn();
-                }
-            }, finalWait);
+    // --- 1. EMERGENCY (HP < 35) ---
+    // Tetap prioritas agar bot tidak mati konyol
+    if (b.hp < 35) {
+        let cdSHeal = getRemCD('super_heal');
+        if (cdSHeal < 4.8 && b.mana >= 10) {
+            targetSkill = 'super_heal';
+            if (cdSHeal > 0) waitTime = (cdSHeal * 1000) + 150;
         }
+    }
 
+    // --- 2. THE AGGRESSIVE COMBO ENGINE ---
+    if (!targetSkill) {
+        // [COMBO 1: BURNING] - Pasang api agar P1 panik & fokus Heal
+        if (getRemCD('burning') === 0 && b.mana >= 45 && p.hp > 40) {
+            targetSkill = 'burning';
+            log("JOVITA: 'Rasakan panasnya! Fokuslah menyembuhkan dirimu!'");
+        }
+        
+        // [COMBO 2: ULTIMATE] - Jika mana penuh (65), langsung eksekusi finisher
+        else if (getRemCD('ulti') === 0 && b.mana >= 65) {
+            targetSkill = 'ulti';
+            log("JOVITA: 'Combo Selesai! ULTIMATE!'");
+        }
+        
+        // [COMBO 3: SUPER PUNCH] - Jika Ulti CD tapi Mana 30+, hajar terus!
+        else if (b.mana >= 30) {
+            let cdPunch = getRemCD('super_punch');
+            if (cdPunch < 4.8) {
+                targetSkill = 'super_punch';
+                if (cdPunch > 0) waitTime = (cdPunch * 1000) + 150;
+                log("JOVITA: 'Jangan kasih kendor! Super Punch!'");
+            }
+        }
+    }
 
+    // --- 3. REAKTIF SHIELD (Hanya jika diserang Super Punch) ---
+    if (!targetSkill && b.shield <= 0 && getRemCD('shield') === 0 && b.mana >= 20) {
+        if (pSuperCD > 13.0) { // Jika P1 baru saja klik Super Punch
+            targetSkill = 'shield';
+            log("JOVITA: 'Refleks! Shield aktif!'");
+            waitTime = 300;
+        }
+    }
 
+    // --- 4. SMART RECOVERY (Nunggu CD Heal/Vampire < 4.8s) ---
+    if (!targetSkill && b.hp < 130) {
+        let cdHeal = getRemCD('heal');
+        let cdVamp = getRemCD('vampire');
+        
+        if (cdHeal < 4.8 && b.mana >= 50) {
+            targetSkill = 'heal';
+            if (cdHeal > 0) waitTime = (cdHeal * 1000) + 150;
+        } else if (cdVamp < 4.8 && b.mana >= 45) {
+            targetSkill = 'vampire';
+            if (cdVamp > 0) waitTime = (cdVamp * 1000) + 150;
+        }
+    }
+
+    // --- 5. MANA FARMING (STRIKE) ---
+    // Jika tidak ada skill yang siap atau mana kurang, pukul terus buat isi Mana!
+    if (!targetSkill) {
+        targetSkill = 'strike';
+        if (b.mana < 65) {
+            log("JOVITA: 'Sedang mengumpulkan Mana... Terima Strike ini!'");
+        }
+    }
+
+    // Batasan maksimal menunggu giliran (4.9 detik)
+    const safeWait = Math.min(waitTime, 4900);
+
+    setTimeout(() => {
+        if (game.turn !== 'bot' || !game.active) return;
+        
+        const s = SKILLS.find(x => x.id === targetSkill);
+        
+        // Cek final: Gunakan skill jika Mana cukup & CD bersih
+        if (targetSkill && s && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
+            useSkill(targetSkill, 'bot');
+        } 
+        else {
+            // Jika kondisi tidak memungkinkan, tetap Strike (Paling aman & nambah Mana)
+            useSkill('strike', 'bot');
+        }
+    }, safeWait);
+}
 
         function updateUI() {
             const now = Date.now();
