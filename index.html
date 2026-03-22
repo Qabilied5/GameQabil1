@@ -1068,96 +1068,91 @@ function botAI() {
     const p = game.p1;
     const now = Date.now();
     
-    const getRemCD = (id) => Math.max(0, (b.cds[id] - now) / 1000);
-    const pSuperCD = (p.cds['super_punch'] - now) / 1000;
+    // Helper untuk sisa CD
+    const getRemCD = (id) => Math.max(0, ((b.cds[id] || 0) - now) / 1000);
+    
+    // Helper untuk cek apakah skill BISA diklik (Mana cukup & CD 0)
+    const isReady = (id) => {
+        const s = SKILLS.find(x => x.id === id);
+        return s && b.mana >= s.cost && now >= (b.cds[id] || 0);
+    };
 
     let targetSkill = null;
-    let waitTime = 50; 
+    let currentCD = 0;
 
-    // --- 1. EMERGENCY (HP < 35) ---
-    // Tetap prioritas agar bot tidak mati konyol
-    if (b.hp < 35) {
+    // --- STRATEGI UTAMA ---
+
+    // 1. EMERGENCY HEAL (Hanya jika Mana Cukup & CD hampir habis)
+    if (b.hp < 35 && b.mana >= 10) {
         let cdSHeal = getRemCD('super_heal');
-        if (cdSHeal < 4.8 && b.mana >= 10) {
+        if (cdSHeal < 4.7) {
             targetSkill = 'super_heal';
-            if (cdSHeal > 0) waitTime = (cdSHeal * 1000) + 150;
+            currentCD = cdSHeal;
         }
     }
 
-    // --- 2. THE AGGRESSIVE COMBO ENGINE ---
-    if (!targetSkill) {
-        // [COMBO 1: BURNING] - Pasang api agar P1 panik & fokus Heal
-        if (getRemCD('burning') === 0 && b.mana >= 45 && p.hp > 40) {
+    // 2. AGGRESSIVE COMBO (Hanya jika Mana Sehat)
+    if (!targetSkill && b.mana >= 30) {
+        if (isReady('burning') && p.hp > 40) {
             targetSkill = 'burning';
-            log("JOVITA: 'Rasakan panasnya! Fokuslah menyembuhkan dirimu!'");
-        }
-        
-        // [COMBO 2: ULTIMATE] - Jika mana penuh (65), langsung eksekusi finisher
-        else if (getRemCD('ulti') === 0 && b.mana >= 65) {
+        } 
+        else if (isReady('ulti') && b.mana >= 65) {
             targetSkill = 'ulti';
-            log("JOVITA: 'Combo Selesai! ULTIMATE!'");
-        }
-        
-        // [COMBO 3: SUPER PUNCH] - Jika Ulti CD tapi Mana 30+, hajar terus!
-        else if (b.mana >= 30) {
+        } 
+        else {
             let cdPunch = getRemCD('super_punch');
-            if (cdPunch < 4.8) {
+            if (cdPunch < 4.7 && b.mana >= 30) {
                 targetSkill = 'super_punch';
-                if (cdPunch > 0) waitTime = (cdPunch * 1000) + 150;
-                log("JOVITA: 'Jangan kasih kendor! Super Punch!'");
+                currentCD = cdPunch;
             }
         }
     }
 
-    // --- 3. REAKTIF SHIELD (Hanya jika diserang Super Punch) ---
-    if (!targetSkill && b.shield <= 0 && getRemCD('shield') === 0 && b.mana >= 20) {
-        if (pSuperCD > 13.0) { // Jika P1 baru saja klik Super Punch
-            targetSkill = 'shield';
-            log("JOVITA: 'Refleks! Shield aktif!'");
-            waitTime = 300;
-        }
-    }
-
-    // --- 4. SMART RECOVERY (Nunggu CD Heal/Vampire < 4.8s) ---
+    // 3. DEFENSE & RECOVERY
     if (!targetSkill && b.hp < 130) {
-        let cdHeal = getRemCD('heal');
-        let cdVamp = getRemCD('vampire');
-        
-        if (cdHeal < 4.8 && b.mana >= 50) {
-            targetSkill = 'heal';
-            if (cdHeal > 0) waitTime = (cdHeal * 1000) + 150;
-        } else if (cdVamp < 4.8 && b.mana >= 45) {
-            targetSkill = 'vampire';
-            if (cdVamp > 0) waitTime = (cdVamp * 1000) + 150;
-        }
+        if (isReady('heal') && b.mana >= 50) targetSkill = 'heal';
+        else if (isReady('vampire') && b.mana >= 45) targetSkill = 'vampire';
     }
 
-    // --- 5. MANA FARMING (STRIKE) ---
-    // Jika tidak ada skill yang siap atau mana kurang, pukul terus buat isi Mana!
+    // 4. MANA RECOVERY (STRIKE) - biar ga bengong
+    // Jika tidak ada targetSkill (karena Mana kurang atau skill utama sedang CD lama)
     if (!targetSkill) {
         targetSkill = 'strike';
-        if (b.mana < 65) {
-            log("JOVITA: 'Sedang mengumpulkan Mana... Terima Strike ini!'");
-        }
+        currentCD = getRemCD('strike');
     }
 
-    // Batasan maksimal menunggu giliran (4.9 detik)
-    const safeWait = Math.min(waitTime, 4900);
-
-    setTimeout(() => {
+    // --- EKSEKUSI ---
+    const execute = () => {
         if (game.turn !== 'bot' || !game.active) return;
         
+        // Cek apakah targetSkill benar-benar bisa dipakai saat ini
         const s = SKILLS.find(x => x.id === targetSkill);
         
-        // Cek final: Gunakan skill jika Mana cukup & CD bersih
-        if (targetSkill && s && b.mana >= s.cost && Date.now() >= b.cds[targetSkill]) {
+        if (s && b.mana >= s.cost && Date.now() >= (b.cds[targetSkill] || 0)) {
             useSkill(targetSkill, 'bot');
-        } 
-        else {
-            // Jika kondisi tidak memungkinkan, tetap Strike (Paling aman & nambah Mana)
-            useSkill('strike', 'bot');
+        } else {
+            // JIKA GAGAL (Mana tiba-tiba kurang/CD belum pas), PAKSA STRIKE TANPA SYARAT
+            // Selama Mana >= 5, strike harus keluar.
+            if (b.mana >= 5) {
+                useSkill('strike', 'bot');
+            } else {
+                log("JOVITA: 'Kehabisan energi... Menunggu pemulihan!'");
+            }
         }
-    }, safeWait);
+    };
+
+    // Delay
+    if (currentCD === 0) {
+        execute();
+    } else if (currentCD < 4.7) {
+        setTimeout(execute, (currentCD * 1000) + 100);
+    } else {
+        // Jika CD skill utama terlalu lama (> 4.7 detik), langsung pindah ke Strike
+        targetSkill = 'strike';
+        let cdStrike = getRemCD('strike');
+        if (cdStrike === 0) execute();
+        else setTimeout(execute, (cdStrike * 1000) + 100);
+    }
 }
 
         function updateUI() {
