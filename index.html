@@ -1093,18 +1093,32 @@ function botAI() {
 
     // 2. AGGRESSIVE COMBO (Hanya jika Mana Sehat)
     if (!targetSkill && b.mana >= 30) {
-        if (isReady('burning') && p.hp > 40) {
-            targetSkill = 'burning';
-        } 
-        else if (isReady('ulti') && b.mana >= 65) {
+        let cdUlti = getRemCD('ulti');
+        let cdPunch = getRemCD('super_punch');
+        let cdBurning = getRemCD('burning');
+
+        // PRIORITAS A: FINISHER (Jika P1 sekarat, tunggu Ulti)
+        // Jika darah P1 <= 55 dan Ulti dikit lagi ready, TUNGGU!
+        if (p.hp <= 55 && b.mana >= 65 && cdUlti < 4.9) {
             targetSkill = 'ulti';
+            currentCD = cdUlti;
+            if (cdUlti > 0) log("JOVITA: 'Tunggu sebentar... ini akan segera berakhir!'");
         } 
-        else {
-            let cdPunch = getRemCD('super_punch');
-            if (cdPunch < 4.7 && b.mana >= 30) {
-                targetSkill = 'super_punch';
-                currentCD = cdPunch;
-            }
+        
+        // PRIORITAS B: BURNING (Hanya jika darah P1 masih tebal)
+        else if (isReady('burning') && p.hp > 55) {
+            targetSkill = 'burning';
+        }
+
+        // PRIORITAS C: SUPER PUNCH (Hanya jika Ulti masih lama CD-nya)
+        else if (b.mana >= 30 && cdPunch < 4.7 && cdUlti > 5) {
+            targetSkill = 'super_punch';
+            currentCD = cdPunch;
+        }
+        
+        // PRIORITAS D: ULTI NORMAL (Jika Mana cukup dan ready)
+        else if (isReady('ulti')) {
+            targetSkill = 'ulti';
         }
     }
 
