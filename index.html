@@ -48,6 +48,105 @@
         .shake { animation: shake 0.3s; }
         @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-8px, 8px); } 50% { transform: translate(8px, -8px); } }
 
+
+        /* Popup Overlay */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .popup-content {
+            margin: 0px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .popup-content h1 {
+            margin-bottom: 10px;
+            color: var(--p1);
+            letter-spacing: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .info-item {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 3px solid var(--p1);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, var(--p1), #3498db);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        /* RESULT CSS POPUP -------------------------------------------------- */
+        #result-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+            text-align: center;
+        }
+
+        #result-title {
+            font-size: 3rem;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            margin-bottom: 10px;
+        }
+
+        .result-stats {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        /* GAME START ------------------------------------------------------------------------------- */
+
         .shield-active {
             border: 4px solid #2980b9 !important;
             box-shadow: 0 0 20px #3498db;
@@ -661,6 +760,55 @@
     <div id="event-banner">EVENT ACTIVE</div>
     <div id="global-timer">5.0</div>
 
+    <div id="start-overlay">
+        <div class="popup-content">
+            <h1>BATTLE ARENA</h1>
+            <p>Kalahkan <b>Jovita (Smart Bot)</b> Dengan Taktik!!<br>Made By <b>Qabil</b></p>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>👤 Player (You)</strong><br>
+                    HP: 100 | Mana: 30
+                </div>
+                <div class="info-item" style="border-left-color: var(--bot)">
+                    <strong>🤖 Jovita</strong><br>
+                    HP: 200 | Mana: 40
+                </div>
+                <div class="info-item">
+                    <strong>⚡ Strike</strong><br>
+                    Memberi Damage & (+25) Mana
+                </div>
+                <div class="info-item">
+                    <strong>✨ Super Heal</strong><br>
+                    Dapat Digunakan saat HP < 30%
+                </div>
+                <div class="info-item">
+                    <strong>❤️‍🩹 Best Heal Combo</strong><br>
+                    Heal + Vampire + Super Punch
+                </div>
+                <div class="info-item">
+                    <strong>⚔️ Best Execute Combo</strong><br>
+                    Ulti + Vampire + Strike
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">START BATTLE</button>
+        </div>
+    </div>
+
+    <div id="result-overlay" style="display: none;">
+        <div class="popup-content">
+            <h1 id="result-title">HASIL</h1>
+            <p id="result-message"></p>
+            
+            <div class="result-stats">
+                <div id="winner-name" style="font-size: 20px; font-weight: bold; margin-bottom: 15px;"></div>
+            </div>
+
+            <button class="start-btn" onclick="location.reload()">TRY AGAIN</button>
+        </div>
+    </div>
+
     <div class="game-wrapper" id="arena">
         <div class="card" id="p1-card">
             <div id="p1-debuff" class="debuff-label"></div>
@@ -683,6 +831,10 @@
 
     <script>
 
+        
+
+        // GAME BEGIN ---------------------------------------------------------
+
         const strikeSound = new Audio('/audio/StrikeSound.mp3');
         strikeSound.preload = 'auto';
         strikeSound.volume = 0.6;
@@ -702,13 +854,13 @@
             { 
                 id: 'super_punch', 
                 name: 'SUPER PUNCH', 
-                cost: 30,           // Biaya mana/stamina (bisa disesuaikan)
-                cd: 15000,          // Cooldown 15 detik
-                color: '#f1c40f',    // Warna kuning emas
+                cost: 30,       
+                cd: 15000,        
+                color: '#f1c40f',  
                 damage: 15, 
                 healPerHit: 5, 
                 hits: 3, 
-                interval: 2000      // Jeda 2 detik (2000ms)
+                interval: 2000
             },
             { 
                 id: 'super_heal', 
@@ -716,8 +868,8 @@
                 cost: 10, 
                 cd: 90000,
                 color: '#00ff88', 
-                duration: 7, // Durasi heal 7 detik
-                percent: 0.9  // 85% dari Max HP
+                duration: 5,
+                percent: 0.9  
             }
         ];
 
@@ -745,107 +897,99 @@
             });
         }
 
-        setInterval(() => {
-            if (!game.active) return;
+        // Fungsi untuk memulai game dari Popup
+        function startGame() {
+            const startBtn = document.querySelector('.start-btn');
+            if (startBtn) {
+                startBtn.disabled = true; // Matikan tombol agar tidak bisa diklik lagi
+                startBtn.innerText = "LOADING..."; // Opsional: Beri feedback visual
+            }
+
+            const overlay = document.getElementById('start-overlay');
+            if(overlay) {
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none'; // Tambahan: Agar klik tidak tembus
+                setTimeout(() => overlay.remove(), 500);
+            }
+
+            init(); 
             
-            // Logic Freeze
-            if (game[game.turn].freeze > 0) {
-                game[game.turn].freeze -= 0.1;
-                if (game[game.turn].freeze <= 0) {
-                    game[game.turn].freeze = 0;
-                    document.getElementById(`${game.turn}-card`).classList.remove('frozen');
-                    log(`${game.turn.toUpperCase()} sudah tidak membeku!`);
-                    changeTurn();
+            const gameLoop = setInterval(() => {
+                if (!game.active) {
+                    clearInterval(gameLoop); // Berhenti jika ada yang menang
+                    return;
                 }
-            } else {
-                game.timer -= 0.1;
-                if (game.timer <= 0) changeTurn();
-            }
 
-            // Logic Burning (Damage 5 per detik = 0.5 per 0.1s)
-            ['p1', 'bot'].forEach(p => {
-                if (game[p].burn > 0) {
-                    game[p].burn -= 0.1;
-                    game[p].hp -= 0.5; 
-                    document.getElementById(`${p}-card`).classList.add('burning');
-                    if (game[p].hp <= 0) win(p === 'p1' ? 'bot' : 'p1');
-                    if (game[p].burn <= 0) {
-                        game[p].burn = 0;
-                        document.getElementById(`${p}-card`).classList.remove('burning');
+                // --- LOGIKA FREEZE & TIMER ---
+                if (game[game.turn].freeze > 0) {
+                    game[game.turn].freeze -= 0.1;
+                    if (game[game.turn].freeze <= 0) {
+                        game[game.turn].freeze = 0;
+                        document.getElementById(`${game.turn}-card`).classList.remove('frozen');
+                        log(`${game.turn.toUpperCase()} sudah tidak membeku!`);
+                        changeTurn();
                     }
+                } else {
+                    game.timer -= 0.1;
+                    if (game.timer <= 0) changeTurn();
                 }
-                updateDebuffLabel(p);
-            });
 
-            // Logic Super Heal (Regen Berkala)
-            ['p1', 'bot'].forEach(p => {
-                const maxHP = (p === 'bot') ? 200 : 100;
-
-                if (game[p].sHeal > 0) {
-                    game[p].sHeal -= 0.1;
-                    
-                    let healPerTick = (maxHP * 0.7) / 100;
-                    game[p].hp = Math.min(maxHP, game[p].hp + healPerTick);
-
-                    // Buat partikel hijau kecil berjatuhan (opsional tapi bagus untuk kontras)
-                    for (let i = 0; i < 2; i++) { // Membuat 2 partikel sekaligus per tick
-                        setTimeout(() => createHealParticle(p), i * 30);
+                // --- LOGIKA BURNING & REGEN ---
+                ['p1', 'bot'].forEach(p => {
+                    // Burning logic
+                    if (game[p].burn > 0) {
+                        game[p].burn -= 0.1;
+                        game[p].hp -= 0.5; 
+                        document.getElementById(`${p}-card`).classList.add('burning');
+                        if (game[p].hp <= 0) win(p === 'p1' ? 'bot' : 'p1');
+                        if (game[p].burn <= 0) {
+                            game[p].burn = 0;
+                            document.getElementById(`${p}-card`).classList.remove('burning');
+                        }
                     }
-                    
-                    // --- AKTIFKAN VISUAL SUPER HEAL ---
-                    // Ini akan memicu CSS di atas
-                    document.getElementById(`${p}-card`).classList.add('super-healing-active');
 
-                    if (game[p].sHeal <= 0) {
-                        game[p].sHeal = 0;
-                        // Hapus visual saat durasi habis
-                        document.getElementById(`${p}-card`).classList.remove('super-healing-active');
+                    // Super Heal logic
+                    const maxHP = (p === 'bot') ? 200 : 100;
+                    if (game[p].sHeal > 0) {
+                        game[p].sHeal -= 0.1;
+                        let healPerTick = (maxHP * 0.7) / 100;
+                        game[p].hp = Math.min(maxHP, game[p].hp + healPerTick);
+                        createHealParticle(p);
+                        document.getElementById(`${p}-card`).classList.add('super-healing-active');
+                        if (game[p].sHeal <= 0) {
+                            game[p].sHeal = 0;
+                            document.getElementById(`${p}-card`).classList.remove('super-healing-active');
+                        }
                     }
+                    updateDebuffLabel(p);
+                });
+
+                // --- LOGIKA EVENT & REGEN MANA ---
+                let mR = 0.3, hR = 0;
+                if (game.event.time > 0) {
+                    game.event.time -= 0.1;
+                    if (game.event.type === 'MANA') mR = 1.2;
+                    if (game.event.type === 'HEALTH') hR = 0.25;
+                    if (game.event.time <= 0) {
+                        document.getElementById('event-banner').className = '';
+                        document.querySelectorAll('.mana-fill').forEach(el => el.classList.remove('mana-shaking-active'));
+                    }
+                } else if (Math.random() < 0.01) {
+                    startEvent();
                 }
-            });
 
-            document.getElementById('global-timer').innerText = game.timer.toFixed(1);
+                ['p1', 'bot'].forEach(i => {
+                    const maxHP = (i === 'bot') ? 200 : 100;
+                    game[i].mana = Math.min(100, game[i].mana + mR);
+                    game[i].hp = Math.min(maxHP, game[i].hp + hR);
+                });
 
-            // Regen Logic
-            let mR = 0.3, hR = 0;
+                document.getElementById('global-timer').innerText = game.timer.toFixed(1);
+                updateUI();
+            }, 100);
 
-            if (game.event.time > 0) {
-                game.event.time -= 0.1;
-                
-                if (game.event.type === 'MANA') {
-                    mR = 1.2;
-                    // Tambahkan efek getar ke semua bar mana (P1 dan Bot)
-                    document.querySelectorAll('.mana-fill').forEach(el => {
-                        el.classList.add('mana-shaking-active');
-                    });
-                }
-                
-                if (game.event.type === 'HEALTH') hR = 0.25;
-
-                // Jika waktu habis, hapus banner dan hapus efek getar
-                if (game.event.time <= 0) {
-                    document.getElementById('event-banner').className = '';
-                    document.querySelectorAll('.mana-fill').forEach(el => {
-                        el.classList.remove('mana-shaking-active');
-                    });
-                }
-                
-            } else if (Math.random() < 0.01) { // --> 003 Normal 
-                startEvent();
-            }
-
-            ['p1', 'bot'].forEach(i => {
-                // Tentukan batas maksimal HP: Bot 200, Player 100
-                const maxHP = (i === 'bot') ? 200 : 100;
-
-                // Tambah mana (tetap max 100)
-                game[i].mana = Math.min(100, game[i].mana + mR);
-
-                // Tambah HP dengan batas maxHP yang sesuai
-                game[i].hp = Math.min(maxHP, game[i].hp + hR);
-            });
-            updateUI();
-        }, 100);
+            log("Pertarungan Dimulai!");
+        }
 
         // function updateDebuffLabel(p) {
         //     let txt = "";
@@ -907,7 +1051,7 @@
                 let d = calc(10, 16, opp);
                 game[opp].hp -= d;
 
-                strikeSound.currentTime = 0; // Mulai dari awal
+                strikeSound.currentTime = 0;
                 strikeSound.play();
 
                 setTimeout(() => {
@@ -974,7 +1118,7 @@
                 log(`🛡️ ${pid.toUpperCase()} Mengaktifkan Pelindung (75% Damage Reduction)!`);
             } else if (sid === 'vampire') {
                 let baseDamage = 20;
-                // Ubah 0.5 menjadi 0.25 untuk pengurangan 75%
+                // 0.25 untuk pengurangan 75%
                 let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.25) : baseDamage;
                 
                 game[opp].hp -= d;
@@ -1252,10 +1396,25 @@ function botAI() {
 
         function win(id) {
             game.active = false;
-            setTimeout(() => {
-                alert(id === 'p1' ? "SELAMAT! KAMU MENANG!" : "JOVITA JAHAT MENGALAHKANMU!");
-                location.reload();
-            }, 100);
+            
+            const resOverlay = document.getElementById('result-overlay');
+            const resTitle = document.getElementById('result-title');
+            const resMsg = document.getElementById('result-message');
+            const resWinner = document.getElementById('winner-name');
+
+            resOverlay.style.display = 'flex';
+
+            if (id === 'p1') {
+                resTitle.innerText = "VICTORY!";
+                resTitle.style.color = "#00ff88";
+                resMsg.innerText = "Kamu berhasil menaklukkan BOT Jovita!";
+                resWinner.innerText = "PLAYER 1 WINS";
+            } else {
+                resTitle.innerText = "DEFEAT";
+                resTitle.style.color = "#ff4757";
+                resMsg.innerText = "Kalah dengan bot?";
+                resWinner.innerText = "JOVITA WINS";
+            }
         }
 
         function createHealParticle(pid) {
@@ -1528,8 +1687,7 @@ function botAI() {
             }
         }
         
-        init();
-
+        // init();
 
     </script>
 </body>
