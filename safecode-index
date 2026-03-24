@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mage War: Hero vs Bot (Skill Expansion)</title>
+    <link rel="stylesheet" href="effect.css">
+    <link rel="stylesheet" href="base.css">
+    <script src="ai-controller.js" defer></script>
+    <script src="effect.js" defer></script>
+    <script src="core.js" defer></script>
+  </head>
+  <body class="active-p1">
+    <div id="event-banner">EVENT ACTIVE</div>
+    <div id="global-timer">5.0</div>
+
+    <div id="start-overlay">
+      <div class="popup-content">
+        <h1>BATTLE ARENA</h1>
+        <p>
+          Kalahkan <b>Jovita (Smart Bot)</b> Dengan Taktik!!<br />Made By
+          <b>Qabil</b>
+        </p>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>👤 Player (You)</strong><br />
+            HP: 100 | Mana: 30
+          </div>
+          <div class="info-item" style="border-left-color: var(--bot)">
+            <strong>🤖 Jovita</strong><br />
+            HP: 200 | Mana: 40
+          </div>
+          <div class="info-item">
+            <strong>⚡ Strike</strong><br />
+            Memberi Damage & (+25) Mana
+          </div>
+          <div class="info-item">
+            <strong>✨ Super Heal</strong><br />
+            Dapat Digunakan saat HP < 30%
+          </div>
+          <div class="info-item">
+            <strong>❤️‍🩹 Best Heal Combo</strong><br />
+            Heal + Vampire + Super Punch
+          </div>
+          <div class="info-item">
+            <strong>⚔️ Best Execute Combo</strong><br />
+            Ulti + Vampire + Strike
+          </div>
+        </div>
+
+        <p>Pilih Tingkat Kesulitan:</p>
+        <div class="difficulty-selector" style="margin-bottom: 20px">
+          <button
+            class="diff-btn"
+            id="easy-btn"
+            onclick="selectDifficulty('easy')"
+          >
+            EASY
+          </button>
+          <button
+            class="diff-btn active-diff"
+            id="normal-btn"
+            onclick="selectDifficulty('normal')"
+          >
+            NORMAL
+          </button>
+          <button
+            class="diff-btn"
+            id="hard-btn"
+            onclick="selectDifficulty('hard')"
+          >
+            HARD
+          </button>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">START BATTLE</button>
+      </div>
+    </div>
+
+    <div id="result-overlay" style="display: none">
+      <div class="popup-content">
+        <h1 id="result-title">HASIL</h1>
+        <p id="result-message"></p>
+
+        <div class="result-stats">
+          <div
+            id="winner-name"
+            style="font-size: 20px; font-weight: bold; margin-bottom: 15px"
+          ></div>
+        </div>
+
+        <button class="start-btn" onclick="location.reload()">TRY AGAIN</button>
+      </div>
+    </div>
+
+    <div class="game-wrapper" id="arena">
+      <div class="card" id="p1-card">
+        <div id="p1-debuff" class="debuff-label"></div>
+        <h2 style="color: var(--p1)">YOU</h2>
+        <div class="bar-bg">
+          <div id="p1-hp" class="hp-fill"></div>
+          <div class="bar-text" id="p1-hp-t">100/100</div>
+        </div>
+        <div class="bar-bg">
+          <div id="p1-mana" class="mana-fill"></div>
+          <div class="bar-text" id="p1-mana-t">30/100</div>
+        </div>
+        <div class="grid" id="p1-skills"></div>
+      </div>
+
+      <div class="card" id="bot-card">
+        <div id="bot-debuff" class="debuff-label"></div>
+        <h2 style="color: var(--bot)">Jovita (Smart Bot V3)</h2>
+        <div class="bar-bg">
+          <div id="bot-hp" class="hp-fill"></div>
+          <div class="bar-text" id="bot-hp-t">100/100</div>
+        </div>
+        <div class="bar-bg">
+          <div id="bot-mana" class="mana-fill"></div>
+          <div class="bar-text" id="bot-mana-t">30/100</div>
+        </div>
+        <div class="grid" id="bot-skills"></div>
+      </div>
+    </div>
+
+    <div id="log">
+      > Battle Start! Gunakan BURNING untuk damage berkala!<br />> Vampire
+      Menyerang dan menyerap darah musuh
+    </div>
+  </body>
+</html>
