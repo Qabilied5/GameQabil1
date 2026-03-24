@@ -118,6 +118,15 @@
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
         }
 
+        .difficulty-selector { display: flex; gap: 10px; justify-content: center; }
+        .diff-btn { 
+            padding: 8px 15px; cursor: pointer; border: 2px solid #555; 
+            background: transparent; color: white; border-radius: 5px;
+        }
+        .diff-btn.active-diff { 
+            background: #f1c40f; color: black; border-color: #f1c40f; font-weight: bold;
+        }
+
         /* RESULT CSS POPUP -------------------------------------------------- */
         #result-overlay {
             position: fixed;
@@ -760,41 +769,48 @@
     <div id="event-banner">EVENT ACTIVE</div>
     <div id="global-timer">5.0</div>
 
-    <div id="start-overlay">
-        <div class="popup-content">
-            <h1>BATTLE ARENA</h1>
-            <p>Kalahkan <b>Jovita (Smart Bot)</b> Dengan Taktik!!<br>Made By <b>Qabil</b></p>
-            
-            <div class="info-grid">
-                <div class="info-item">
-                    <strong>👤 Player (You)</strong><br>
-                    HP: 100 | Mana: 30
+        <div id="start-overlay">
+            <div class="popup-content">
+                <h1>BATTLE ARENA</h1>
+                <p>Kalahkan <b>Jovita (Smart Bot)</b> Dengan Taktik!!<br>Made By <b>Qabil</b></p>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>👤 Player (You)</strong><br>
+                        HP: 100 | Mana: 30
+                    </div>
+                    <div class="info-item" style="border-left-color: var(--bot)">
+                        <strong>🤖 Jovita</strong><br>
+                        HP: 200 | Mana: 40
+                    </div>
+                    <div class="info-item">
+                        <strong>⚡ Strike</strong><br>
+                        Memberi Damage & (+25) Mana
+                    </div>
+                    <div class="info-item">
+                        <strong>✨ Super Heal</strong><br>
+                        Dapat Digunakan saat HP < 30%
+                    </div>
+                    <div class="info-item">
+                        <strong>❤️‍🩹 Best Heal Combo</strong><br>
+                        Heal + Vampire + Super Punch
+                    </div>
+                    <div class="info-item">
+                        <strong>⚔️ Best Execute Combo</strong><br>
+                        Ulti + Vampire + Strike
+                    </div>
                 </div>
-                <div class="info-item" style="border-left-color: var(--bot)">
-                    <strong>🤖 Jovita</strong><br>
-                    HP: 200 | Mana: 40
-                </div>
-                <div class="info-item">
-                    <strong>⚡ Strike</strong><br>
-                    Memberi Damage & (+25) Mana
-                </div>
-                <div class="info-item">
-                    <strong>✨ Super Heal</strong><br>
-                    Dapat Digunakan saat HP < 30%
-                </div>
-                <div class="info-item">
-                    <strong>❤️‍🩹 Best Heal Combo</strong><br>
-                    Heal + Vampire + Super Punch
-                </div>
-                <div class="info-item">
-                    <strong>⚔️ Best Execute Combo</strong><br>
-                    Ulti + Vampire + Strike
-                </div>
-            </div>
 
-            <button class="start-btn" onclick="startGame()">START BATTLE</button>
+                <p>Pilih Tingkat Kesulitan:</p>
+                <div class="difficulty-selector" style="margin-bottom: 20px;">
+                    <button class="diff-btn" id="easy-btn" onclick="selectDifficulty('easy')">EASY</button>
+                    <button class="diff-btn active-diff" id="normal-btn" onclick="selectDifficulty('normal')">NORMAL</button>
+                    <button class="diff-btn" id="hard-btn" onclick="selectDifficulty('hard')">HARD</button>
+                </div>
+
+                <button class="start-btn" onclick="startGame()">START BATTLE</button>
+            </div>
         </div>
-    </div>
 
     <div id="result-overlay" style="display: none;">
         <div class="popup-content">
@@ -830,8 +846,14 @@
     <div id="log">> Battle Start! Gunakan BURNING untuk damage berkala!<br>> Vampire Menyerang dan menyerap darah musuh</div>
 
     <script>
+        let selectedDiff = 'normal';
 
-        
+        function selectDifficulty(level) {
+            selectedDiff = level;
+
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active-diff'));
+            document.getElementById(`${level}-btn`).classList.add('active-diff');
+        }
 
         // GAME BEGIN ---------------------------------------------------------
 
@@ -1197,14 +1219,66 @@
         }
 
         function changeTurn() {
+            if (!game.active) return; // Jangan ganti turn kalau game sudah selesai
+
             game.turn = game.turn === 'p1' ? 'bot' : 'p1';
             game.timer = 5.0;
+            
             document.body.className = `active-${game.turn}`;
+            
             if (game[game.turn].shield > 0) game[game.turn].shield--;
+            
             if (game[game.turn].freeze > 0) return; 
-            if (game.turn === 'bot' && game.active) setTimeout(botAI, 1000);
+
+            if (game.turn === 'bot') {
+                setTimeout(() => {
+                    if (selectedDiff === 'easy') {
+                        botAIEasy();
+                    } else if (selectedDiff === 'hard') {
+                        botAIHard();
+                    } else {
+                        botAI();
+                    }
+                }, 1000);
+            }
         }
+
+function botAIEasy() {
+    if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+
+    const b = game.bot;
+    const now = Date.now();
+    
+    const isReady = (id) => {
+        const s = SKILLS.find(x => x.id === id);
+        return s && b.mana >= s.cost && now >= (b.cds[id] || 0);
+    };
+
+    let targetSkill = null;
+
+    if (b.hp < 30) {
+        if (isReady('super_heal')) targetSkill = 'super_heal';
+        else if (isReady('heal')) targetSkill = 'heal';
+        else if (isReady('vampire')) targetSkill = 'vampire';
+    }
+
+    if (!targetSkill) {
+        const prioritySkills = ['ulti', 'burning', 'super_punch', 'strike'];
         
+        targetSkill = prioritySkills.find(id => isReady(id));
+    }
+
+    // 3. Cadangan Terakhir: Jika tidak ada mana buat skill, paksa Strike
+    if (!targetSkill) targetSkill = 'strike';
+
+    const s = SKILLS.find(x => x.id === targetSkill);
+    if (s && b.mana >= s.cost && now >= (b.cds[targetSkill] || 0)) {
+        useSkill(targetSkill, 'bot');
+    } else {
+        useSkill('strike', 'bot');
+    }
+}
+
 function botAI() {
     if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
 
@@ -1310,6 +1384,100 @@ function botAI() {
         let cdStrike = getRemCD('strike');
         if (cdStrike === 0) execute();
         else setTimeout(execute, (cdStrike * 1000) + 100);
+    }
+}        
+
+function botAIHard() {
+    if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+
+    const b = game.bot;
+    const p = game.p1;
+    const now = Date.now();
+    
+    const getRemCD = (id) => Math.max(0, ((b.cds[id] || 0) - now) / 1000);
+    const isReady = (id) => {
+        const s = SKILLS.find(x => x.id === id);
+        return s && b.mana >= s.cost && now >= (b.cds[id] || 0);
+    };
+
+    let targetSkill = null;
+    let currentCD = 0;
+
+    // --- LOGIKA PEMILIHAN STRATEGI ---
+
+    // 1. KONDISI DARAT (URGENT HEAL)
+    if (b.hp < 35) {
+        let cdSHeal = getRemCD('super_heal');
+        if (cdSHeal < 4.7 && b.mana >= 10) {
+            targetSkill = 'super_heal';
+            currentCD = cdSHeal;
+        } else if (isReady('heal')) {
+            targetSkill = 'heal';
+        } else if (isReady('vampire')) {
+            targetSkill = 'vampire';
+        }
+    } 
+    // 2. KONDISI HP SEDANG (DEFENSIVE-AGRESSIVE)
+    else if (b.hp >= 35 && b.hp < 100) {
+        if (isReady('heal')) targetSkill = 'heal';
+        else if (isReady('vampire')) targetSkill = 'vampire';
+    }
+
+    // 3. JIKA BELUM ADA TARGET (Atau HP > 100), CARI COMBO SERANG
+    if (!targetSkill) {
+        let cdUlti = getRemCD('ulti');
+        let cdPunch = getRemCD('super_punch');
+
+        // Prioritas Finisher
+        if (p.hp <= 55 && b.mana >= 65 && cdUlti < 4.9) {
+            targetSkill = 'ulti';
+            currentCD = cdUlti;
+        } 
+        else if (isReady('burning') && p.hp > 55) {
+            targetSkill = 'burning';
+        }
+        else if (b.mana >= 30 && cdPunch < 4.7 && cdUlti > 5) {
+            targetSkill = 'super_punch';
+            currentCD = cdPunch;
+        }
+        else if (isReady('ulti')) {
+            targetSkill = 'ulti';
+        }
+    }
+
+    // --- FALLBACK TERAKHIR: JIKA TIDAK ADA SKILL TERPILIH, PAKSA STRIKE ---
+    if (!targetSkill) {
+        targetSkill = 'strike';
+        currentCD = getRemCD('strike');
+    }
+
+    // --- EKSEKUSI ---
+    const execute = () => {
+        if (game.turn !== 'bot' || !game.active) return;
+        
+        const s = SKILLS.find(x => x.id === targetSkill);
+        
+        // Cek lagi apakah benar-benar siap
+        if (s && b.mana >= s.cost && Date.now() >= (b.cds[targetSkill] || 0)) {
+            useSkill(targetSkill, 'bot');
+        } else {
+            // Jika skill pilihan gagal (mana kurang/CD), paksa strike untuk isi mana
+            if (targetSkill !== 'strike') {
+                useSkill('strike', 'bot');
+            }
+        }
+    };
+
+    // Delay handling
+    if (currentCD === 0) {
+        execute();
+    } else if (currentCD < 4.7) {
+        setTimeout(execute, (currentCD * 1000) + 100);
+    } else {
+        // Jika nunggu kelamaan, langsung strike saja
+        targetSkill = 'strike';
+        let cdS = getRemCD('strike');
+        setTimeout(execute, (cdS * 1000) + 100);
     }
 }
 
