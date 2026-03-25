@@ -1,0 +1,765 @@
+:root {
+        --p1: #7dd3fc;
+        --p1-dark: #0369a1;
+        --bot: #f87171;
+        --bot-dark: #991b1b;
+        --warn: #fbbf24;
+        --freeze: #93c5fd;
+        --burn: #fb923c;
+        --vamp: #c084fc;
+        --gold: #d4af37;
+        --gold-light: #fde68a;
+        --glass: rgba(10, 8, 20, 0.65);
+        --glass-border: rgba(212, 175, 55, 0.3);
+        --rune-glow: rgba(139, 92, 246, 0.4);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Crimson Text", Georgia, serif;
+        background: #04030a;
+        color: #e2d9f3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        height: 100vh;
+        justify-content: center;
+        transition: background 0.7s;
+        position: relative;
+      }
+
+      /* ============================================================
+           ANIMATED BACKGROUND
+        ============================================================ */
+      #bg-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .bg-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          radial-gradient(
+            ellipse at 15% 50%,
+            rgba(99, 32, 120, 0.18) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 85% 50%,
+            rgba(30, 15, 60, 0.25) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 50% 100%,
+            rgba(80, 10, 10, 0.2) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      body.active-p1 .bg-gradient {
+        background:
+          radial-gradient(
+            ellipse at 15% 50%,
+            rgba(3, 105, 161, 0.3) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 85% 50%,
+            rgba(30, 15, 60, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 50% 100%,
+            rgba(80, 10, 10, 0.1) 0%,
+            transparent 50%
+          );
+      }
+      body.active-bot .bg-gradient {
+        background:
+          radial-gradient(
+            ellipse at 85% 50%,
+            rgba(153, 27, 27, 0.35) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 15% 50%,
+            rgba(30, 15, 60, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 50% 100%,
+            rgba(100, 20, 100, 0.1) 0%,
+            transparent 50%
+          );
+      }
+
+      /* Floating rune symbols */
+      .rune-field {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .rune {
+        position: absolute;
+        font-size: 1.2rem;
+        color: rgba(167, 139, 250, 0.12);
+        animation: rune-float linear infinite;
+        user-select: none;
+      }
+      @keyframes rune-float {
+        0% {
+          transform: translateY(110vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 0.8;
+        }
+        100% {
+          transform: translateY(-10vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* ============================================================
+           LAYOUT WRAPPERS
+        ============================================================ */
+      #event-banner {
+        position: absolute;
+        top: 18px;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        padding: 8px 35px;
+        border-radius: 50px;
+        font-family: "Cinzel", serif;
+        font-size: 0.7rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        opacity: 0;
+        z-index: 20;
+        border: 1px solid transparent;
+        transition: all 0.4s;
+      }
+      .event-active {
+        opacity: 1 !important;
+        border-color: var(--gold) !important;
+        box-shadow:
+          0 0 25px rgba(212, 175, 55, 0.5),
+          inset 0 0 15px rgba(212, 175, 55, 0.1);
+        color: var(--gold-light);
+      }
+
+      #global-timer {
+        font-family: "Cinzel Decorative", serif;
+        font-size: 3.2rem;
+        font-weight: 900;
+        color: var(--warn);
+        margin: 8px 0;
+        z-index: 5;
+        text-shadow:
+          0 0 20px rgba(251, 191, 36, 0.7),
+          0 0 40px rgba(251, 191, 36, 0.3);
+        position: relative;
+        letter-spacing: 4px;
+      }
+
+      .game-wrapper {
+        display: flex;
+        gap: 45px;
+        position: relative;
+        z-index: 2;
+      }
+
+      /* ============================================================
+           ORNATE CARD
+        ============================================================ */
+      .card {
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 22px 20px 18px;
+        width: 310px;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 2;
+        overflow: visible;
+      }
+
+      /* Corner ornaments */
+      .card::before,
+      .card::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-color: var(--gold);
+        border-style: solid;
+        opacity: 0.6;
+        transition: opacity 0.3s;
+      }
+      .card::before {
+        top: -2px;
+        left: -2px;
+        border-width: 2px 0 0 2px;
+        border-radius: 3px 0 0 0;
+      }
+      .card::after {
+        bottom: -2px;
+        right: -2px;
+        border-width: 0 2px 2px 0;
+        border-radius: 0 0 3px 0;
+      }
+      /* Extra corners via inner pseudo-elements on a wrapper */
+      .card-inner-corner-tl,
+      .card-inner-corner-br {
+        display: none;
+      }
+
+      .card h2 {
+        font-family: "Cinzel", serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        text-shadow: 0 0 15px currentColor;
+      }
+
+      /* Divider line under name */
+      .card h2::after {
+        content: "";
+        display: block;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--gold),
+          transparent
+        );
+        margin-top: 8px;
+        opacity: 0.5;
+      }
+
+      /* ============================================================
+           ACTIVE CARD STATES
+        ============================================================ */
+      @keyframes pulse-p1 {
+        0%,
+        100% {
+          box-shadow:
+            0 0 20px rgba(125, 211, 252, 0.3),
+            inset 0 0 20px rgba(125, 211, 252, 0.05);
+        }
+        50% {
+          box-shadow:
+            0 0 50px rgba(125, 211, 252, 0.6),
+            inset 0 0 30px rgba(125, 211, 252, 0.1);
+        }
+      }
+      @keyframes pulse-bot {
+        0%,
+        100% {
+          box-shadow:
+            0 0 20px rgba(248, 113, 113, 0.3),
+            inset 0 0 20px rgba(248, 113, 113, 0.05);
+        }
+        50% {
+          box-shadow:
+            0 0 50px rgba(248, 113, 113, 0.6),
+            inset 0 0 30px rgba(248, 113, 113, 0.1);
+        }
+      }
+
+      .active-p1 #p1-card:not(.frozen) {
+        border-color: rgba(125, 211, 252, 0.6);
+        animation: pulse-p1 2s infinite;
+        transform: scale(1.04);
+      }
+      .active-bot #bot-card:not(.frozen) {
+        border-color: rgba(248, 113, 113, 0.6);
+        animation: pulse-bot 2s infinite;
+        transform: scale(1.04);
+      }
+      .active-p1 #bot-card,
+      .active-bot #p1-card {
+        opacity: 0.35;
+        filter: grayscale(0.6) brightness(0.7);
+        transform: scale(0.92);
+      }
+
+      /* ============================================================
+           BARS
+        ============================================================ */
+      .bar-label {
+        font-family: "Cinzel", serif;
+        font-size: 0.55rem;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-top: 8px;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .bar-label .bar-icon {
+        font-size: 0.7rem;
+      }
+
+      .bar-bg {
+        height: 16px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        margin-bottom: 2px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+      }
+      .hp-fill {
+        background: linear-gradient(90deg, #7f1d1d, #dc2626, #ef4444);
+        width: 100%;
+        height: 100%;
+        transition: width 0.3s ease;
+        position: relative;
+      }
+      .hp-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.15),
+          transparent
+        );
+        border-radius: 8px 8px 0 0;
+      }
+      .mana-fill {
+        background: linear-gradient(90deg, #1e3a5f, #2563eb, #818cf8);
+        width: 20%;
+        height: 100%;
+        transition: width 0.3s ease;
+        position: relative;
+      }
+      .mana-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.12),
+          transparent
+        );
+        border-radius: 8px 8px 0 0;
+      }
+      .bar-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        z-index: 1;
+      }
+
+      /* ============================================================
+           DEBUFF LABEL
+        ============================================================ */
+      .debuff-label {
+        font-family: "Cinzel", serif;
+        font-weight: 600;
+        font-size: 0.62rem;
+        letter-spacing: 1.5px;
+        display: block;
+        text-align: center;
+        margin-bottom: 4px;
+        min-height: 1em;
+      }
+
+      /* ============================================================
+           SKILL GRID
+        ============================================================ */
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        margin-top: 14px;
+      }
+      .skill-box {
+        position: relative;
+        border-radius: 6px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.04);
+        height: 42px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        transition: border-color 0.2s;
+      }
+      .skill-box:hover {
+        border-color: rgba(212, 175, 55, 0.5);
+      }
+      button {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: "Cinzel", serif;
+        font-weight: 600;
+        font-size: 0.55rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        z-index: 5;
+        position: relative;
+        transition:
+          color 0.2s,
+          background 0.2s;
+      }
+      button:hover:not(:disabled) {
+        background: rgba(212, 175, 55, 0.08);
+        color: var(--gold-light);
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.2;
+      }
+      .cd-text {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Cinzel Decorative", serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: rgba(255, 255, 255, 0.9);
+        z-index: 6;
+        pointer-events: none;
+        text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+      }
+      .cd-overlay {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 1;
+        transition: height linear;
+      }
+
+      /* ============================================================
+           BATTLE LOG
+        ============================================================ */
+      #log-container {
+        position: relative;
+        z-index: 5;
+        margin-top: 18px;
+        width: 665px;
+      }
+      .log-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+        padding: 0 4px;
+      }
+      .log-header-title {
+        font-family: "Cinzel", serif;
+        font-size: 0.65rem;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--gold);
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+      }
+      .log-header-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          rgba(212, 175, 55, 0.5),
+          transparent
+        );
+      }
+      .log-header-ornament {
+        color: var(--gold);
+        font-size: 0.7rem;
+        opacity: 0.7;
+      }
+      #log {
+        background: rgba(4, 3, 12, 0.8);
+        backdrop-filter: blur(12px);
+        width: 100%;
+        height: 95px;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(212, 175, 55, 0.25);
+        border-top: 1px solid rgba(212, 175, 55, 0.4);
+        overflow-y: auto;
+        font-family: "Crimson Text", Georgia, serif;
+        font-size: 0.85rem;
+        color: #c4b5fd;
+        box-shadow:
+          0 0 20px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(212, 175, 55, 0.1);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+      }
+      #log > div {
+        padding: 1px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      #log > div:last-child {
+        border-bottom: none;
+      }
+      #log::-webkit-scrollbar {
+        width: 4px;
+      }
+      #log::-webkit-scrollbar-thumb {
+        background: rgba(212, 175, 55, 0.3);
+        border-radius: 4px;
+      }
+
+/* ============================================================
+           POPUP BASE
+        ============================================================ */
+      #start-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(2, 1, 8, 0.9);
+        backdrop-filter: blur(16px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+      .popup-content {
+        margin: 0 20px;
+        background: linear-gradient(
+          160deg,
+          rgba(20, 12, 40, 0.9),
+          rgba(8, 5, 20, 0.95)
+        );
+        border: 1px solid rgba(212, 175, 55, 0.4);
+        padding: 32px 28px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 490px;
+        text-align: center;
+        color: #e2d9f3;
+        box-shadow:
+          0 0 60px rgba(0, 0, 0, 0.8),
+          0 0 30px rgba(212, 175, 55, 0.1),
+          inset 0 0 40px rgba(99, 32, 120, 0.05);
+        position: relative;
+      }
+      /* Ornate corner borders on popup */
+      .popup-content::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        right: -1px;
+        bottom: -1px;
+        border-radius: 16px;
+        background: linear-gradient(
+          135deg,
+          rgba(212, 175, 55, 0.5) 0%,
+          transparent 30%,
+          transparent 70%,
+          rgba(212, 175, 55, 0.3) 100%
+        );
+        z-index: -1;
+        pointer-events: none;
+      }
+      .popup-content h1 {
+        font-family: "Cinzel Decorative", serif;
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin-bottom: 8px;
+        background: linear-gradient(
+          135deg,
+          var(--gold-light),
+          var(--gold),
+          #c9a227
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 4px;
+        text-shadow: none;
+      }
+      .popup-content p {
+        font-family: "Crimson Text", serif;
+        font-size: 1rem;
+        color: #c4b5fd;
+        line-height: 1.6;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin: 18px 0;
+        text-align: left;
+        font-size: 0.88em;
+      }
+      .info-item {
+        background: rgba(255, 255, 255, 0.04);
+        padding: 10px 12px;
+        border-radius: 8px;
+        border-left: 2px solid var(--gold);
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+        font-family: "Crimson Text", serif;
+        line-height: 1.5;
+      }
+      .info-item strong {
+        font-family: "Cinzel", serif;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        color: var(--gold-light);
+        display: block;
+        margin-bottom: 3px;
+      }
+      .start-btn {
+        background: linear-gradient(135deg, #1a0e35, #2d1a5e, #1a0e35);
+        color: var(--gold-light);
+        border: 1px solid var(--gold);
+        padding: 14px 45px;
+        border-radius: 6px;
+        font-family: "Cinzel", serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 3px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.3s;
+        margin-top: 12px;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+      }
+      .start-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #2d1a5e, #4a2d8e, #2d1a5e);
+        box-shadow: 0 0 35px rgba(212, 175, 55, 0.4);
+        transform: translateY(-2px);
+        color: #fff;
+      }
+      .start-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+
+      .difficulty-selector {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      .diff-btn {
+        padding: 7px 18px;
+        cursor: pointer;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        background: rgba(255, 255, 255, 0.03);
+        color: #c4b5fd;
+        border-radius: 4px;
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .diff-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold-light);
+      }
+      .diff-btn.active-diff {
+        background: linear-gradient(
+          135deg,
+          rgba(212, 175, 55, 0.25),
+          rgba(212, 175, 55, 0.1)
+        );
+        color: var(--gold-light);
+        border-color: var(--gold);
+        font-weight: 700;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+      }
+      .diff-label {
+        font-family: "Cinzel", serif;
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+        color: rgba(196, 181, 253, 0.7);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+
+      /* ============================================================
+           RESULT OVERLAY
+        ============================================================ */
+      #result-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(2, 1, 8, 0.9);
+        backdrop-filter: blur(16px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        color: white;
+        text-align: center;
+      }
+      #result-title {
+        font-family: "Cinzel Decorative", serif;
+        font-size: 2.8rem;
+        font-weight: 900;
+        letter-spacing: 5px;
+        margin-bottom: 10px;
+      }
+      .result-stats {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        padding: 18px;
+        border-radius: 10px;
+        margin: 18px 0;
+      }
