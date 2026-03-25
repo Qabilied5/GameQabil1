@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mage War: Hero vs Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --p1: #7dd3fc;
+            --p1-dark: #0369a1;
+            --bot: #f87171;
+            --bot-dark: #991b1b;
+            --warn: #fbbf24;
+            --freeze: #93c5fd;
+            --burn: #fb923c;
+            --vamp: #c084fc;
+            --gold: #d4af37;
+            --gold-light: #fde68a;
+            --glass: rgba(10, 8, 20, 0.65);
+            --glass-border: rgba(212, 175, 55, 0.3);
+            --rune-glow: rgba(139, 92, 246, 0.4);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Crimson Text', Georgia, serif;
+            background: #04030a;
+            color: #e2d9f3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+            justify-content: center;
+            transition: background 0.7s;
+            position: relative;
+        }
+
+        /* ============================================================
+           ANIMATED BACKGROUND
+        ============================================================ */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 15% 50%, rgba(99, 32, 120, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 85% 50%, rgba(30, 15, 60, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(80, 10, 10, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body.active-p1 .bg-gradient {
+            background:
+                radial-gradient(ellipse at 15% 50%, rgba(3, 105, 161, 0.3) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 50%, rgba(30, 15, 60, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(80, 10, 10, 0.1) 0%, transparent 50%);
+        }
+        body.active-bot .bg-gradient {
+            background:
+                radial-gradient(ellipse at 85% 50%, rgba(153, 27, 27, 0.35) 0%, transparent 55%),
+                radial-gradient(ellipse at 15% 50%, rgba(30, 15, 60, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(100, 20, 100, 0.1) 0%, transparent 50%);
+        }
+
+        /* Floating rune symbols */
+        .rune-field {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .rune {
+            position: absolute;
+            font-size: 1.2rem;
+            color: rgba(167, 139, 250, 0.12);
+            animation: rune-float linear infinite;
+            user-select: none;
+        }
+        @keyframes rune-float {
+            0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.8; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ============================================================
+           LAYOUT WRAPPERS
+        ============================================================ */
+        #event-banner {
+            position: absolute;
+            top: 18px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 8px 35px;
+            border-radius: 50px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0;
+            z-index: 20;
+            border: 1px solid transparent;
+            transition: all 0.4s;
+        }
+        .event-active {
+            opacity: 1 !important;
+            border-color: var(--gold) !important;
+            box-shadow: 0 0 25px rgba(212,175,55,0.5), inset 0 0 15px rgba(212,175,55,0.1);
+            color: var(--gold-light);
+        }
+
+        #global-timer {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--warn);
+            margin: 8px 0;
+            z-index: 5;
+            text-shadow: 0 0 20px rgba(251,191,36,0.7), 0 0 40px rgba(251,191,36,0.3);
+            position: relative;
+            letter-spacing: 4px;
+        }
+
+        .game-wrapper {
+            display: flex;
+            gap: 45px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ============================================================
+           ORNATE CARD
+        ============================================================ */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 22px 20px 18px;
+            width: 310px;
+            transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+            z-index: 2;
+            overflow: visible;
+        }
+
+        /* Corner ornaments */
+        .card::before, .card::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            border-color: var(--gold);
+            border-style: solid;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        .card::before {
+            top: -2px; left: -2px;
+            border-width: 2px 0 0 2px;
+            border-radius: 3px 0 0 0;
+        }
+        .card::after {
+            bottom: -2px; right: -2px;
+            border-width: 0 2px 2px 0;
+            border-radius: 0 0 3px 0;
+        }
+        /* Extra corners via inner pseudo-elements on a wrapper */
+        .card-inner-corner-tl, .card-inner-corner-br { display: none; }
+
+        .card h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        /* Divider line under name */
+        .card h2::after {
+            content: '';
+            display: block;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin-top: 8px;
+            opacity: 0.5;
+        }
+
+        /* ============================================================
+           ACTIVE CARD STATES
+        ============================================================ */
+        @keyframes pulse-p1 {
+            0%, 100% { box-shadow: 0 0 20px rgba(125,211,252,0.3), inset 0 0 20px rgba(125,211,252,0.05); }
+            50%       { box-shadow: 0 0 50px rgba(125,211,252,0.6), inset 0 0 30px rgba(125,211,252,0.1); }
+        }
+        @keyframes pulse-bot {
+            0%, 100% { box-shadow: 0 0 20px rgba(248,113,113,0.3), inset 0 0 20px rgba(248,113,113,0.05); }
+            50%       { box-shadow: 0 0 50px rgba(248,113,113,0.6), inset 0 0 30px rgba(248,113,113,0.1); }
+        }
+
+        .active-p1 #p1-card:not(.frozen) {
+            border-color: rgba(125,211,252,0.6);
+            animation: pulse-p1 2s infinite;
+            transform: scale(1.04);
+        }
+        .active-bot #bot-card:not(.frozen) {
+            border-color: rgba(248,113,113,0.6);
+            animation: pulse-bot 2s infinite;
+            transform: scale(1.04);
+        }
+        .active-p1 #bot-card, .active-bot #p1-card {
+            opacity: 0.35;
+            filter: grayscale(0.6) brightness(0.7);
+            transform: scale(0.92);
+        }
+
+        /* ============================================================
+           BARS
+        ============================================================ */
+        .bar-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.55rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-top: 8px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .bar-label .bar-icon { font-size: 0.7rem; }
+
+        .bar-bg {
+            height: 16px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .hp-fill {
+            background: linear-gradient(90deg, #7f1d1d, #dc2626, #ef4444);
+            width: 100%; height: 100%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        .hp-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
+            border-radius: 8px 8px 0 0;
+        }
+        .mana-fill {
+            background: linear-gradient(90deg, #1e3a5f, #2563eb, #818cf8);
+            width: 20%; height: 100%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        .mana-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+            border-radius: 8px 8px 0 0;
+        }
+        .bar-text {
+            position: absolute;
+            width: 100%; text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        /* ============================================================
+           DEBUFF LABEL
+        ============================================================ */
+        .debuff-label {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 0.62rem;
+            letter-spacing: 1.5px;
+            display: block;
+            text-align: center;
+            margin-bottom: 4px;
+            min-height: 1em;
+        }
+
+        /* ============================================================
+           SKILL GRID
+        ============================================================ */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            margin-top: 14px;
+        }
+        .skill-box {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.04);
+            height: 42px;
+            border: 1px solid rgba(212,175,55,0.2);
+            transition: border-color 0.2s;
+        }
+        .skill-box:hover { border-color: rgba(212,175,55,0.5); }
+        button {
+            width: 100%; height: 100%;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.9);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 0.55rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            z-index: 5;
+            position: relative;
+            transition: color 0.2s, background 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: rgba(212,175,55,0.08);
+            color: var(--gold-light);
+        }
+        button:disabled { cursor: not-allowed; opacity: 0.2; }
+        .cd-text {
+            position: absolute;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.9);
+            z-index: 6;
+            pointer-events: none;
+            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+        }
+        .cd-overlay {
+            position: absolute;
+            bottom: 0; width: 100%;
+            background: rgba(0,0,0,0.75);
+            z-index: 1;
+            transition: height linear;
+        }
+
+        /* ============================================================
+           BATTLE LOG
+        ============================================================ */
+        #log-container {
+            position: relative;
+            z-index: 5;
+            margin-top: 18px;
+            width: 665px;
+        }
+        .log-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            padding: 0 4px;
+        }
+        .log-header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(212,175,55,0.5);
+        }
+        .log-header-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(212,175,55,0.5), transparent);
+        }
+        .log-header-ornament {
+            color: var(--gold);
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        #log {
+            background: rgba(4, 3, 12, 0.8);
+            backdrop-filter: blur(12px);
+            width: 100%;
+            height: 95px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(212,175,55,0.25);
+            border-top: 1px solid rgba(212,175,55,0.4);
+            overflow-y: auto;
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 0.85rem;
+            color: #c4b5fd;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.1);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(212,175,55,0.3) transparent;
+        }
+        #log > div { padding: 1px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        #log > div:last-child { border-bottom: none; }
+        #log::-webkit-scrollbar { width: 4px; }
+        #log::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 4px; }
+
+        /* ============================================================
+           POPUP BASE
+        ============================================================ */
+        #start-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 1, 8, 0.9);
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .popup-content {
+            margin: 0 20px;
+            background: linear-gradient(160deg, rgba(20,12,40,0.9), rgba(8,5,20,0.95));
+            border: 1px solid rgba(212,175,55,0.4);
+            padding: 32px 28px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 490px;
+            text-align: center;
+            color: #e2d9f3;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 30px rgba(212,175,55,0.1), inset 0 0 40px rgba(99,32,120,0.05);
+            position: relative;
+        }
+        /* Ornate corner borders on popup */
+        .popup-content::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, transparent 30%, transparent 70%, rgba(212,175,55,0.3) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .popup-content h1 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold), #c9a227);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px;
+            text-shadow: none;
+        }
+        .popup-content p {
+            font-family: 'Crimson Text', serif;
+            font-size: 1rem;
+            color: #c4b5fd;
+            line-height: 1.6;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 18px 0;
+            text-align: left;
+            font-size: 0.88em;
+        }
+        .info-item {
+            background: rgba(255,255,255,0.04);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 2px solid var(--gold);
+            border-top: 1px solid rgba(212,175,55,0.2);
+            font-family: 'Crimson Text', serif;
+            line-height: 1.5;
+        }
+        .info-item strong {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            color: var(--gold-light);
+            display: block;
+            margin-bottom: 3px;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #1a0e35, #2d1a5e, #1a0e35);
+            color: var(--gold-light);
+            border: 1px solid var(--gold);
+            padding: 14px 45px;
+            border-radius: 6px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            margin-top: 12px;
+            box-shadow: 0 0 20px rgba(212,175,55,0.2);
+        }
+        .start-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2d1a5e, #4a2d8e, #2d1a5e);
+            box-shadow: 0 0 35px rgba(212,175,55,0.4);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        .start-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+        .difficulty-selector { display: flex; gap: 8px; justify-content: center; }
+        .diff-btn {
+            padding: 7px 18px;
+            cursor: pointer;
+            border: 1px solid rgba(212,175,55,0.3);
+            background: rgba(255,255,255,0.03);
+            color: #c4b5fd;
+            border-radius: 4px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .diff-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+        .diff-btn.active-diff {
+            background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.1));
+            color: var(--gold-light);
+            border-color: var(--gold);
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(212,175,55,0.3);
+        }
+        .diff-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(196,181,253,0.7);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        /* ============================================================
+           RESULT OVERLAY
+        ============================================================ */
+        #result-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2,1,8,0.9);
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+            text-align: center;
+        }
+        #result-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+        }
+        .result-stats {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.3);
+            padding: 18px;
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+
+        /* ============================================================
+           SHIELD
+        ============================================================ */
+        .shield-active {
+            border-color: rgba(59,130,246,0.7) !important;
+            box-shadow: 0 0 25px rgba(59,130,246,0.4), inset 0 0 20px rgba(59,130,246,0.05) !important;
+        }
+        .shield-active::after {
+            content: "🛡 WARDED";
+            position: absolute;
+            top: -11px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(37,99,235,0.9);
+            color: #bfdbfe;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            letter-spacing: 1px;
+            font-weight: bold;
+            white-space: nowrap;
+            border: 1px solid rgba(147,197,253,0.4);
+        }
+
+        /* ============================================================
+           BURNING
+        ============================================================ */
+        @keyframes fire-glow {
+            0%   { box-shadow: 0 -8px 20px rgba(251,146,60,0.5), 0 0 15px rgba(251,191,36,0.3), inset 0 0 15px rgba(251,146,60,0.05); }
+            50%  { box-shadow: 0 -18px 40px rgba(220,38,38,0.7), 0 0 25px rgba(251,146,60,0.5), inset 0 0 25px rgba(251,146,60,0.08); }
+            100% { box-shadow: 0 -8px 20px rgba(251,146,60,0.5), 0 0 15px rgba(251,191,36,0.3), inset 0 0 15px rgba(251,146,60,0.05); }
+        }
+        @keyframes fire-flicker {
+            0%   { transform: scale(1.04) translateY(0) rotate(-0.3deg); }
+            25%  { transform: scale(1.01) translateY(-2px) rotate(0.5deg); }
+            50%  { transform: scale(1.04) translateY(0) rotate(-0.5deg); }
+            75%  { transform: scale(1.02) translateY(-1px) rotate(0.3deg); }
+            100% { transform: scale(1.04) translateY(0) rotate(-0.3deg); }
+        }
+        .burning {
+            border-color: #fb923c !important;
+            background: linear-gradient(to top, rgba(10,8,20,0.8), rgba(100,30,0,0.5)) !important;
+            animation: fire-glow 1.5s infinite alternate, fire-flicker 0.22s infinite !important;
+        }
+        .burning::before {
+            content: "🔥";
+            position: absolute;
+            top: -22px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 8px rgba(251,191,36,0.8));
+            animation: fire-flicker 0.3s infinite;
+            z-index: 10;
+        }
+
+        /* ============================================================
+           FROZEN
+        ============================================================ */
+        .frozen {
+            border-color: var(--freeze) !important;
+            box-shadow: 0 0 30px rgba(147,197,253,0.4), inset 0 0 20px rgba(147,197,253,0.05) !important;
+            filter: saturate(0.4) brightness(1.15) hue-rotate(180deg);
+        }
+
+        /* ============================================================
+           HEAL FX
+        ============================================================ */
+        @keyframes heal-glow {
+            0%   { box-shadow: 0 0 20px rgba(34,197,94,0.5), inset 0 0 15px rgba(34,197,94,0.05); }
+            50%  { box-shadow: 0 0 50px rgba(74,222,128,0.7), inset 0 0 25px rgba(74,222,128,0.08); border-color: rgba(255,255,255,0.5); }
+            100% { box-shadow: 0 0 20px rgba(34,197,94,0.5), inset 0 0 15px rgba(34,197,94,0.05); }
+        }
+        .healing-active { animation: heal-glow 0.8s ease-in-out !important; }
+        .heal-particle {
+            position: fixed;
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 1.4rem;
+            pointer-events: none;
+            z-index: 1000;
+            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(255,255,255,0.5);
+            animation: fly-up-fade 1s forwards ease-out;
+        }
+        @keyframes fly-up-fade {
+            0%   { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+
+        /* ============================================================
+           ULTI FX
+        ============================================================ */
+        .ulti-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.05) 100%);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            animation: flash-anim 0.7s ease-out;
+        }
+        @keyframes flash-anim {
+            0%   { opacity: 0; }
+            10%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .shockwave {
+            position: fixed;
+            border: 4px solid rgba(248,113,113,0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99;
+            animation: wave-anim 0.6s ease-out forwards;
+        }
+        @keyframes wave-anim {
+            0%   { width: 0; height: 0; opacity: 1; margin-left: 0; margin-top: 0; }
+            100% { width: 500px; height: 500px; opacity: 0; margin-left: -250px; margin-top: -250px; }
+        }
+        .dmg-popup {
+            position: fixed;
+            color: #f87171;
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 25px rgba(248,113,113,0.7);
+            pointer-events: none;
+            z-index: 1001;
+            animation: dmg-fly 0.8s forwards ease-out;
+        }
+        @keyframes dmg-fly {
+            0%   { transform: scale(0.5) translateY(0); opacity: 1; }
+            50%  { transform: scale(1.5) translateY(-50px); }
+            100% { transform: scale(1) translateY(-120px); opacity: 0; }
+        }
+
+        /* ============================================================
+           STRIKE FX
+        ============================================================ */
+        .strike-effect {
+            position: fixed;
+            width: 200px; height: 35px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 20px white, 0 0 40px var(--p1);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transform-origin: center;
+            border-radius: 50%;
+            animation: strike-anim 0.3s ease-out forwards;
+        }
+        @keyframes strike-anim {
+            0%   { transform: scaleX(0) rotate(var(--rot)) skewX(-45deg); opacity: 1; }
+            50%  { transform: scaleX(1.2) rotate(var(--rot)) skewX(-45deg); opacity: 1; }
+            100% { transform: scaleX(1) rotate(var(--rot)) skewX(-45deg); opacity: 0; }
+        }
+        .strike-spark {
+            position: fixed;
+            width: 5px; height: 5px;
+            background: #f87171;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1002;
+            box-shadow: 0 0 8px #f87171;
+            animation: spark-fly 0.5s ease-out forwards;
+        }
+        @keyframes spark-fly {
+            0%   { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx),var(--ty)) scale(0); opacity: 0; }
+        }
+        .hit-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,0,0,0.18);
+            pointer-events: none;
+            z-index: 2000;
+            opacity: 0;
+            animation: hit-flash-anim 0.2s ease-out;
+        }
+        @keyframes hit-flash-anim {
+            0%   { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* ============================================================
+           SHAKE
+        ============================================================ */
+        .shake { animation: shake 0.3s; }
+        @keyframes shake {
+            0%, 100% { transform: translate(0,0); }
+            25%       { transform: translate(-8px,8px); }
+            50%       { transform: translate(8px,-8px); }
+        }
+        .heavy-shake { animation: heavy-shake-anim 0.1s 4; }
+        @keyframes heavy-shake-anim {
+            0%   { transform: translate(5px,5px); }
+            25%  { transform: translate(-5px,-5px); }
+            50%  { transform: translate(-8px,2px); }
+            75%  { transform: translate(8px,-2px); }
+            100% { transform: translate(0,0); }
+        }
+
+        /* ============================================================
+           VAMPIRE FX
+        ============================================================ */
+        .vampire-active {
+            animation: vampire-glow 1s ease-in-out !important;
+        }
+        @keyframes vampire-glow {
+            0%   { box-shadow: 0 0 20px rgba(192,132,252,0.4); border-color: rgba(192,132,252,0.6); }
+            50%  { box-shadow: 0 0 60px rgba(192,132,252,0.8), inset 0 0 30px rgba(192,132,252,0.1); border-color: rgba(255,255,255,0.6); }
+            100% { box-shadow: 0 0 20px rgba(192,132,252,0.4); border-color: rgba(192,132,252,0.6); }
+        }
+        .vamp-orb {
+            position: fixed;
+            width: 10px; height: 10px;
+            background: radial-gradient(circle, #f87171, #c084fc);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1500;
+            box-shadow: 0 0 12px #c084fc;
+            animation: vamp-travel 0.8s cubic-bezier(0.6,-0.28,0.735,0.045) forwards;
+        }
+        @keyframes vamp-travel {
+            0%   { transform: translate(0,0) scale(1.5); opacity: 1; }
+            100% { transform: translate(var(--dx),var(--dy)) scale(0.3); opacity: 0; }
+        }
+        .vamp-dim {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,0,25,0.45);
+            pointer-events: none;
+            z-index: 1400;
+            opacity: 0;
+            animation: vamp-dim-anim 1s ease-out;
+        }
+        @keyframes vamp-dim-anim {
+            0%   { opacity: 0; }
+            50%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* ============================================================
+           SUPER PUNCH FX
+        ============================================================ */
+        .punch-text {
+            position: fixed;
+            font-family: 'Cinzel Decorative', serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            text-shadow: 0 0 15px rgba(0,0,0,0.6), 0 0 25px rgba(251,191,36,0.8);
+            pointer-events: none;
+            z-index: 10000;
+            font-style: italic;
+            animation: punch-float 0.8s ease-out forwards;
+            letter-spacing: 2px;
+        }
+        @keyframes punch-float {
+            0%   { transform: scale(0.5) translateY(0); opacity: 0; }
+            20%  { transform: scale(1.2) translateY(-20px); opacity: 1; }
+            100% { transform: scale(1) translateY(-100px); opacity: 0; }
+        }
+        @keyframes pulse-out {
+            0%   { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* ============================================================
+           SUPER HEAL FX
+        ============================================================ */
+        .super-healing-active {
+            background: linear-gradient(160deg, rgba(10,8,20,0.7), rgba(0,80,40,0.3)) !important;
+            border: 1px solid rgba(74,222,128,0.7) !important;
+            box-shadow: 0 0 35px rgba(74,222,128,0.5), inset 0 0 25px rgba(74,222,128,0.05) !important;
+            transform: scale(1.03);
+            overflow: hidden;
+        }
+        .super-healing-active::before {
+            content: '';
+            position: absolute;
+            top: -150%; left: -150%;
+            width: 400%; height: 400%;
+            background: conic-gradient(
+                from 0deg at 50% 50%,
+                rgba(74,222,128,0) 0deg,
+                rgba(74,222,128,0.4) 180deg,
+                rgba(74,222,128,0) 360deg
+            );
+            animation: super-heal-rotate 2s linear infinite;
+            z-index: -1;
+        }
+        @keyframes super-heal-rotate { 100% { transform: rotate(360deg); } }
+        .super-heal-particle {
+            position: fixed;
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 1.6rem;
+            pointer-events: none;
+            z-index: 1000;
+            text-shadow: 0 0 12px #4ade80, 0 0 25px rgba(255,255,255,0.5);
+            animation: super-fly 1.2s forwards cubic-bezier(0.12,0.82,0.32,1);
+        }
+        @keyframes super-fly {
+            0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 0; }
+            10%  { opacity: 1; }
+            100% { transform: translate(var(--dx),var(--dy)) scale(1.8) rotate(var(--rot)); opacity: 0; }
+        }
+        .super-healing-active .hp-fill {
+            background: linear-gradient(90deg, #065f46, #4ade80, #ffffff) !important;
+            box-shadow: 0 0 20px #fff, 0 0 40px #4ade80 !important;
+            animation: hp-breathing-green 0.8s infinite alternate ease-in-out, hp-shake 0.1s infinite, hp-flash-white 0.4s infinite alternate !important;
+            transition: none !important;
+        }
+        @keyframes hp-shake {
+            0%   { transform: translate(1px,1px); }
+            50%  { transform: translate(-1px,-1px); }
+            100% { transform: translate(0,0); }
+        }
+        @keyframes hp-breathing-green {
+            0%   { filter: brightness(1.2) saturate(1.5); box-shadow: 0 0 15px #4ade80; }
+            100% { filter: brightness(2) saturate(2); box-shadow: 0 0 35px #fff, 0 0 70px #4ade80; }
+        }
+        @keyframes hp-flash-white {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.7; }
+            100% { filter: brightness(3); }
+        }
+
+        /* ============================================================
+           MANA BOOST EVENT
+        ============================================================ */
+        @keyframes mana-shaking-violent {
+            0%   { transform: translate(0,0); }
+            20%  { transform: translate(-2px,1px); }
+            40%  { transform: translate(2px,-1px); }
+            60%  { transform: translate(-1px,2px); }
+            80%  { transform: translate(1px,-1px); }
+            100% { transform: translate(0,0); }
+        }
+        @keyframes mana-glow-bright {
+            0%, 100% { box-shadow: 0 0 10px #818cf8, inset 0 0 5px white; filter: brightness(1.2); }
+            50%       { box-shadow: 0 0 25px #c084fc, 0 0 40px #818cf8, inset 0 0 15px white; filter: brightness(1.8); }
+        }
+        .mana-shaking-active {
+            animation: mana-shaking-violent 0.1s infinite, mana-glow-bright 0.6s infinite ease-in-out;
+            border: 1px solid #fff !important;
+        }
+
+        /* ============================================================
+           READY TO USE (SUPER HEAL)
+        ============================================================ */
+        .ready-to-use {
+            animation: ready-flash 0.5s infinite alternate !important;
+            opacity: 1 !important;
+        }
+        @keyframes ready-flash {
+            from { background: rgba(74,222,128,0.3); }
+            to   { background: rgba(255,255,255,0.15); color: #fff; }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
+        @media screen and (max-width: 768px) {
+            body { overflow-y: auto; justify-content: flex-start; padding: 15px 0 30px; }
+            #event-banner { font-size: 0.6rem; padding: 5px 14px; top: 5px; }
+            #global-timer { font-size: 2rem; margin: 42px 0 8px; }
+            .game-wrapper { flex-direction: column; gap: 12px; align-items: center; width: 100%; }
+            #bot-card { order: 1; }
+            #p1-card { order: 2; }
+            .card { width: 88%; max-width: 310px; padding: 12px; }
+            .card h2 { font-size: 0.85rem; }
+            .grid { grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 10px; }
+            .skill-box { height: 40px; }
+            button { font-size: 0.5rem; }
+            #log-container { width: 88%; margin-top: 12px; order: 3; }
+            #log { height: 75px; font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body class="active-p1">
+
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="rune-field" id="rune-field"></div>
+
+    <!-- Event Banner -->
+    <div id="event-banner">⚡ EVENT ACTIVE ⚡</div>
+
+    <!-- Timer -->
+    <div id="global-timer" style="position:relative;z-index:5;">5.0</div>
+
+    <!-- ========== START OVERLAY ========== -->
+    <div id="start-overlay">
+        <div class="popup-content">
+            <h1>MAGE WAR</h1>
+            <p>Kalahkan <b style="color:var(--bot)">Jovita (Smart Bot)</b> dengan taktik terbaikmu!<br>
+               <span style="font-size:0.8rem;opacity:0.6">Made by <b>Qabil</b></span></p>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>👤 PLAYER</strong>
+                    HP: 100 &nbsp;|&nbsp; Mana: 30
+                </div>
+                <div class="info-item" style="border-left-color: var(--bot)">
+                    <strong>🤖 JOVITA</strong>
+                    HP: 200 &nbsp;|&nbsp; Mana: 40
+                </div>
+                <div class="info-item">
+                    <strong>⚡ STRIKE</strong>
+                    Damage + (+25) Mana gain
+                </div>
+                <div class="info-item">
+                    <strong>✨ SUPER HEAL</strong>
+                    Aktif saat HP &lt; 30%
+                </div>
+                <div class="info-item">
+                    <strong>❤️ HEAL COMBO</strong>
+                    Heal + Vampire + Super Punch
+                </div>
+                <div class="info-item">
+                    <strong>⚔️ EXECUTE COMBO</strong>
+                    Ulti + Vampire + Strike
+                </div>
+            </div>
+
+            <p class="diff-label">— Tingkat Kesulitan —</p>
+            <div class="difficulty-selector" style="margin-bottom:20px;">
+                <button class="diff-btn" id="easy-btn" onclick="selectDifficulty('easy')">EASY</button>
+                <button class="diff-btn active-diff" id="normal-btn" onclick="selectDifficulty('normal')">NORMAL</button>
+                <button class="diff-btn" id="hard-btn" onclick="selectDifficulty('hard')">HARD</button>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">⚔ BEGIN BATTLE ⚔</button>
+        </div>
+    </div>
+
+    <!-- ========== RESULT OVERLAY ========== -->
+    <div id="result-overlay" style="display:none;">
+        <div class="popup-content">
+            <h1 id="result-title">HASIL</h1>
+            <p id="result-message"></p>
+            <div class="result-stats">
+                <div id="winner-name" style="font-family:'Cinzel Decorative',serif; font-size:1.1rem; font-weight:bold; margin-bottom:5px;"></div>
+            </div>
+            <button class="start-btn" onclick="location.reload()">↺ TRY AGAIN</button>
+        </div>
+    </div>
+
+    <!-- ========== ARENA ========== -->
+    <div class="game-wrapper" id="arena">
+
+        <!-- PLAYER CARD -->
+        <div class="card" id="p1-card">
+            <div id="p1-debuff" class="debuff-label"></div>
+            <h2 style="color:var(--p1)">⚡ YOU</h2>
+
+            <div class="bar-label"><span class="bar-icon">❤️</span>Health</div>
+            <div class="bar-bg">
+                <div id="p1-hp" class="hp-fill"></div>
+                <div class="bar-text" id="p1-hp-t">100/100</div>
+            </div>
+
+            <div class="bar-label"><span class="bar-icon">🔮</span>Mana</div>
+            <div class="bar-bg">
+                <div id="p1-mana" class="mana-fill"></div>
+                <div class="bar-text" id="p1-mana-t">30/100</div>
+            </div>
+
+            <div class="grid" id="p1-skills"></div>
+        </div>
+
+        <!-- BOT CARD -->
+        <div class="card" id="bot-card">
+            <div id="bot-debuff" class="debuff-label"></div>
+            <h2 style="color:var(--bot)">🤖 JOVITA</h2>
+
+            <div class="bar-label"><span class="bar-icon">❤️</span>Health</div>
+            <div class="bar-bg">
+                <div id="bot-hp" class="hp-fill"></div>
+                <div class="bar-text" id="bot-hp-t">200/200</div>
+            </div>
+
+            <div class="bar-label"><span class="bar-icon">🔮</span>Mana</div>
+            <div class="bar-bg">
+                <div id="bot-mana" class="mana-fill"></div>
+                <div class="bar-text" id="bot-mana-t">40/100</div>
+            </div>
+
+            <div class="grid" id="bot-skills"></div>
+        </div>
+
+    </div>
+
+    <!-- ========== BATTLE LOG ========== -->
+    <div id="log-container" style="position:relative;z-index:5;">
+        <div class="log-header">
+            <span class="log-header-ornament">✦</span>
+            <span class="log-header-title">Battle Log</span>
+            <span class="log-header-ornament">✦</span>
+            <div class="log-header-line"></div>
+        </div>
+        <div id="log">> Battle Start! Gunakan BURNING untuk damage berkala!<br>> Vampire Menyerang dan menyerap darah musuh</div>
+    </div>
+
+    <script>
+        /* ============================================================
+           ANIMATED RUNES BACKGROUND
+        ============================================================ */
+        (function spawnRunes() {
+            const field = document.getElementById('rune-field');
+            const runeSymbols = ['᛫','ᚱ','ᚢ','ᚾ','ᛖ','ᛗ','ᚠ','ᚦ','ᚨ','ᛚ','⬡','✦','⬢','◈','⟁','⌘','⍟','⎊'];
+            for (let i = 0; i < 28; i++) {
+                const r = document.createElement('div');
+                r.className = 'rune';
+                r.innerText = runeSymbols[Math.floor(Math.random() * runeSymbols.length)];
+                r.style.left = (Math.random() * 100) + 'vw';
+                r.style.animationDuration = (18 + Math.random() * 22) + 's';
+                r.style.animationDelay = -(Math.random() * 30) + 's';
+                r.style.fontSize = (0.7 + Math.random() * 1.2) + 'rem';
+                r.style.opacity = (0.06 + Math.random() * 0.1).toString();
+                field.appendChild(r);
+            }
+        })();
+
+        /* ============================================================
+           GAME LOGIC — ALL ORIGINAL, ZERO CHANGES
+        ============================================================ */
+        let selectedDiff = 'normal';
+
+        function selectDifficulty(level) {
+            selectedDiff = level;
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active-diff'));
+            document.getElementById(`${level}-btn`).classList.add('active-diff');
+        }
+
+        const strikeSound = new Audio('/audio/StrikeSound.mp3');
+        strikeSound.preload = 'auto';
+        strikeSound.volume = 0.6;
+
+        const ultiSound = new Audio('/audio/UltimateSound.mp3');
+        ultiSound.preload = 'auto';
+        ultiSound.volume = 1.0;
+
+        const SKILLS = [
+            { id: 'strike',      name: 'STRIKE',      cost: 5,  cd: 5000,  color: '#6b7280' },
+            { id: 'heal',        name: 'HEAL',         cost: 50, cd: 13000, color: '#16a34a' },
+            { id: 'burning',     name: 'BURNING',      cost: 45, cd: 20000, color: '#ea580c' },
+            { id: 'vampire',     name: 'VAMPIRE',      cost: 45, cd: 15000, color: '#9333ea' },
+            { id: 'shield',      name: 'SHIELD',       cost: 20, cd: 10000, color: '#2563eb' },
+            { id: 'freeze',      name: 'FREEZE',       cost: 15, cd: 30000, color: '#60a5fa' },
+            { id: 'ulti',        name: 'ULTI',         cost: 65, cd: 30000, color: '#b91c1c' },
+            { id: 'super_punch', name: 'SUPER PUNCH',  cost: 30, cd: 15000, color: '#d97706', damage: 15, healPerHit: 5, hits: 3, interval: 2000 },
+            { id: 'super_heal',  name: 'SUPER HEAL',   cost: 10, cd: 90000, color: '#059669', duration: 5, percent: 0.9 }
+        ];
+
+        let game = {
+            turn: 'p1', timer: 5.0, active: true,
+            event: { type: 'none', time: 0 },
+            p1:  { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} },
+            bot: { hp: 200, mana: 40, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} }
+        };
+
+        ['p1', 'bot'].forEach(p => SKILLS.forEach(s => game[p].cds[s.id] = 0));
+
+        function init() {
+            ['p1', 'bot'].forEach(p => {
+                const cont = document.getElementById(`${p}-skills`);
+                SKILLS.forEach(s => {
+                    cont.innerHTML += `
+                        <div class="skill-box">
+                            <div id="${p}-${s.id}-txt" class="cd-text"></div>
+                            <button id="${p}-${s.id}-btn" onclick="useSkill('${s.id}','${p}')" style="border-bottom:2px solid ${s.color}">${s.name}</button>
+                            <div id="${p}-${s.id}-cd" class="cd-overlay"></div>
+                        </div>`;
+                });
+            });
+        }
+
+        function startGame() {
+            const startBtn = document.querySelector('.start-btn');
+            if (startBtn) { startBtn.disabled = true; startBtn.innerText = "ENTERING THE ARENA..."; }
+            const overlay = document.getElementById('start-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+                setTimeout(() => overlay.remove(), 500);
+            }
+            init();
+
+            const gameLoop = setInterval(() => {
+                if (!game.active) { clearInterval(gameLoop); return; }
+
+                if (game[game.turn].freeze > 0) {
+                    game[game.turn].freeze -= 0.1;
+                    if (game[game.turn].freeze <= 0) {
+                        game[game.turn].freeze = 0;
+                        document.getElementById(`${game.turn}-card`).classList.remove('frozen');
+                        log(`${game.turn.toUpperCase()} sudah tidak membeku!`);
+                        changeTurn();
+                    }
+                } else {
+                    game.timer -= 0.1;
+                    if (game.timer <= 0) changeTurn();
+                }
+
+                ['p1', 'bot'].forEach(p => {
+                    if (game[p].burn > 0) {
+                        game[p].burn -= 0.1;
+                        game[p].hp -= 0.5;
+                        document.getElementById(`${p}-card`).classList.add('burning');
+                        if (game[p].hp <= 0) win(p === 'p1' ? 'bot' : 'p1');
+                        if (game[p].burn <= 0) {
+                            game[p].burn = 0;
+                            document.getElementById(`${p}-card`).classList.remove('burning');
+                        }
+                    }
+                    const maxHP = (p === 'bot') ? 200 : 100;
+                    if (game[p].sHeal > 0) {
+                        game[p].sHeal -= 0.1;
+                        let healPerTick = (maxHP * 0.7) / 100;
+                        game[p].hp = Math.min(maxHP, game[p].hp + healPerTick);
+                        createHealParticle(p);
+                        document.getElementById(`${p}-card`).classList.add('super-healing-active');
+                        if (game[p].sHeal <= 0) {
+                            game[p].sHeal = 0;
+                            document.getElementById(`${p}-card`).classList.remove('super-healing-active');
+                        }
+                    }
+                    updateDebuffLabel(p);
+                });
+
+                let mR = 0.3, hR = 0;
+                if (game.event.time > 0) {
+                    game.event.time -= 0.1;
+                    if (game.event.type === 'MANA')   mR = 1.2;
+                    if (game.event.type === 'HEALTH')  hR = 0.25;
+                    if (game.event.time <= 0) {
+                        document.getElementById('event-banner').className = '';
+                        document.querySelectorAll('.mana-fill').forEach(el => el.classList.remove('mana-shaking-active'));
+                    }
+                } else if (Math.random() < 0.01) { startEvent(); }
+
+                ['p1', 'bot'].forEach(i => {
+                    const maxHP = (i === 'bot') ? 200 : 100;
+                    game[i].mana = Math.min(100, game[i].mana + mR);
+                    game[i].hp   = Math.min(maxHP, game[i].hp + hR);
+                });
+
+                document.getElementById('global-timer').innerText = game.timer.toFixed(1);
+                updateUI();
+            }, 100);
+
+            log("⚔ Pertarungan Dimulai!");
+        }
+
+        function updateDebuffLabel(p) {
+            let txt = "";
+            if (game[p].freeze > 0) txt += `❄️ FROZEN (${game[p].freeze.toFixed(1)}s) `;
+            if (game[p].burn  > 0) txt += `🔥 BURNING (${game[p].burn.toFixed(1)}s) `;
+            if (game[p].sHeal > 0) txt += `✨ REGEN (${game[p].sHeal.toFixed(1)}s)`;
+            const el = document.getElementById(`${p}-debuff`);
+            el.innerText = txt;
+            if      (game[p].freeze > 0) el.style.color = "var(--freeze)";
+            else if (game[p].burn   > 0) el.style.color = "var(--burn)";
+            else if (game[p].sHeal  > 0) el.style.color = "#4ade80";
+            else el.style.color = "";
+        }
+
+        function startEvent() {
+            game.event.type = Math.random() > 0.3 ? 'MANA' : 'HEALTH';
+            game.event.time = 30;
+            const b = document.getElementById('event-banner');
+            b.innerText = `✦ ${game.event.type} SURGE ACTIVE ✦`;
+            b.className = 'event-active';
+            if (game.event.type === 'MANA') {
+                document.querySelectorAll('.mana-fill').forEach(el => el.classList.add('mana-shaking-active'));
+            }
+            log(`✦ EVENT: ${game.event.type} SURGE dimulai!`);
+        }
+
+        function useSkill(sid, pid) {
+            if (pid !== game.turn || !game.active || game[pid].freeze > 0) return;
+            const s = SKILLS.find(x => x.id === sid);
+            const now = Date.now();
+            const opp = pid === 'p1' ? 'bot' : 'p1';
+            if (now < game[pid].cds[sid] || game[pid].mana < s.cost) return;
+
+            game[pid].mana -= s.cost;
+            game[pid].cds[sid] = now + s.cd;
+
+            if (sid === 'strike') {
+                let d = calc(10, 16, opp);
+                game[opp].hp -= d;
+                strikeSound.currentTime = 0; strikeSound.play();
+                setTimeout(() => { strikeSound.pause(); strikeSound.currentTime = 0; }, 2000);
+                let manaGain = (pid === 'p1') ? 25 : 15;
+                game[pid].mana = Math.min(100, game[pid].mana + manaGain);
+                createStrikeVisual(opp);
+                log(`${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP. (+${manaGain} Mana)`);
+            } else if (sid === 'heal') {
+                const isBot = (pid === 'bot');
+                const maxHP = isBot ? 200 : 100;
+                const healAmount = isBot ? 50 : 30;
+                game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
+                const card = document.getElementById(`${pid}-card`);
+                card.classList.add('healing-active');
+                for (let i = 0; i < 5; i++) createHealParticle(pid);
+                setTimeout(() => card.classList.remove('healing-active'), 800);
+                log(`${pid.toUpperCase()} menggunakan Heal! (+${healAmount} HP)`);
+            } else if (sid === 'burning') {
+                game[opp].burn = 6.0;
+                log(`🔥 ${pid.toUpperCase()} membakar ${opp.toUpperCase()} selama 6 detik!`);
+            } else if (sid === 'shield') {
+                game[pid].shield = 2;
+                const card = document.getElementById(`${pid}-card`);
+                card.style.transition = "all 0.3s ease";
+                card.style.transform = "scale(1.1)";
+                for (let i = 0; i < 3; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'heal-particle';
+                    p.innerText = '🛡️';
+                    p.style.left = (card.getBoundingClientRect().left + Math.random() * 100) + 'px';
+                    p.style.top  = (card.getBoundingClientRect().top) + 'px';
+                    p.style.color = "#60a5fa";
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 1000);
+                }
+                setTimeout(() => card.style.transform = "scale(1.02)", 300);
+                log(`🛡️ ${pid.toUpperCase()} Mengaktifkan Pelindung (75% Damage Reduction)!`);
+            } else if (sid === 'vampire') {
+                let baseDamage = 20;
+                let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.25) : baseDamage;
+                game[opp].hp -= d;
+                game[pid].hp = Math.min(100, game[pid].hp + 20);
+                createVampireVisual(pid, opp);
+                log(`🦇 ${pid.toUpperCase()} Vampire! Sedot ${d} HP & Heal 20 HP.`);
+            } else if (sid === 'freeze') {
+                game[opp].freeze = 3.0;
+                document.getElementById(`${opp}-card`).classList.add('frozen');
+                log(`❄️ ${pid.toUpperCase()} membekukan ${opp.toUpperCase()}!`);
+            } else if (sid === 'ulti') {
+                let d = calc(35, 50, opp);
+                ultiSound.currentTime = 0; ultiSound.play();
+                setTimeout(() => { ultiSound.pause(); ultiSound.currentTime = 0; }, 2000);
+                const flash = document.createElement('div');
+                flash.className = 'ulti-flash';
+                document.body.appendChild(flash);
+                setTimeout(() => flash.remove(), 700);
+                const card = document.getElementById(`${pid}-card`);
+                const rect = card.getBoundingClientRect();
+                const wave = document.createElement('div');
+                wave.className = 'shockwave';
+                wave.style.left = (rect.left + rect.width / 2) + 'px';
+                wave.style.top  = (rect.top + rect.height / 2) + 'px';
+                document.body.appendChild(wave);
+                setTimeout(() => wave.remove(), 600);
+                const oppCard = document.getElementById(`${opp}-card`);
+                const oppRect = oppCard.getBoundingClientRect();
+                const popup = document.createElement('div');
+                popup.className = 'dmg-popup';
+                popup.innerText = `-${d}`;
+                popup.style.left = (oppRect.left + oppRect.width / 2 - 30) + 'px';
+                popup.style.top  = (oppRect.top + oppRect.height / 2) + 'px';
+                document.body.appendChild(popup);
+                setTimeout(() => popup.remove(), 800);
+                game[opp].hp -= d;
+                document.getElementById('arena').classList.add('shake');
+                setTimeout(() => document.getElementById('arena').classList.remove('shake'), 500);
+                log(`💥 ULTIMATE: ${pid.toUpperCase()} Menghancurkan ${opp.toUpperCase()} sebesar ${d} HP!`);
+            } else if (sid === 'super_punch') {
+                executeSuperPunch(pid, opp);
+                log(`👊 ${pid.toUpperCase()} Menggunakan SUPER PUNCH! (3x Serangan Beruntun)`);
+            } else if (sid === 'super_heal') {
+                const sk = SKILLS.find(x => x.id === 'super_heal');
+                game[pid].sHeal = sk.duration;
+                for (let i = 0; i < 15; i++) setTimeout(() => createHealParticle(pid), i * 50);
+                createSuperHealVisual(pid);
+                log(`✨ ${pid.toUpperCase()} mengaktifkan SUPER HEAL! (Regen 70% HP selama 10 detik)`);
+            }
+
+            if (game[opp].hp <= 0) win(pid);
+            else changeTurn();
+        }
+
+        function changeTurn() {
+            if (!game.active) return;
+            game.turn = game.turn === 'p1' ? 'bot' : 'p1';
+            game.timer = 5.0;
+            document.body.className = `active-${game.turn}`;
+            if (game[game.turn].shield > 0) game[game.turn].shield--;
+            if (game[game.turn].freeze > 0) return;
+            if (game.turn === 'bot') {
+                setTimeout(() => {
+                    if      (selectedDiff === 'easy') botAIEasy();
+                    else if (selectedDiff === 'hard') botAIHard();
+                    else                              botAI();
+                }, 1000);
+            }
+        }
+
+        /* ---------- BOT AI EASY ---------- */
+        function botAIEasy() {
+            if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+            const b = game.bot, now = Date.now();
+            const isReady = id => { const s = SKILLS.find(x => x.id === id); return s && b.mana >= s.cost && now >= (b.cds[id] || 0); };
+            let targetSkill = null;
+            if (b.hp < 30) {
+                if (isReady('super_heal')) targetSkill = 'super_heal';
+                else if (isReady('heal')) targetSkill = 'heal';
+                else if (isReady('vampire')) targetSkill = 'vampire';
+            }
+            if (!targetSkill) {
+                const prio = ['ulti', 'burning', 'super_punch', 'strike'];
+                targetSkill = prio.find(id => isReady(id));
+            }
+            if (!targetSkill) targetSkill = 'strike';
+            const s = SKILLS.find(x => x.id === targetSkill);
+            if (s && b.mana >= s.cost && now >= (b.cds[targetSkill] || 0)) useSkill(targetSkill, 'bot');
+            else useSkill('strike', 'bot');
+        }
+
+        /* ---------- BOT AI NORMAL ---------- */
+        function botAI() {
+            if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+            const b = game.bot, p = game.p1, now = Date.now();
+            const getRemCD = id => Math.max(0, ((b.cds[id] || 0) - now) / 1000);
+            const isReady = id => { const s = SKILLS.find(x => x.id === id); return s && b.mana >= s.cost && now >= (b.cds[id] || 0); };
+            let targetSkill = null, currentCD = 0;
+            if (b.hp < 35 && b.mana >= 10) {
+                let cdSH = getRemCD('super_heal');
+                if (cdSH < 4.7) { targetSkill = 'super_heal'; currentCD = cdSH; }
+            }
+            if (!targetSkill && b.mana >= 30) {
+                let cdU = getRemCD('ulti'), cdP = getRemCD('super_punch');
+                if (p.hp <= 55 && b.mana >= 65 && cdU < 4.9) {
+                    targetSkill = 'ulti'; currentCD = cdU;
+                    if (cdU > 0) log("JOVITA: 'Tunggu sebentar... ini akan segera berakhir!'");
+                } else if (isReady('burning') && p.hp > 55) { targetSkill = 'burning'; }
+                else if (b.mana >= 30 && cdP < 4.7 && cdU > 5) { targetSkill = 'super_punch'; currentCD = cdP; }
+                else if (isReady('ulti')) { targetSkill = 'ulti'; }
+            }
+            if (!targetSkill && b.hp < 130) {
+                if (isReady('heal') && b.mana >= 50) targetSkill = 'heal';
+                else if (isReady('vampire') && b.mana >= 45) targetSkill = 'vampire';
+            }
+            if (!targetSkill) { targetSkill = 'strike'; currentCD = getRemCD('strike'); }
+            const execute = () => {
+                if (game.turn !== 'bot' || !game.active) return;
+                const s = SKILLS.find(x => x.id === targetSkill);
+                if (s && b.mana >= s.cost && Date.now() >= (b.cds[targetSkill] || 0)) useSkill(targetSkill, 'bot');
+                else if (b.mana >= 5) useSkill('strike', 'bot');
+                else log("JOVITA: 'Kehabisan energi...'");
+            };
+            if (currentCD === 0) execute();
+            else if (currentCD < 4.7) setTimeout(execute, currentCD * 1000 + 100);
+            else {
+                targetSkill = 'strike';
+                let cdS = getRemCD('strike');
+                if (cdS === 0) execute(); else setTimeout(execute, cdS * 1000 + 100);
+            }
+        }
+
+        /* ---------- BOT AI HARD ---------- */
+        function botAIHard() {
+            if (game.turn !== 'bot' || !game.active || game.bot.freeze > 0) return;
+            const b = game.bot, p = game.p1, now = Date.now();
+            const getRemCD = id => Math.max(0, ((b.cds[id] || 0) - now) / 1000);
+            const isReady = id => { const s = SKILLS.find(x => x.id === id); return s && b.mana >= s.cost && now >= (b.cds[id] || 0); };
+            let targetSkill = null, currentCD = 0;
+            if (b.hp < 35) {
+                let cdSH = getRemCD('super_heal');
+                if (cdSH < 4.7 && b.mana >= 10) { targetSkill = 'super_heal'; currentCD = cdSH; }
+                else if (isReady('heal')) targetSkill = 'heal';
+                else if (isReady('vampire')) targetSkill = 'vampire';
+            } else if (b.hp >= 35 && b.hp < 100) {
+                if (isReady('heal')) targetSkill = 'heal';
+                else if (isReady('vampire')) targetSkill = 'vampire';
+            }
+            if (!targetSkill) {
+                let cdU = getRemCD('ulti'), cdP = getRemCD('super_punch');
+                if (p.hp <= 55 && b.mana >= 65 && cdU < 4.9) { targetSkill = 'ulti'; currentCD = cdU; }
+                else if (isReady('burning') && p.hp > 55) targetSkill = 'burning';
+                else if (b.mana >= 30 && cdP < 4.7 && cdU > 5) { targetSkill = 'super_punch'; currentCD = cdP; }
+                else if (isReady('ulti')) targetSkill = 'ulti';
+            }
+            if (!targetSkill) { targetSkill = 'strike'; currentCD = getRemCD('strike'); }
+            const execute = () => {
+                if (game.turn !== 'bot' || !game.active) return;
+                const s = SKILLS.find(x => x.id === targetSkill);
+                if (s && b.mana >= s.cost && Date.now() >= (b.cds[targetSkill] || 0)) useSkill(targetSkill, 'bot');
+                else if (targetSkill !== 'strike') useSkill('strike', 'bot');
+            };
+            if (currentCD === 0) execute();
+            else if (currentCD < 4.7) setTimeout(execute, currentCD * 1000 + 100);
+            else { targetSkill = 'strike'; let cdS = getRemCD('strike'); setTimeout(execute, cdS * 1000 + 100); }
+        }
+
+        /* ---------- UPDATE UI ---------- */
+        function updateUI() {
+            const now = Date.now();
+            ['p1', 'bot'].forEach(p => {
+                const maxHP = (p === 'bot') ? 200 : 100;
+                const hpPercent = (game[p].hp / maxHP) * 100;
+                document.getElementById(`${p}-hp`).style.width   = Math.max(0, hpPercent) + "%";
+                document.getElementById(`${p}-mana`).style.width = game[p].mana + "%";
+                document.getElementById(`${p}-hp-t`).innerText   = Math.ceil(Math.max(0, game[p].hp)) + "/" + maxHP;
+                document.getElementById(`${p}-mana-t`).innerText = Math.floor(game[p].mana) + "/100";
+                const card = document.getElementById(`${p}-card`);
+                game[p].shield > 0 ? card.classList.add('shield-active') : card.classList.remove('shield-active');
+                SKILLS.forEach(s => {
+                    const btn  = document.getElementById(`${p}-${s.id}-btn`);
+                    const over = document.getElementById(`${p}-${s.id}-cd`);
+                    const txt  = document.getElementById(`${p}-${s.id}-txt`);
+                    const rem  = game[p].cds[s.id] - now;
+                    if (rem > 0) {
+                        over.style.height = (rem / s.cd * 100) + "%";
+                        txt.innerText = (rem / 1000).toFixed(1);
+                        btn.disabled = true;
+                        if (s.id === 'super_heal') btn.classList.remove('ready-to-use');
+                    } else {
+                        over.style.height = "0%";
+                        txt.innerText = "";
+                        if (s.id === 'super_heal') {
+                            if (hpPercent < 30) {
+                                btn.disabled = (game.turn !== p || game[p].mana < s.cost || game[p].freeze > 0);
+                                btn.classList.toggle('ready-to-use', !btn.disabled);
+                                btn.innerText = s.name;
+                                btn.style.fontSize = "";
+                            } else {
+                                btn.disabled = true;
+                                btn.innerText = "SUPER HEAL <30HP";
+                                btn.classList.remove('ready-to-use');
+                                btn.style.fontSize = "9px";
+                            }
+                        } else {
+                            btn.disabled = (game.turn !== p || game[p].mana < s.cost || game[p].freeze > 0);
+                            btn.innerText = s.name;
+                            btn.style.fontSize = "";
+                        }
+                    }
+                });
+            });
+        }
+
+        function calc(min, max, t) {
+            let b = Math.floor(Math.random() * (max - min + 1)) + min;
+            return game[t].shield > 0 ? Math.floor(b * 0.25) : b;
+        }
+
+        function log(m) {
+            const l = document.getElementById('log');
+            l.innerHTML = `<div>◈ ${m}</div>` + l.innerHTML;
+        }
+
+        function win(id) {
+            game.active = false;
+            const resOverlay = document.getElementById('result-overlay');
+            const resTitle   = document.getElementById('result-title');
+            const resMsg     = document.getElementById('result-message');
+            const resWinner  = document.getElementById('winner-name');
+            resOverlay.style.display = 'flex';
+            if (id === 'p1') {
+                resTitle.innerText = "VICTORY";
+                resTitle.style.color = "#4ade80";
+                resMsg.innerText = "Kamu berhasil menaklukkan BOT Jovita!";
+                resWinner.innerText = "✦ PLAYER 1 WINS ✦";
+                resWinner.style.color = "#4ade80";
+            } else {
+                resTitle.innerText = "DEFEAT";
+                resTitle.style.color = "#f87171";
+                resMsg.innerText = "Kalah dengan bot? Coba lagi, pejuang!";
+                resWinner.innerText = "✦ JOVITA WINS ✦";
+                resWinner.style.color = "#f87171";
+            }
+        }
+
+        /* ---------- VFX HELPERS ---------- */
+        function createHealParticle(pid) {
+            const card = document.getElementById(`${pid}-card`);
+            const rect = card.getBoundingClientRect();
+            const p = document.createElement('div');
+            p.className = 'heal-particle';
+            p.innerText = '+';
+            p.style.left = (rect.left + Math.random() * rect.width) + 'px';
+            p.style.top  = (rect.top + Math.random() * (rect.height / 2)) + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 1000);
+        }
+
+        function createStrikeVisual(targetPid) {
+            const card   = document.getElementById(`${targetPid}-card`);
+            const arena  = document.getElementById('arena');
+            const rect   = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top  + rect.height / 2;
+            const flash = document.createElement('div');
+            flash.className = 'hit-flash';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 200);
+            arena.classList.add('heavy-shake');
+            setTimeout(() => arena.classList.remove('heavy-shake'), 400);
+            const strike = document.createElement('div');
+            strike.className = 'strike-effect';
+            strike.style.left = (centerX - 100) + 'px';
+            strike.style.top  = (centerY - 17) + 'px';
+            strike.style.setProperty('--rot', `${Math.random() * 360}deg`);
+            document.body.appendChild(strike);
+            setTimeout(() => strike.remove(), 300);
+            for (let i = 0; i < 12; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'strike-spark';
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = (Math.random() - 0.5) * 200;
+                spark.style.left = centerX + 'px';
+                spark.style.top  = centerY + 'px';
+                spark.style.setProperty('--tx', `${tx}px`);
+                spark.style.setProperty('--ty', `${ty}px`);
+                document.body.appendChild(spark);
+                setTimeout(() => spark.remove(), 500);
+            }
+        }
+
+        function createVampireVisual(sourcePid, targetPid) {
+            const sCard = document.getElementById(`${sourcePid}-card`);
+            const tCard = document.getElementById(`${targetPid}-card`);
+            const sRect = sCard.getBoundingClientRect();
+            const tRect = tCard.getBoundingClientRect();
+            const dim = document.createElement('div');
+            dim.className = 'vamp-dim';
+            document.body.appendChild(dim);
+            setTimeout(() => dim.remove(), 1000);
+            sCard.classList.add('vampire-active');
+            setTimeout(() => sCard.classList.remove('vampire-active'), 1000);
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const orb = document.createElement('div');
+                    orb.className = 'vamp-orb';
+                    const startX = tRect.left + tRect.width / 2 + (Math.random() - 0.5) * 50;
+                    const startY = tRect.top  + tRect.height / 2 + (Math.random() - 0.5) * 50;
+                    const dx = (sRect.left + sRect.width / 2)  - startX;
+                    const dy = (sRect.top  + sRect.height / 2) - startY;
+                    orb.style.left = startX + 'px';
+                    orb.style.top  = startY + 'px';
+                    orb.style.setProperty('--dx', `${dx}px`);
+                    orb.style.setProperty('--dy', `${dy}px`);
+                    document.body.appendChild(orb);
+                    setTimeout(() => orb.remove(), 800);
+                }, i * 100);
+            }
+        }
+
+        function executeSuperPunch(pid, opp) {
+            let hitsDone = 0;
+            const s = SKILLS.find(x => x.id === 'super_punch');
+            function performPunch() {
+                if (!game.active) return false;
+                let d = calc(s.damage, s.damage, opp);
+                game[opp].hp -= d;
+                const maxHP = (pid === 'bot') ? 200 : 100;
+                let healAmount = (pid === 'p1') ? 7 : s.healPerHit;
+                game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
+                let manaText = "";
+                if (pid === 'p1') { game[pid].mana = Math.min(100, game[pid].mana + 8); manaText = " (+7 Mana)"; }
+                createSuperPunchVisual(opp);
+                createHealParticle(pid);
+                log(`👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!${manaText}`);
+                if (game[opp].hp <= 0) { win(pid); return true; }
+                updateUI();
+                return false;
+            }
+            performPunch(); hitsDone++;
+            const punchTimer = setInterval(() => {
+                if (hitsDone >= 3 || !game.active) { clearInterval(punchTimer); return; }
+                const isDead = performPunch();
+                if (isDead) clearInterval(punchTimer);
+                hitsDone++;
+            }, s.interval);
+        }
+
+        function createSuperPunchVisual(targetPid) {
+            const card   = document.getElementById(`${targetPid}-card`);
+            const arena  = document.getElementById('arena');
+            const rect   = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top  + rect.height / 2;
+            const txt = document.createElement('div');
+            txt.className = 'punch-text';
+            txt.innerText = 'SUPER PUNCH!';
+            txt.style.left = (centerX - 80 + Math.random() * 40) + 'px';
+            txt.style.top  = (centerY - 50) + 'px';
+            document.body.appendChild(txt);
+            setTimeout(() => txt.remove(), 800);
+            const flash = document.createElement('div');
+            flash.className = 'hit-flash';
+            flash.style.background = 'rgba(251,191,36,0.35)';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 150);
+            arena.classList.add('heavy-shake');
+            setTimeout(() => arena.classList.remove('heavy-shake'), 500);
+            const impact = document.createElement('div');
+            impact.style.cssText = `position:fixed;left:${centerX-50}px;top:${centerY-50}px;width:100px;height:100px;border:4px solid #fbbf24;border-radius:50%;animation:pulse-out 0.3s ease-out forwards;pointer-events:none;z-index:9999;`;
+            document.body.appendChild(impact);
+            setTimeout(() => impact.remove(), 300);
+            for (let i = 0; i < 20; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'strike-spark';
+                spark.style.background = '#fbbf24';
+                spark.style.boxShadow  = '0 0 8px #fbbf24';
+                const tx = (Math.random() - 0.5) * 400;
+                const ty = (Math.random() - 0.5) * 400;
+                spark.style.left = centerX + 'px';
+                spark.style.top  = centerY + 'px';
+                spark.style.setProperty('--tx', `${tx}px`);
+                spark.style.setProperty('--ty', `${ty}px`);
+                document.body.appendChild(spark);
+                setTimeout(() => spark.remove(), 600);
+            }
+        }
+
+        function createSuperHealVisual(pid) {
+            const card = document.getElementById(`${pid}-card`);
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top  + rect.height / 2;
+            const flash = document.createElement('div');
+            flash.className = 'hit-flash';
+            flash.style.background = 'rgba(74,222,128,0.25)';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 250);
+            const symbols = ['+', '💖', '✨', '🌿'];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'super-heal-particle';
+                    p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist  = 100 + Math.random() * 150;
+                    p.style.left = centerX + 'px';
+                    p.style.top  = centerY + 'px';
+                    p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+                    p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+                    p.style.setProperty('--rot', `${(Math.random() - 0.5) * 360}deg`);
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 1200);
+                }, i * 30);
+            }
+        }
+    </script>
+</body>
+</html>
