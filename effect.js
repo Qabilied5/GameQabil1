@@ -75,46 +75,6 @@
         }
       }
 
-      function executeSuperPunch(pid, opp) {
-        let hitsDone = 0;
-        const s = SKILLS.find((x) => x.id === "super_punch");
-        function performPunch() {
-          if (!game.active) return false;
-          let d = calc(s.damage, s.damage, opp);
-          game[opp].hp -= d;
-          const maxHP = pid === "bot" ? 200 : 100;
-          let healAmount = pid === "p1" ? 7 : s.healPerHit;
-          game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
-          let manaText = "";
-          if (pid === "p1") {
-            game[pid].mana = Math.min(100, game[pid].mana + 8);
-            manaText = " (+7 Mana)";
-          }
-          createSuperPunchVisual(opp);
-          createHealParticle(pid);
-          log(
-            `👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!${manaText}`,
-          );
-          if (game[opp].hp <= 0) {
-            win(pid);
-            return true;
-          }
-          updateUI();
-          return false;
-        }
-        performPunch();
-        hitsDone++;
-        const punchTimer = setInterval(() => {
-          if (hitsDone >= 3 || !game.active) {
-            clearInterval(punchTimer);
-            return;
-          }
-          const isDead = performPunch();
-          if (isDead) clearInterval(punchTimer);
-          hitsDone++;
-        }, s.interval);
-      }
-
       function createSuperPunchVisual(targetPid) {
         const card = document.getElementById(`${targetPid}-card`);
         const arena = document.getElementById("arena");

@@ -33,43 +33,21 @@
   }
 })();
 
-let isPVP = false; 
+let isPVP = true;
+
+function togglePVP() {
+  isPVP = !isPVP;
+  log(isPVP ? "Mode: PLAYER VS PLAYER" : "Mode: PLAYER VS BOT");
+}
+
 let selectedDiff = "normal";
-let game = {
-    turn: "p1",
-    timer: 5.0,
-    active: true,
-    event: { type: "none", time: 0 },
-    p1: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} },
-    bot: { hp: 100, mana: 40, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} } 
-};
-
-// let isPVP = false; // true = main 2 player
-
-// function togglePVP() {
-//   isPVP = !isPVP;
-//   log(isPVP ? "Mode: PLAYER VS PLAYER" : "Mode: PLAYER VS BOT");
-// }
-
-// let selectedDiff = "normal";
 
 function selectDifficulty(level) {
   selectedDiff = level;
-  
-  document.querySelectorAll(".difficulty-selector .diff-btn").forEach((btn) => {
-      btn.classList.remove("active-diff");
-  });
-
-  const targetBtn = document.getElementById(`${level}-btn`);
-  if (targetBtn) targetBtn.classList.add("active-diff");
-
-  // Pastikan HP Bot sinkron dengan mode PvE
-  if (!isPVP) {
-    game.bot.hp = 200; 
-  }
-
-  updateUI(); 
-  log(`DIFFICULTY SET TO: ${level.toUpperCase()}`);
+  document
+    .querySelectorAll(".diff-btn")
+    .forEach((btn) => btn.classList.remove("active-diff"));
+  document.getElementById(`${level}-btn`).classList.add("active-diff");
 }
 
 const strikeSound = new Audio("/audio/StrikeSound.mp3");
@@ -81,78 +59,71 @@ ultiSound.preload = "auto";
 ultiSound.volume = 1.0;
 
 const SKILLS = [
-    { id: "strike", name: "STRIKE", cost: 5, cd: 5000, color: "#6b7280" },
-    { id: "heal", name: "HEAL", cost: 50, cd: 13000, color: "#16a34a" },
-    { id: "burning", name: "BURNING", cost: 45, cd: 20000, color: "#ea580c" },
-    { id: "vampire", name: "VAMPIRE", cost: 45, cd: 15000, color: "#9333ea" },
-    { id: "shield", name: "SHIELD", cost: 20, cd: 10000, color: "#2563eb" },
-    { id: "freeze", name: "FREEZE", cost: 15, cd: 30000, color: "#60a5fa" },
-    { id: "ulti", name: "ULTI", cost: 65, cd: 30000, color: "#b91c1c" },
-    { id: "super_punch", name: "SUPER PUNCH", cost: 30, cd: 15000, color: "#d97706", damage: 15, healPerHit: 5, hits: 3, interval: 2000 },
-    { id: "super_heal", name: "SUPER HEAL", cost: 10, cd: 90000, color: "#059669", duration: 5 }
+  { id: "strike", name: "STRIKE", cost: 5, cd: 5000, color: "#6b7280" },
+  { id: "heal", name: "HEAL", cost: 50, cd: 13000, color: "#16a34a" },
+  {
+    id: "burning",
+    name: "BURNING",
+    cost: 45,
+    cd: 20000,
+    color: "#ea580c",
+  },
+  {
+    id: "vampire",
+    name: "VAMPIRE",
+    cost: 45,
+    cd: 15000,
+    color: "#9333ea",
+  },
+  { id: "shield", name: "SHIELD", cost: 20, cd: 10000, color: "#2563eb" },
+  { id: "freeze", name: "FREEZE", cost: 15, cd: 30000, color: "#60a5fa" },
+  { id: "ulti", name: "ULTI", cost: 65, cd: 30000, color: "#b91c1c" },
+  {
+    id: "super_punch",
+    name: "SUPER PUNCH",
+    cost: 30,
+    cd: 15000,
+    color: "#d97706",
+    damage: 15,
+    healPerHit: 5,
+    hits: 3,
+    interval: 2000,
+  },
+  {
+    id: "super_heal",
+    name: "SUPER HEAL",
+    cost: 10,
+    cd: 90000,
+    color: "#059669",
+    duration: 5,
+    percent: 0.9,
+  },
 ];
 
-function setMode(mode) {
-    isPVP = (mode === 'pvp');
-    const botLabel = document.getElementById("bot-name-label");
-    
-    const diffButtons = document.querySelectorAll(".difficulty-selector .diff-btn");
-
-    document.querySelectorAll(".mode-selector .diff-btn").forEach(btn => btn.classList.remove("active-diff"));
-    
-    if (isPVP) {
-        document.getElementById("btn-pvp").classList.add("active-diff");
-        game.bot.hp = 100; 
-        if (botLabel) botLabel.innerText = "PLAYER 2";
-
-        // DISABLE tombol difficulty saat PVP
-        diffButtons.forEach(btn => {
-            btn.disabled = true;
-            btn.classList.add("btn-disabled"); // Tambah class untuk styling (opsional)
-        });
-        log("MODE: PLAYER VS PLAYER (Difficulty Disabled)");
-    } else {
-        document.getElementById("btn-pve").classList.add("active-diff");
-        game.bot.hp = 200; 
-        if (botLabel) botLabel.innerText = "JOVITA";
-
-        // ENABLE kembali tombol difficulty saat PvE
-        diffButtons.forEach(btn => {
-            btn.disabled = false;
-            btn.classList.remove("btn-disabled");
-        });
-        log("MODE: PLAYER VS BOT (JOVITA)");
-    }
-    
-    if (document.getElementById("p1-skills")) {
-        init();
-    }
-}
-
-// let game = {
-//   turn: "p1",
-//   timer: 5.0,
-//   active: true,
-//   event: { type: "none", time: 0 },
-//   p1: {
-//     hp: 100,
-//     mana: 30,
-//     shield: 0,
-//     freeze: 0,
-//     burn: 0,
-//     sHeal: 0,
-//     cds: {},
-//   },
-//   bot: {
-//     hp: 200,
-//     mana: 40,
-//     shield: 0,
-//     freeze: 0,
-//     burn: 0,
-//     sHeal: 0,
-//     cds: {},
-//   },
-// };
+let game = {
+  turn: "p1",
+  timer: 5.0,
+  active: true,
+  event: { type: "none", time: 0 },
+  p1: {
+    hp: 100,
+    mana: 30,
+    shield: 0,
+    freeze: 0,
+    burn: 0,
+    sHeal: 0,
+    cds: {},
+  },
+  bot: {
+    hp: 100,
+    mana: 40,
+    shield: 0,
+    freeze: 0,
+    burn: 0,
+    sHeal: 0,
+    cds: {},
+  },
+};
 
 ["p1", "bot"].forEach((p) => SKILLS.forEach((s) => (game[p].cds[s.id] = 0)));
 
@@ -167,15 +138,10 @@ function init() {
 
     SKILLS.forEach((s, index) => {
       const keyLabel = keys[index];
-      
-      // Tentukan class berdasarkan mode isPVP
-      const hintClass = isPVP ? "visible-hint" : "hidden-hint";
-      const displayKey = isPVP ? `[${keyLabel}]` : "";
-
       cont.innerHTML += `
-        <div class="skill-box" style="display: flex; flex-direction: column; align-items: center; position: relative;">
-            <div class="key-hint ${hintClass}" style="font-size: 9px; font-family: monospace;">
-                ${displayKey}
+        <div class="skill-box" style="display: flex; flex-direction: column; align-items: center;">
+            <div class="key-hint" style="font-size:10px; color:#aaa; text-align:center; margin-bottom:2px;">
+                [${keyLabel}]
             </div>
             <div id="${p}-${s.id}-txt" class="cd-text"></div>
             <button id="${p}-${s.id}-btn" 
@@ -188,9 +154,7 @@ function init() {
     });
   });
 
-  if (typeof adjustGridToThreeColumns === "function") {
-    adjustGridToThreeColumns();
-  }
+  adjustGridToThreeColumns();
 }
 
 function startGame() {
@@ -237,7 +201,7 @@ function startGame() {
           document.getElementById(`${p}-card`).classList.remove("burning");
         }
       }
-      const maxHP = p === "bot" ? 200 : 100; // --> HP BOT/PLAYER
+      const maxHP = p === "bot" ? 100 : 100;
       if (game[p].sHeal > 0) {
         game[p].sHeal -= 0.1;
         let healPerTick = (maxHP * 0.7) / 100;
@@ -273,7 +237,7 @@ function startGame() {
     }
 
     ["p1", "bot"].forEach((i) => {
-      const maxHP = i === "bot" ? 200 : 100; // --> HP BOT/PLAYER
+      const maxHP = i === "bot" ? 200 : 100;
       game[i].mana = Math.min(100, game[i].mana + mR);
       game[i].hp = Math.min(maxHP, game[i].hp + hR);
     });
@@ -442,22 +406,22 @@ function useSkill(sid, pid) {
 }
 
 function changeTurn() {
-    if (!game.active) return;
-    
-    game.turn = (game.turn === "p1") ? "bot" : "p1";
-    game.timer = 5.0;
-    document.body.className = `active-${game.turn}`;
+  if (!game.active) return;
+  game.turn = game.turn === "p1" ? "bot" : "p1";
+  game.timer = 5.0;
+  document.body.className = `active-${game.turn}`;
 
-    if (game[game.turn].shield > 0) game[game.turn].shield--;
-    if (game[game.turn].freeze > 0) return;
+  if (game[game.turn].shield > 0) game[game.turn].shield--;
+  if (game[game.turn].freeze > 0) return;
 
-    if (game.turn === "bot" && !isPVP) {
-        setTimeout(() => {
-            if (selectedDiff === "easy") botAIEasy();
-            else if (selectedDiff === "hard") botAIHard();
-            else botAI();
-        }, 1000);
-    }
+  // HANYA JALANKAN BOT JIKA BUKAN MODE PVP
+  if (game.turn === "bot" && !isPVP) {
+    setTimeout(() => {
+      if (selectedDiff === "easy") botAIEasy();
+      else if (selectedDiff === "hard") botAIHard();
+      else botAI();
+    }, 1000);
+  }
 }
 
 // function changeTurn() {
@@ -479,16 +443,13 @@ function changeTurn() {
 function updateUI() {
   const now = Date.now();
   ["p1", "bot"].forEach((p) => {
-    const maxHP = (p === "bot" && !isPVP) ? 200 : 100;
+    const maxHP = p === "bot" ? 100 : 100;
     const hpPercent = (game[p].hp / maxHP) * 100;
-    const hpBar = document.getElementById(`${p}-hp`);
-    if (hpBar) hpBar.style.width = Math.max(0, hpPercent) + "%";
-    const hpText = document.getElementById(`${p}-hp-t`);
-    if (hpText) hpText.innerText = `${Math.ceil(Math.max(0, game[p].hp))}/${maxHP}`;
-
-    document.getElementById(`${p}-hp`).style.width = Math.max(0, hpPercent) + "%";
+    document.getElementById(`${p}-hp`).style.width =
+      Math.max(0, hpPercent) + "%";
     document.getElementById(`${p}-mana`).style.width = game[p].mana + "%";
-    document.getElementById(`${p}-hp-t`).innerText = `${Math.ceil(Math.max(0, game[p].hp))}/${maxHP}`;
+    document.getElementById(`${p}-hp-t`).innerText =
+      Math.ceil(Math.max(0, game[p].hp)) + "/" + maxHP;
     document.getElementById(`${p}-mana-t`).innerText =
       Math.floor(game[p].mana) + "/100";
     const card = document.getElementById(`${p}-card`);
@@ -564,7 +525,9 @@ function win(id) {
   }
 }
 
-// Key  untuk P1 dan P2/Bot
+// -- KEYBOARD
+
+// Mapping Tombol untuk P1 dan P2/Bot
 const P1_KEYS = ["q", "w", "e", "a", "s", "d", "z", "x", "c"];
 const P2_KEYS = ["7", "8", "9", "4", "5", "6", "1", "2", "3"];
 
@@ -586,42 +549,65 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-      function executeSuperPunch(pid, opp) {
-        let hitsDone = 0;
-        const s = SKILLS.find((x) => x.id === "super_punch");
-        function performPunch() {
-          if (!game.active) return false;
-          let d = calc(s.damage, s.damage, opp);
-          game[opp].hp -= d;
-          const maxHP = pid === "bot" ? 200 : 100;
-          let healAmount = pid === "p1" ? 7 : s.healPerHit;
-          game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
-          let manaText = "";
-          if (pid === "p1") {
-            game[pid].mana = Math.min(100, game[pid].mana + 8);
-            manaText = " (+7 Mana)";
-          }
-          createSuperPunchVisual(opp);
-          createHealParticle(pid);
-          log(
-            `👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!${manaText}`,
-          );
-          if (game[opp].hp <= 0) {
-            win(pid);
-            return true;
-          }
-          updateUI();
-          return false;
-        }
-        performPunch();
-        hitsDone++;
-        const punchTimer = setInterval(() => {
-          if (hitsDone >= 3 || !game.active) {
-            clearInterval(punchTimer);
-            return;
-          }
-          const isDead = performPunch();
-          if (isDead) clearInterval(punchTimer);
-          hitsDone++;
-        }, s.interval);
-      }
+function adjustGridToThreeColumns() {
+  // Mencari semua elemen yang memiliki class 'grid'
+  const grids = document.querySelectorAll(".grid");
+
+  grids.forEach((grid) => {
+    // Mengubah layout menjadi 3 kolom via JS
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(3, 1fr)";
+    grid.style.gap = "7px";
+    grid.style.marginTop = "14px";
+  });
+}
+
+function executeSuperPunch(pid, opp) {
+  let hitsDone = 0;
+  const s = SKILLS.find((x) => x.id === "super_punch");
+
+  function performPunch() {
+    if (!game.active) return false;
+
+    // 1. Damage (Sesuai statistik skill)
+    let d = calc(s.damage, s.damage, opp);
+    game[opp].hp -= d;
+
+    // 2. Heal (Disamakan: Player & Bot dapat s.healPerHit)
+    const maxHP = 100;
+    game[pid].hp = Math.min(maxHP, game[pid].hp + s.healPerHit);
+
+    // 3. Mana Gain (Disamakan: Keduanya dapat +8 Mana per hit)
+    game[pid].mana = Math.min(100, game[pid].mana + 8);
+
+    // Visual & Log
+    createSuperPunchVisual(opp);
+    createHealParticle(pid);
+    log(`👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP! (+8 Mana)`);
+
+    if (game[opp].hp <= 0) {
+      win(pid);
+      return true;
+    }
+
+    updateUI();
+    return false;
+  }
+
+  // Pukulan Pertama
+  const isDeadImmediate = performPunch();
+  if (isDeadImmediate) return;
+
+  hitsDone++;
+
+  // Pukulan Berikutnya (Interval)
+  const punchTimer = setInterval(() => {
+    if (hitsDone >= 3 || !game.active) {
+      clearInterval(punchTimer);
+      return;
+    }
+    const isDead = performPunch();
+    if (isDead) clearInterval(punchTimer);
+    hitsDone++;
+  }, s.interval);
+}

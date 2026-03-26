@@ -633,6 +633,10 @@
            RESPONSIVE
         ============================================================ */
       @media screen and (max-width: 768px) {
+        .start-btn {
+          font-size: 0.75rem;
+        }
+
         body {
           overflow-y: auto;
           justify-content: flex-start;

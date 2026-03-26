@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mage War: Hero vs Bot</title>
 
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="effect.css">
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="effect.css" />
+    <link rel="stylesheet" href="skin-player.css" />
 
     <script src="core.js" defer></script>
     <script src="ai-controller.js" defer></script>
@@ -33,8 +34,8 @@
       <div class="popup-content">
         <h1>MAGE WAR</h1>
         <p>
-          Kalahkan <b style="color: var(--bot)">JOVITA</b> dengan
-          taktik terbaikmu!<br />
+          Kalahkan <b style="color: var(--bot)">JOVITA</b> dengan taktik
+          terbaikmu!<br />
           <span style="font-size: 0.8rem; opacity: 0.6"
             >Made by <b>@Qabilied</b></span
           >
@@ -68,34 +69,42 @@
         </div>
 
         <p class="diff-label">— Difficulty —</p>
-        <div class="difficulty-selector" style="margin-bottom: 20px">
-          <button
-            class="diff-btn"
-            id="easy-btn"
-            onclick="selectDifficulty('easy')"
-          >
-            EASY
-          </button>
+        <div class="difficulty-selector">
+          <button id="easy-btn" class="diff-btn" onclick="selectDifficulty('easy')">EASY</button>
+          <button id="normal-btn" class="diff-btn active-diff" onclick="selectDifficulty('normal')">NORMAL</button>
+          <button id="hard-btn" class="diff-btn" onclick="selectDifficulty('hard')">HARD</button>
+        </div>
+
+        <!-- MODE SELECTOR AI/2PLAYER -->
+        <p class="diff-label" style="margin-top: 15px; box-sizing: border-box;">— Battle Mode —</p>
+        <div
+          class="mode-selector"
+          style="
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+          "
+        >
           <button
             class="diff-btn active-diff"
-            id="normal-btn"
-            onclick="selectDifficulty('normal')"
+            id="btn-pve"
+            onclick="setMode('pve')"
           >
-            NORMAL
+            SOLO (VS BOT)
           </button>
-          <button
-            class="diff-btn"
-            id="hard-btn"
-            onclick="selectDifficulty('hard')"
-          >
-            HARD
+
+          <button class="diff-btn" id="btn-pvp" onclick="setMode('pvp')">
+            DUEL (PVP)
           </button>
         </div>
 
         <button class="start-btn" onclick="startGame()">
           ⚔ BEGIN BATTLE ⚔
         </button>
-        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px;">v2.28.2 - Dark Arcane Expansion</p>
+        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px">
+          v2.28.2 - Dark Arcane Expansion
+        </p>
       </div>
     </div>
 
@@ -126,7 +135,7 @@
       <!-- PLAYER CARD -->
       <div class="card" id="p1-card">
         <div id="p1-debuff" class="debuff-label"></div>
-        <h2 style="color: var(--p1)"> YOU</h2>
+        <h2 style="color: var(--p1)">YOU</h2>
 
         <div class="bar-label"><span class="bar-icon">❤️</span>Health</div>
         <div class="bar-bg">
@@ -146,7 +155,7 @@
       <!-- BOT CARD -->
       <div class="card" id="bot-card">
         <div id="bot-debuff" class="debuff-label"></div>
-        <h2 style="color: var(--bot)"> JOVITA</h2>
+        <h2 style="color: var(--bot)" id="bot-name-label">JOVITA</h2>
 
         <div class="bar-label"><span class="bar-icon">❤️</span>Health</div>
         <div class="bar-bg">
@@ -173,8 +182,8 @@
         <div class="log-header-line"></div>
       </div>
       <div id="log">
-        > v2.28.2 - Dark Arcane Expansion<br />>
-        > Battle Start! Gunakan BURNING dan SUPER PUNCH untuk damage berkala!<br />>
+        > v2.28.2 - Dark Arcane Expansion<br />> > Battle Start! Gunakan BURNING
+        dan SUPER PUNCH untuk damage berkala!<br />>
       </div>
     </div>
   </body>
