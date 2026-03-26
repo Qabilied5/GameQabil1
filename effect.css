@@ -694,4 +694,9 @@
         #event-banner {
           margin-top: 20px;
         }
+
+        #battle-mode-label, 
+        #battle-mode-selector {
+            display: none !important;
+        }
       }

@@ -240,17 +240,17 @@ function startGame() {
       const maxHP = p === "bot" ? 200 : 100; // --> HP BOT/PLAYER
       if (game[p].sHeal > 0) {
         game[p].sHeal -= 0.1;
-        let healPerTick = (maxHP * 0.7) / 100;
+        let healPerTick = (maxHP * 1) / 75; 
         game[p].hp = Math.min(maxHP, game[p].hp + healPerTick);
+        
         createHealParticle(p);
-        document
-          .getElementById(`${p}-card`)
-          .classList.add("super-healing-active");
+
+        const card = document.getElementById(`${p}-card`);
+        if (card) card.classList.add("super-healing-active");
+
         if (game[p].sHeal <= 0) {
           game[p].sHeal = 0;
-          document
-            .getElementById(`${p}-card`)
-            .classList.remove("super-healing-active");
+          if (card) card.classList.remove("super-healing-active");
         }
       }
       updateDebuffLabel(p);
@@ -273,7 +273,7 @@ function startGame() {
     }
 
     ["p1", "bot"].forEach((i) => {
-      const maxHP = i === "bot" ? 200 : 100; // --> HP BOT/PLAYER
+      const maxHP = (i === "bot" && !isPVP) ? 200 : 100;
       game[i].mana = Math.min(100, game[i].mana + mR);
       game[i].hp = Math.min(maxHP, game[i].hp + hR);
     });
@@ -287,6 +287,9 @@ function startGame() {
 
 function updateDebuffLabel(p) {
   let txt = "";
+  if (game[p].shield > 0) {
+    txt += `🛡️ SHIELD! [${game[p].shield}] TURN LEFT `;
+  }
   if (game[p].freeze > 0) txt += `❄️ FROZEN (${game[p].freeze.toFixed(1)}s) `;
   if (game[p].burn > 0) txt += `🔥 BURNING (${game[p].burn.toFixed(1)}s) `;
   if (game[p].sHeal > 0) txt += `✨ REGEN (${game[p].sHeal.toFixed(1)}s)`;
@@ -294,6 +297,7 @@ function updateDebuffLabel(p) {
   el.innerText = txt;
   if (game[p].freeze > 0) el.style.color = "var(--freeze)";
   else if (game[p].burn > 0) el.style.color = "var(--burn)";
+  else if (game[p].shield > 0) el.style.color = "#87bcfd";
   else if (game[p].sHeal > 0) el.style.color = "#4ade80";
   else el.style.color = "";
 }
@@ -354,6 +358,7 @@ function useSkill(sid, pid) {
     );
   } else if (sid === "shield") {
     game[pid].shield = 2;
+    updateDebuffLabel(pid);
     const card = document.getElementById(`${pid}-card`);
     card.style.transition = "all 0.3s ease";
     card.style.transform = "scale(1.1)";
@@ -447,6 +452,10 @@ function changeTurn() {
     game.turn = (game.turn === "p1") ? "bot" : "p1";
     game.timer = 5.0;
     document.body.className = `active-${game.turn}`;
+
+    // Update label untuk kedua pihak agar angka turn sinkron
+    updateDebuffLabel("p1");
+    updateDebuffLabel("bot");
 
     if (game[game.turn].shield > 0) game[game.turn].shield--;
     if (game[game.turn].freeze > 0) return;
