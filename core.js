@@ -95,7 +95,9 @@ const SKILLS = [
 function setMode(mode) {
     isPVP = (mode === 'pvp');
     const botLabel = document.getElementById("bot-name-label");
-    
+    const gameWrapper = document.querySelector(".game-wrapper");
+    const logContainer = document.getElementById("log-container");
+    const cards = document.querySelectorAll(".card, .ornate-card");
     const diffButtons = document.querySelectorAll(".difficulty-selector .diff-btn");
 
     document.querySelectorAll(".mode-selector .diff-btn").forEach(btn => btn.classList.remove("active-diff"));
@@ -105,16 +107,23 @@ function setMode(mode) {
         game.bot.hp = 100; 
         if (botLabel) botLabel.innerText = "PLAYER 2";
 
-        // DISABLE tombol difficulty saat PVP
+        gameWrapper.classList.add("pvp-mode");
+        if (logContainer) logContainer.classList.add("pvp-log");
+        cards.forEach(card => card.classList.add("pvp-card"));
+
+        // DISABLE tombol difficulty
         diffButtons.forEach(btn => {
             btn.disabled = true;
-            btn.classList.add("btn-disabled"); // Tambah class untuk styling (opsional)
+            btn.classList.add("btn-disabled");
         });
-        log("MODE: PLAYER VS PLAYER (Difficulty Disabled)");
     } else {
         document.getElementById("btn-pve").classList.add("active-diff");
         game.bot.hp = 200; 
         if (botLabel) botLabel.innerText = "JOVITA";
+
+        gameWrapper.classList.remove("pvp-mode");
+        if (logContainer) logContainer.classList.remove("pvp-log");
+        cards.forEach(card => card.classList.remove("pvp-card"));
 
         // ENABLE kembali tombol difficulty saat PvE
         diffButtons.forEach(btn => {

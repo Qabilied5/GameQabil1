@@ -231,6 +231,21 @@
         }
       }
 
+      .game-wrapper.pvp-mode {
+        gap: 25px; /* Jarak antar kartu sedikit dirapatkan */
+        max-width: 1300px; /* Batas lebar maksimal agar tidak terlalu ke pinggir */
+        margin: 0 auto; /* Memastikan wrapper sendiri berada di tengah body */
+      }
+
+      .pvp-card {
+        width: 400px !important;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #log-container.pvp-log {
+        width: 820px;
+      }
+
       .active-p1 #p1-card:not(.frozen) {
         border-color: rgba(125, 211, 252, 0.6);
         animation: pulse-p1 2s infinite;
@@ -258,7 +273,8 @@
       }
 
       .grid.grid-3-col {
-        grid-template-columns: 1fr 1fr 1fr !important;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
       }
 
       /* .grid-3-col button {
