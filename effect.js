@@ -143,3 +143,45 @@
           }, i * 30);
         }
       }
+
+      /**
+ * Efek ledakan perisai saat skill diaktifkan
+ * @param {string} pid - 'p1' atau 'bot'
+ */
+function createShieldBurst(pid) {
+  const card = document.getElementById(`${pid}-card`);
+  if (!card) return;
+
+  const rect = card.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  // Buat 8-10 partikel ikon perisai
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement("div");
+    p.className = "shield-burst-particle";
+    p.innerText = "🛡️";
+    
+    // Posisi awal di tengah kartu
+    p.style.left = centerX + "px";
+    p.style.top = centerY + "px";
+    
+    // Tentukan arah ledakan (X dan Y acak)
+    const angle = Math.random() * Math.PI * 2; // 360 derajat
+    const velocity = 100 + Math.random() * 150; // Jarak lempar
+    const tx = Math.cos(angle) * velocity;
+    const ty = Math.sin(angle) * velocity;
+
+    p.style.setProperty('--tx', `${tx}px`);
+    p.style.setProperty('--ty', `${ty}px`);
+
+    document.body.appendChild(p);
+
+    // Hapus elemen setelah animasi selesai (800ms sesuai CSS)
+    setTimeout(() => p.remove(), 800);
+  }
+
+  // Tambahkan guncangan kecil pada kartu (feedback mekanik)
+  card.classList.add("shake");
+  setTimeout(() => card.classList.remove("shake"), 300);
+}

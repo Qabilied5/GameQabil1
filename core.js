@@ -41,7 +41,7 @@ let game = {
     active: true,
     event: { type: "none", time: 0 },
     p1: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} },
-    bot: { hp: 100, mana: 40, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} } 
+    bot: { hp: 200, mana: 40, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} } 
 };
 
 // let isPVP = false; // true = main 2 player
@@ -195,6 +195,13 @@ function init() {
 
 function startGame() {
   const startBtn = document.querySelector(".start-btn");
+  
+  if (!isPVP) {
+      game.bot.hp = 200;
+  } else {
+      game.bot.hp = 100;
+  }
+
   if (startBtn) {
     startBtn.disabled = true;
     startBtn.innerText = "ENTERING THE ARENA...";
@@ -288,7 +295,7 @@ function startGame() {
 function updateDebuffLabel(p) {
   let txt = "";
   if (game[p].shield > 0) {
-    txt += `🛡️ SHIELD! [${game[p].shield}] TURN LEFT `;
+    txt += `🛡️Defflect ${game[p].shield} Attacks `;
   }
   if (game[p].freeze > 0) txt += `❄️ FROZEN (${game[p].freeze.toFixed(1)}s) `;
   if (game[p].burn > 0) txt += `🔥 BURNING (${game[p].burn.toFixed(1)}s) `;
@@ -297,7 +304,7 @@ function updateDebuffLabel(p) {
   el.innerText = txt;
   if (game[p].freeze > 0) el.style.color = "var(--freeze)";
   else if (game[p].burn > 0) el.style.color = "var(--burn)";
-  else if (game[p].shield > 0) el.style.color = "#87bcfd";
+  else if (game[p].shield > 0) el.style.color = "#fdff6bb0";
   else if (game[p].sHeal > 0) el.style.color = "#4ade80";
   else el.style.color = "";
 }
@@ -362,6 +369,9 @@ function useSkill(sid, pid) {
     const card = document.getElementById(`${pid}-card`);
     card.style.transition = "all 0.3s ease";
     card.style.transform = "scale(1.1)";
+    if (typeof createShieldBurst === "function") {
+        createShieldBurst(pid);
+    }
     for (let i = 0; i < 3; i++) {
       const p = document.createElement("div");
       p.className = "heal-particle";
