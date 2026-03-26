@@ -163,12 +163,18 @@ function init() {
   ["p1", "bot"].forEach((p) => {
     const cont = document.getElementById(`${p}-skills`);
     const keys = p === "p1" ? P1_KEYS : P2_KEYS;
+
+    if (isPVP) {
+      cont.classList.add("grid-3-col");
+    } else {
+      cont.classList.remove("grid-3-col");
+    }
+
     cont.innerHTML = "";
 
     SKILLS.forEach((s, index) => {
       const keyLabel = keys[index];
       
-      // Tentukan class berdasarkan mode isPVP
       const hintClass = isPVP ? "visible-hint" : "hidden-hint";
       const displayKey = isPVP ? `[${keyLabel}]` : "";
 

@@ -256,6 +256,16 @@
         gap: 7px;
         margin-top: 14px;
       }
+
+      .grid.grid-3-col {
+        grid-template-columns: 1fr 1fr 1fr !important;
+      }
+
+      /* .grid-3-col button {
+        font-size: 0.5rem !important;
+        letter-spacing: 0.5px !important;
+      } */
+
       .skill-box {
         position: relative;
         border-radius: 6px;
