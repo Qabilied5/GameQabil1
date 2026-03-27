@@ -385,14 +385,16 @@ function useSkill(sid, pid) {
       `${pid.toUpperCase()} Strike! ${opp.toUpperCase()} -${d} HP. (+${manaGain} Mana)`,
     );
   } else if (sid === "heal") {
-    const isBot = pid === "bot";
-    const maxHP = isBot ? 200 : 100;
-    const healAmount = isBot ? 50 : 30;
+    const maxHP = (pid === "bot" && !isPVP) ? 200 : 100;
+    const healAmount = (pid === "bot" && !isPVP) ? 55 : 35;
+
     game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
+    
     const card = document.getElementById(`${pid}-card`);
     card.classList.add("healing-active");
     for (let i = 0; i < 5; i++) createHealParticle(pid);
     setTimeout(() => card.classList.remove("healing-active"), 800);
+    
     log(`${pid.toUpperCase()} menggunakan Heal! (+${healAmount} HP)`);
   } else if (sid === "burning") {
     game[opp].burn = 6.0;
@@ -427,9 +429,13 @@ function useSkill(sid, pid) {
     let baseDamage = 20;
     let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.25) : baseDamage;
     game[opp].hp -= d;
-    game[pid].hp = Math.min(100, game[pid].hp + 20);
+
+    let vampHeal = 25;
+    const maxHP_vamp = (pid === "bot" && !isPVP) ? 200 : 100;
+    game[pid].hp = Math.min(maxHP_vamp, game[pid].hp + vampHeal);
+    
     createVampireVisual(pid, opp);
-    log(`🦇 ${pid.toUpperCase()} Vampire! Sedot ${d} HP & Heal 20 HP.`);
+    log(`🦇 ${pid.toUpperCase()} Vampire! Sedot ${d} HP & Heal ${vampHeal} HP.`);
   } else if (sid === "freeze") {
     game[opp].freeze = 3.0;
     document.getElementById(`${opp}-card`).classList.add("frozen");
