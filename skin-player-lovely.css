@@ -1,0 +1,276 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Palette: Rose, Lavender, and Soft Gold */
+      --gold:        #eec0c8; /* Rose Gold */
+      --gold-light:  #fff0f3;
+      --gold-bright: #ffd1dc;
+      --gold-dark:   #b5838d;
+      --gold-pale:   #f8edeb;
+      --crimson:     #ff758f; /* Soft Rose */
+      --crimson-glow:#ffb3c1;
+      --azure:       #a2d2ff; /* Sky Blue */
+      --azure-glow:  #caf0f8;
+      --bg-deep:     #1a1a2e; /* Deep Midnight */
+      --bg-mid:      #2d1b33; /* Dark Plum */
+      --glass:       rgba(255, 255, 255, 0.08);
+      --glass-border:rgba(255, 182, 193, 0.3);
+      --p1:          #ffafcc; /* Princess Pink */
+      --bot:         #cdb4db; /* Soft Lavender */
+      --text:        #fae1dd;
+      --text-dim:    #d8bfd8;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Quicksand', 'Cormorant Garamond', serif;
+      overflow-x: hidden;
+    }
+
+    /* ── LOVELY ANIMATED BACKGROUND ──────────────────── */
+    .bg-gradient {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,175,204,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(162,210,255,0.15) 0%, transparent 50%),
+        linear-gradient(135deg, #1a1a2e 0%, #2d1b33 100%);
+    }
+    
+    .bg-shimmer {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+      opacity: 0.3;
+      animation: shimmer-pulse 10s ease-in-out infinite;
+    }
+    @keyframes shimmer-pulse {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.05); }
+    }
+
+    /* Floating Heart/Rune Particles */
+    .rune-field { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .rune-field span {
+      position: absolute;
+      font-size: 1.2rem;
+      color: rgba(255, 182, 193, 0.3);
+      animation: float-lovely linear infinite;
+      user-select: none;
+    }
+    @keyframes float-lovely {
+      0%   { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; }
+      20%  { opacity: 0.8; }
+      100% { transform: translateY(-10vh) translateX(50px) rotate(360deg); opacity: 0; }
+    }
+
+    body { display: flex; flex-direction: column; align-items: center; padding: 0 12px 40px; }
+
+    /* ── EVENT BANNER ─────────────────────────── */
+    #event-banner {
+      position: relative; z-index: 10;
+      margin-top: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px var(--crimson);
+      padding: 8px 30px;
+      border: 2px solid var(--glass-border);
+      background: rgba(255, 175, 204, 0.1);
+      border-radius: 50px; /* Rounded for "Lovely" feel */
+      animation: banner-float 4s ease-in-out infinite;
+    }
+    @keyframes banner-float {
+      0%, 100% { transform: translateY(0); box-shadow: 0 5px 15px rgba(255,175,204,0.2); }
+      50% { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(255,175,204,0.4); }
+    }
+
+    /* ── GAME TITLE ───────────────────────────── */
+    .game-title-wrap { margin: 25px 0 15px; z-index: 10; }
+    .game-title-wrap h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      background: linear-gradient(to bottom, #fff, #ffafcc, #b5838d);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 15px rgba(255,175,204,0.5));
+      letter-spacing: 4px;
+    }
+    .game-title-wrap .subtitle {
+      color: var(--azure);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      font-style: italic;
+    }
+
+    /* ── GLOBAL TIMER ─────────────────────────── */
+    #global-timer {
+      position: relative; z-index: 10;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 2rem;
+      color: #fff;
+      width: 90px; height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      border: 3px double var(--gold);
+      background: radial-gradient(circle, rgba(255,175,204,0.2) 0%, transparent 70%);
+      box-shadow: 0 0 20px rgba(255,182,193,0.3);
+      margin-bottom: 20px;
+    }
+
+    /* ── CARDS (GLASSMORPHISM) ────────────────── */
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px; /* Softer corners */
+      padding: 35px 25px 25px;
+      width: 320px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+    .card:hover { transform: translateY(-10px) scale(1.02); }
+
+    /* Ornate Corners - Swapped to Hearts/Dots */
+    .card::before, .card::after, .corner-tr, .corner-bl {
+      content: "❤"; position: absolute;
+      color: var(--gold); font-size: 12px;
+      opacity: 0.6; border: none; width: auto; height: auto;
+    }
+    .card::before { top: 15px; left: 15px; }
+    .card::after { bottom: 15px; right: 15px; }
+    .corner-tr { top: 15px; right: 15px; }
+    .corner-bl { bottom: 15px; left: 15px; }
+
+    .card-gem {
+      background: linear-gradient(135deg, #ffafcc, #ff8fab);
+      border-radius: 50%; /* Circle gem instead of diamond */
+      width: 16px; height: 16px;
+      clip-path: none;
+      box-shadow: 0 0 15px #ffafcc;
+    }
+
+    /* Wings - Dreamy Style */
+    .wing-left, .wing-right {
+      filter: drop-shadow(0 0 10px var(--p1));
+      opacity: 0.4;
+    }
+
+    /* ── BARS (CANDY STYLE) ───────────────────── */
+    .bar-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--text); /* Warna teks label lebih terang */
+      margin: 12px 0 6px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .bar-bg {
+      position: relative;
+      background: rgba(0, 0, 0, 0.4); /* Background bar lebih gelap agar isi terlihat */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px; /* Lebih membulat */
+      height: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hp-fill {
+      height: 100%;
+      /* Warna Pink/Rose yang menyala */
+      background: linear-gradient(90deg, #ff4d6d, #ff85a1, #ffafcc);
+      box-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
+      border-radius: 12px;
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mana-fill {
+      height: 100%;
+      /* Warna Sky Blue/Lavender yang kontras */
+      background: linear-gradient(90deg, #48cae4, #90e0ef, #ade8f4);
+      box-shadow: 0 0 10px rgba(72, 202, 228, 0.5);
+      border-radius: 12px;
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bar-text {
+      position: absolute; 
+      inset: 0;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* Shadow agar angka terbaca jelas */
+      z-index: 2;
+    }
+
+    /* Tambahkan sedikit efek kilau pada bar */
+    .bar-bg::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+      pointer-events: none;
+    }
+
+    /* ── SKILLS (LOVELY BUTTONS) ───────────────── */
+    .skill-btn {
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      font-size: 0.65rem;
+      transition: 0.3s;
+    }
+    .skill-btn:hover:not(:disabled) {
+      background: var(--crimson);
+      transform: scale(1.05);
+      border-color: #fff;
+    }
+
+    /* ── BATTLE LOG ──────────────────────────── */
+    #log-container {
+      border-radius: 15px;
+      background: rgba(20, 10, 30, 0.7);
+      border: 1px solid var(--glass-border);
+    }
+    .log-header {
+      background: rgba(255, 175, 204, 0.15);
+    }
+
+    /* ── OVERLAYS ────────────────────────────── */
+    .popup-content {
+      border-radius: 30px;
+      background: linear-gradient(155deg, #2d1b33 0%, #1a1a2e 100%);
+      border: 2px solid var(--p1);
+    }
+    .start-btn {
+      border-radius: 50px;
+      background: var(--crimson);
+      color: white;
+      padding: 15px 50px;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+    .start-btn:hover {
+      background: #ff8fab;
+      box-shadow: 0 0 30px var(--crimson);
+    }
+
+    /* ── FLOATING DAMAGE (POP STYLE) ──────────── */
+    .dmg-float {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 2rem;
+    }
+    .dmg-red { color: #ff4d6d; text-shadow: 2px 2px 0px #fff; }
+    .dmg-blue { color: #00b4d8; text-shadow: 2px 2px 0px #fff; }
+
+    /* Animations for lovely feel */
+    @keyframes gem-pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); filter: brightness(1); }
+      50% { transform: translateX(-50%) scale(1.3); filter: brightness(1.2); }
+    }
