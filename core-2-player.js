@@ -594,13 +594,11 @@ function executeSuperPunch(pid, opp) {
     return false;
   }
 
-  // Pukulan Pertama
   const isDeadImmediate = performPunch();
   if (isDeadImmediate) return;
 
   hitsDone++;
 
-  // Pukulan Berikutnya (Interval)
   const punchTimer = setInterval(() => {
     if (hitsDone >= 3 || !game.active) {
       clearInterval(punchTimer);

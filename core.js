@@ -69,6 +69,7 @@ function selectDifficulty(level) {
   }
 
   updateUI();
+
   log(`DIFFICULTY SET TO: ${level.toUpperCase()}`);
 }
 
@@ -326,6 +327,15 @@ function startGame() {
   }, 100);
 
   log("⚔ Pertarungan Dimulai!");
+
+  let icon = "⚙️";
+  if (selectedDiff === 'easy') icon = "🌱";
+  else if (selectedDiff === 'normal') icon = "⚔️";
+  else if (selectedDiff === 'hard') icon = "💀";
+  else if (selectedDiff === 'expert') icon = "🔥";
+  else if (selectedDiff === 'insanity') icon = "👁️";
+
+  log(`${icon} MODE: ${selectedDiff.toUpperCase()} DIFFICULTY`);
 }
 
 function updateDebuffLabel(p) {
@@ -513,10 +523,23 @@ function changeTurn() {
   if (game[game.turn].freeze > 0) return;
 
   if (game.turn === "bot" && !isPVP) {
+    // Memberikan jeda 1 detik sebelum bot berpikir agar tidak kaku
     setTimeout(() => {
-      if (selectedDiff === "easy") botAIEasy();
-      else if (selectedDiff === "hard") botAIHard();
-      else botAI();
+      if (selectedDiff === "easy") {
+        botAIEasy();
+      } else if (selectedDiff === "normal") {
+        botAI();
+      } else if (selectedDiff === "hard") {
+        botAIHard();
+      } else if (selectedDiff === "expert") {
+        if (typeof botAIExpert === "function") botAIExpert();
+        else botAIHard();
+      } else if (selectedDiff === "insanity") {
+        if (typeof botAIInsanity === "function") botAIInsanity();
+        else botAIExpert();
+      } else {
+        botAI();
+      }
     }, 1000);
   }
 }
@@ -616,14 +639,21 @@ function win(id) {
   if (id === "p1") {
     resTitle.innerText = "VICTORY";
     resTitle.style.color = "#4ade80";
-    resMsg.innerText = "Kamu berhasil menaklukkan BOT Jovita!";
     resWinner.innerText = "✦ PLAYER 1 WINS ✦";
     resWinner.style.color = "#4ade80";
+    if (!isPVP && selectedDiff === "expert") {
+      unlockInsanityMode(); // Panggil fungsi unlock
+      resMsg.innerText = "The whispers grow louder... The INSANITY has been unleashed. There is no turning back.";
+      resMsg.style.color = "#ff4444";
+    } else {
+      resMsg.innerText = "Kamu berhasil menaklukkan BOT Jovita!";
+      resMsg.style.color = "";
+    }
   } else {
     resTitle.innerText = "DEFEAT";
     resTitle.style.color = "#f87171";
     resMsg.innerText = "Kalah dengan bot? Coba lagi, pejuang!";
-    resWinner.innerText = "✦ JOVITA WINS ✦";
+    resWinner.innerText = "✦ THE ENEMY WINS ✦";
     resWinner.style.color = "#f87171";
   }
 }

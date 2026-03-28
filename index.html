@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="effect.css" />
     <link rel="stylesheet" href="skin-player.css" />
 
-    <script src="core.js" defer></script>
     <script src="ai-controller.js" defer></script>
+    <script src="core.js" defer></script>
     <script src="effect.js" defer></script>
 
     <link
@@ -70,13 +70,47 @@
 
         <p class="diff-label">— Difficulty —</p>
         <div class="difficulty-selector">
-          <button id="easy-btn" class="diff-btn" onclick="selectDifficulty('easy')">EASY</button>
-          <button id="normal-btn" class="diff-btn active-diff" onclick="selectDifficulty('normal')">NORMAL</button>
-          <button id="hard-btn" class="diff-btn" onclick="selectDifficulty('hard')">HARD</button>
+          <!-- <button id="easy-btn" class="diff-btn" onclick="selectDifficulty('easy')">EASY</button> -->
+          <button
+            id="normal-btn"
+            class="diff-btn active-diff"
+            onclick="selectDifficulty('normal')"
+          >
+            NORMAL
+          </button>
+          <button
+            id="hard-btn"
+            class="diff-btn"
+            onclick="selectDifficulty('hard')"
+          >
+            HARD
+          </button>
+          <button
+            id="expert-btn"
+            class="diff-btn"
+            onclick="selectDifficulty('expert')"
+          >
+            EXPERT
+          </button>
+          <div class="insanity-wrapper">
+            <button
+              id="insanity-btn"
+              class="diff-btn locked" 
+              onclick="handleInsanityClick()"
+            >
+              INSANITY
+            </button>
+          </div>
         </div>
 
         <!-- MODE SELECTOR AI/2PLAYER -->
-        <p id="battle-mode-label" class="diff-label" style="margin-top: 15px; box-sizing: border-box;">— Battle Mode —</p>
+        <p
+          id="battle-mode-label"
+          class="diff-label"
+          style="margin-top: 15px; box-sizing: border-box"
+        >
+          — Battle Mode —
+        </p>
         <div
           id="battle-mode-selector"
           class="mode-selector"
@@ -104,7 +138,7 @@
           ⚔ BEGIN BATTLE ⚔
         </button>
         <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px">
-          v2.30.4 - The Duelist Update (Desktop Only)
+          v2.40.0 - The Insanity
         </p>
       </div>
     </div>
@@ -125,9 +159,7 @@
             "
           ></div>
         </div>
-        <button class="start-btn" onclick="location.reload()">
-          TRY AGAIN
-        </button>
+        <button class="start-btn" onclick="location.reload()">TRY AGAIN</button>
       </div>
     </div>
 
@@ -183,8 +215,22 @@
         <div class="log-header-line"></div>
       </div>
       <div id="log">
-        > v2.30.4 - The Duelist Update<br />> > Battle Start! Gunakan BURNING
+        > v2.40.0 - The Insanity<br />> > Battle Start! Gunakan BURNING
         dan SUPER PUNCH untuk damage berkala!<br />>
+      </div>
+    </div>
+
+    <div id="insanity-modal" class="modal-overlay">
+      <div class="modal-content">
+        <h2 class="modal-title">VOICE FROM THE VOID</h2>
+        <p class="modal-text">
+          "You are but a wretched speck of dust in the eye of a storm. Your soul
+          is far too fragile for this nightmare. Conquer the EXPERT first... if
+          you wish to see what true despair looks like."
+        </p>
+        <button class="modal-close" onclick="closeInsanityModal()">
+          BEGONE
+        </button>
       </div>
     </div>
   </body>
