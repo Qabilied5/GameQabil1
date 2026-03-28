@@ -1,3 +1,13 @@
+const hasWonExpert = localStorage.getItem("expertWinner") === "true";
+
+if (!hasWonExpert) {
+    localStorage.setItem("insanityUnlocked", "false");
+    console.log("Mode Insanity dikunci (Belum ada rekor menang Expert).");
+} else {
+    localStorage.setItem("insanityUnlocked", "true");
+    console.log("Selamat datang kembali, Master Expert! Mode Insanity tetap aktif.");
+}
+
 (function spawnRunes() {
   const field = document.getElementById("rune-field");
   const runeSymbols = [
@@ -57,19 +67,25 @@ function selectDifficulty(level) {
   selectedDiff = level;
 
   document.querySelectorAll(".difficulty-selector .diff-btn").forEach((btn) => {
-    btn.classList.remove("active-diff");
+    btn.classList.remove("active-diff", "active-insanity");
   });
 
   const targetBtn = document.getElementById(`${level}-btn`);
-  if (targetBtn) targetBtn.classList.add("active-diff");
+  
+  if (targetBtn) {
+    if (level === 'insanity') {
+      targetBtn.classList.add("active-insanity");
+      targetBtn.classList.remove("locked");
+    } else {
+      targetBtn.classList.add("active-diff");
+    }
+  }
 
-  // Pastikan HP Bot sinkron dengan mode PvE
   if (!isPVP) {
     game.bot.hp = 200;
   }
 
   updateUI();
-
   log(`DIFFICULTY SET TO: ${level.toUpperCase()}`);
 }
 

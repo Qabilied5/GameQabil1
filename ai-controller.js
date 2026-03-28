@@ -1,8 +1,6 @@
 (function initGameStorage() {
-    // Cek apakah kunci "insanityUnlocked" sudah ada di browser atau belum
     const currentStatus = localStorage.getItem("insanityUnlocked");
 
-    // Jika hasilnya NULL (artinya user BARU PERTAMA KALI buka link ini)
     if (currentStatus === null) {
         localStorage.setItem("insanityUnlocked", "false");
         console.log("SYSTEM: First time user detected. Insanity Mode Locked.");
@@ -18,6 +16,7 @@ function handleInsanityClick() {
   } else {
     selectDifficulty('insanity');
   }
+  
 }
 
 function checkInsanityLock() {
@@ -34,6 +33,7 @@ function closeInsanityModal() {
 }
 
 window.unlockInsanityMode = function() {
+  localStorage.setItem("expertWinner", "true");
   localStorage.setItem("insanityUnlocked", "true");
   console.log("Storage berhasil diisi!");
   
@@ -359,7 +359,6 @@ function botAIEasy() {
   const btn = document.getElementById('insanity-btn');
   
   if (isUnlocked && btn) {
-    // Membuka gembok secara total
     btn.disabled = false;
     btn.removeAttribute("disabled");
     btn.classList.remove("locked");

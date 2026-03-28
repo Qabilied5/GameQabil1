@@ -196,14 +196,6 @@
         z-index: 2;
       }
 
-      /* ============================================================
-           ORNATE CARD
-        ============================================================ */
-
-
-      /* ============================================================
-           ACTIVE CARD STATES
-        ============================================================ */
       @keyframes pulse-p1 {
         0%,
         100% {
@@ -231,10 +223,137 @@
         }
       }
 
+/* INSANITY BUTTON */
+
+#insanity-btn {
+    position: relative;
+    overflow: hidden;
+    
+    background: radial-gradient(circle at center, rgba(50, 0, 80, 0.5) 0%, rgba(10, 0, 20, 0.8) 100%);
+    border: 1px solid rgba(150, 0, 255, 0.5);
+    color: rgb(210, 180, 255);
+    
+    box-shadow: 
+        inset 0 0 15px rgba(150, 0, 255, 0.3),
+        inset 0 0 30px rgba(100, 0, 200, 0.2),
+        0 0 10px rgba(150, 0, 255, 0.2);
+    
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    z-index: 1; 
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+#insanity-btn::before {
+    content: "";
+    position: absolute;
+    inset: -50px;
+    
+    background-image: 
+        linear-gradient(45deg, transparent 45%, rgba(180, 100, 255, 0.3) 50%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, rgba(150, 0, 255, 0.2) 50%, transparent 55%),
+        radial-gradient(circle at 30% 70%, rgba(100, 0, 200, 0.1) 0%, transparent 40%);
+    
+    background-size: 10px 10px, 15px 15px, 100% 100%;
+    
+    animation: crackleRotate 20s linear infinite;
+    
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+#insanity-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -200%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(150, 0, 255, 0.1),
+        rgba(230, 180, 255, 0.8),
+        rgba(150, 0, 255, 0.1),
+        transparent
+    );
+    transform: skewX(-30deg);
+    animation: insanitySweep 3s infinite ease-in-out;
+    
+    z-index: -1;
+    pointer-events: none;
+}
+
+#insanity-btn span, 
+#insanity-btn {
+    animation: textInsanity 1.5s infinite;
+}
+
+#insanity-btn:hover, 
+#insanity-btn.active-insanity {
+    background: radial-gradient(circle at center, rgba(100, 0, 150, 0.7) 0%, rgba(20, 0, 40, 0.95) 100%) !important;
+    
+    border: 2px solid #bd9ec9 !important; 
+    filter: grayscale(0) brightness(1.2) !important;
+    opacity: 1 !important;
+    
+    box-shadow: 
+        0 0 25px rgba(255, 255, 255, 0.5), 
+        0 0 50px rgba(150, 0, 255, 0.6), 
+        inset 0 0 25px rgba(200, 100, 255, 0.5) !important;
+        
+    color: #ffffff !important;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 30px rgba(150, 0, 255, 1) !important;
+    
+    /* Paksa Animasi Jalan Terus */
+    animation: insanityShake 0.1s infinite, textInsanity 1s infinite !important;
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+#insanity-btn.active-insanity::after {
+    animation: insanitySweep 1.5s infinite linear !important;
+}
+
+@keyframes crackleRotate {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+
+@keyframes insanitySweep {
+    0% { left: -200%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+}
+
+
+@keyframes textInsanity {
+    0%, 100% { color: rgb(210, 180, 255); text-shadow: 0 0 10px rgba(180, 0, 255, 0.7); opacity: 1; }
+    5% { color: #ff00ff; text-shadow: 0 0 20px #ff00ff; opacity: 0.8; } /* Kilatan Pink */
+    10% { color: rgb(210, 180, 255); opacity: 1; }
+    15% { color: #00ffff; text-shadow: 0 0 20px #00ffff; opacity: 0.9; } /* Kilatan Cyan Void */
+    20% { color: rgb(210, 180, 255); opacity: 1; }
+    80% { opacity: 1; }
+    90% { opacity: 0.5; } 
+}
+
+
+@keyframes insanityShake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(1px, 1px) rotate(0.5deg); }
+    50% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+    75% { transform: translate(1px, -1px) rotate(0.5deg); }
+    100% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+}
+
       .game-wrapper.pvp-mode {
-        gap: 25px; /* Jarak antar kartu sedikit dirapatkan */
-        max-width: 1300px; /* Batas lebar maksimal agar tidak terlalu ke pinggir */
-        margin: 0 auto; /* Memastikan wrapper sendiri berada di tengah body */
+        gap: 25px; 
+        max-width: 1300px; 
+        margin: 0 auto; 
       }
 
       .pvp-card {

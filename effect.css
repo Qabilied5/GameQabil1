@@ -730,6 +730,27 @@
            RESPONSIVE
         ============================================================ */
       @media screen and (max-width: 768px) {
+        /* DIFFICULT BUTTON */
+
+        .difficulty-selector {
+            display: grid;
+            /* Membuat 3 kolom sama besar */
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px;
+        }
+
+        /* Targetkan WRAPPER-nya, bukan button-nya */
+        .insanity-wrapper {
+            grid-column: 1 / -1; /* Rentangkan dari kiri ke kanan */
+            width: 100%;
+        }
+
+        /* Pastikan button di dalamnya juga full width terhadap wrapper */
+        #insanity-btn {
+            width: 100%;
+            display: block; /* Menghilangkan behavior inline-block jika ada */
+        }
+
         .start-btn {
           font-size: 0.75rem;
         }
