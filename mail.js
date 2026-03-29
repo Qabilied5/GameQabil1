@@ -23,6 +23,12 @@ const mailData = {
         date: "28 March 2026",
         body: 'Terima kasih sudah mendukung game ini. Jangan lupa cek mode PvP jika kamu ingin menantang temanmu secara langsung!<br><br><b>IGN: <span style="color: #bba934;">@qabilied</span></b>',
         sig: "— Developer"
+    },
+    'jovita_note': {
+        title: "A Note from Jovita",
+        date: "29 March 2026",
+        body: 'hah kalah? lebih baik main pou<br><br>',
+        sig: "— Jovita"
     }
 };
 
