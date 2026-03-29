@@ -393,11 +393,24 @@ function useSkill(sid, pid) {
   if (now < game[pid].cds[sid] || game[pid].mana < s.cost) return;
 
   game[pid].mana -= s.cost;
-  game[pid].cds[sid] = now + s.cd;
+
+  if (selectedDiff === "insanity" && pid === "bot") {
+    if (s.cd > 10000 && s.cd <= 30000) {
+      game[pid].cds[sid] = now + 9900;
+    } 
+    else {
+      game[pid].cds[sid] = now + s.cd;
+    }
+  } else {
+    game[pid].cds[sid] = now + s.cd;
+  }
+
+  // game[pid].cds[sid] = now + s.cd; // ---> ORIGINAL CD YEHHH
 
   if (sid === "strike") {
-    let d = calc(10, 16, opp);
+    let d = (selectedDiff === "insanity" && pid === "bot") ? calc(25, 25, opp) : calc(10, 16, opp);
     game[opp].hp -= d;
+    
     strikeSound.currentTime = 0;
     strikeSound.play();
     setTimeout(() => {
@@ -467,7 +480,7 @@ function useSkill(sid, pid) {
     document.getElementById(`${opp}-card`).classList.add("frozen");
     log(`❄️ ${pid.toUpperCase()} membekukan ${opp.toUpperCase()}!`);
   } else if (sid === "ulti") {
-    let d = calc(35, 50, opp);
+    let d = (selectedDiff === "insanity" && pid === "bot") ? calc(50, 100, opp) : calc(35, 50, opp);
     ultiSound.currentTime = 0;
     ultiSound.play();
     setTimeout(() => {
@@ -703,7 +716,9 @@ function executeSuperPunch(pid, opp) {
   function performPunch() {
     if (!game.active) return false;
 
-    let d = calc(s.damage, s.damage, opp);
+    let baseDmg = (selectedDiff === "insanity" && pid === "bot") ? 20 : s.damage;
+    let d = calc(baseDmg, baseDmg, opp);
+
     game[opp].hp -= d;
 
     const currentMaxHP = (pid === "bot" && !isPVP) ? 200 : 100;
