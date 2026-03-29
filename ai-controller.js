@@ -189,7 +189,6 @@ function botAIEasy() {
         }
       }
 
-
       /* BOT AI Expert */
       function botAIExpert() {
         if (game.turn !== "bot" || !game.active || game.bot.freeze > 0) return;
