@@ -388,8 +388,6 @@ function botAIInsanity() {
   let targetSkill = null,
     currentCD = 0;
 
-  // --- 1. LOGIKA ANTISIPASI ULTIMATE PLAYER (SHIELD LOGIC) ---
-  // Jika HP Bot < 50, dan Player punya mana cukup untuk Ulti (>55)
   if (b.hp < 50 && p.mana >= 55) {
     const sHeal = SKILLS.find(x => x.id === "heal");
     const sVamp = SKILLS.find(x => x.id === "vampire");
@@ -397,7 +395,6 @@ function botAIInsanity() {
     const cannotHeal = (!isReady("heal") && getRemCD("heal") > 4.8) || (sHeal && b.mana < sHeal.cost);
     const cannotVamp = (!isReady("vampire") && getRemCD("vampire") > 4.8) || (sVamp && b.mana < sVamp.cost);
 
-    // Jika bot tidak bisa memulihkan diri dengan cepat, pilih Shield untuk bertahan
     if (cannotHeal && cannotVamp) {
       if (isReady("shield")) {
         targetSkill = "shield";
@@ -408,8 +405,8 @@ function botAIInsanity() {
     }
   }
 
-  // --- 2. OFFENSIVE: FINISHING BLOW (P1 HP < 50) ---
-  if (!targetSkill && p.hp < 50) {
+
+  if (!targetSkill && p.hp <= 100) {
     const playerIsSafe = p.shield > 0 || p.isShielded;
     if (!playerIsSafe) {
       let cdU = getRemCD("ulti");
@@ -426,7 +423,6 @@ function botAIInsanity() {
     }
   }
 
-  // --- 3. SUSTAIN & RECOVERY (BOT HP < 70) ---
   if (!targetSkill && b.hp < 70) {
     const skillsToTry = ["super_heal", "heal", "vampire", "super_punch"];
     for (let id of skillsToTry) {
@@ -441,7 +437,6 @@ function botAIInsanity() {
     }
   }
 
-  // --- 4. COUNTER SHIELD & DEBUFF ---
   if (!targetSkill && (p.shield > 0 || p.isShielded)) {
     if (isReady("freeze")) targetSkill = "freeze";
     else if (getRemCD("burning") < 4.8) {
@@ -450,7 +445,7 @@ function botAIInsanity() {
     }
   }
 
-  // --- 5. AGGRESSIVE STATE (HIGH HP) ---
+
   if (!targetSkill && b.hp > 80) {
     const priority = ["burning", "super_punch", "vampire", "ulti"];
     for (let id of priority) {
@@ -461,7 +456,7 @@ function botAIInsanity() {
     }
   }
 
-  // --- 6. EMERGENCY HEAL (LOW HP) ---
+
   if (!targetSkill && b.hp < 35) {
     if (getRemCD("super_heal") < 4.7 && b.mana >= 10) {
       targetSkill = "super_heal";
@@ -469,13 +464,13 @@ function botAIInsanity() {
     } else if (isReady("heal")) targetSkill = "heal";
   }
 
-  // --- 7. DEFAULT STRIKE ---
+
   if (!targetSkill) {
     targetSkill = "strike";
     currentCD = getRemCD("strike");
   }
 
-  // --- EXECUTION ENGINE ---
+
   const execute = () => {
     if (game.turn !== "bot" || !game.active) return;
     const s = SKILLS.find((x) => x.id === targetSkill);

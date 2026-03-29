@@ -408,7 +408,7 @@ function useSkill(sid, pid) {
   // game[pid].cds[sid] = now + s.cd; // ---> ORIGINAL CD YEHHH
 
   if (sid === "strike") {
-    let d = (selectedDiff === "insanity" && pid === "bot") ? calc(25, 25, opp) : calc(10, 16, opp);
+    let d = (selectedDiff === "insanity" && pid === "bot") ? calc(15, 20, opp) : calc(10, 16, opp);
     game[opp].hp -= d;
     
     strikeSound.currentTime = 0;
@@ -425,7 +425,7 @@ function useSkill(sid, pid) {
     );
   } else if (sid === "heal") {
     const maxHP = (pid === "bot" && !isPVP) ? 200 : 100;
-    const healAmount = (pid === "bot" && !isPVP) ? 55 : 35;
+    const healAmount = (pid === "bot" && !isPVP) ? 45 : 35;
 
     game[pid].hp = Math.min(maxHP, game[pid].hp + healAmount);
     
@@ -480,7 +480,7 @@ function useSkill(sid, pid) {
     document.getElementById(`${opp}-card`).classList.add("frozen");
     log(`❄️ ${pid.toUpperCase()} membekukan ${opp.toUpperCase()}!`);
   } else if (sid === "ulti") {
-    let d = (selectedDiff === "insanity" && pid === "bot") ? calc(50, 100, opp) : calc(35, 50, opp);
+    let d = (selectedDiff === "insanity" && pid === "bot") ? calc(50, 75, opp) : calc(35, 50, opp);
     ultiSound.currentTime = 0;
     ultiSound.play();
     setTimeout(() => {
@@ -668,21 +668,21 @@ function win(id) {
   if (id === "p1") {
     resTitle.innerText = "VICTORY";
     resTitle.style.color = "#4ade80";
-    resWinner.innerText = "✦ PLAYER 1 WINS ✦";
+    resWinner.innerText = "THE ENTITY IS VANQUISHED";
     resWinner.style.color = "#4ade80";
     if (!isPVP && selectedDiff === "expert") {
       unlockInsanityMode(); // Panggil fungsi unlock
       resMsg.innerText = "The whispers grow louder... The INSANITY has been unleashed. There is no turning back.";
       resMsg.style.color = "#ff4444";
     } else {
-      resMsg.innerText = "Kamu berhasil menaklukkan BOT Jovita!";
+      resMsg.innerText = "The entity Jovita is banished back into the starless void. Your soul remains... for now.";
       resMsg.style.color = "";
     }
   } else {
     resTitle.innerText = "DEFEAT";
     resTitle.style.color = "#f87171";
-    resMsg.innerText = "Kalah dengan bot? Coba lagi, pejuang!";
-    resWinner.innerText = "✦ THE ENEMY WINS ✦";
+    resMsg.innerText = "Your blood shall stain the altar. Die in silence, or rise to fail again.";
+    resWinner.innerText = "CRUSHED INTO OBLIVION";
     resWinner.style.color = "#f87171";
   }
 }
@@ -728,7 +728,7 @@ function executeSuperPunch(pid, opp) {
       healAmount = 7;
       manaGain = 8;
     } else {
-      healAmount = s.healPerHit; // Standar Bot di mode PvE
+      healAmount = s.healPerHit;
       manaGain = 5;
     }
 
@@ -742,7 +742,6 @@ function executeSuperPunch(pid, opp) {
     let hText = ` (+${healAmount} HP)`;
     log(`👊 PUNCH ${hitsDone + 1}: ${opp.toUpperCase()} -${d} HP!${hText}${mText}`);
 
-    // 7. Cek Kemenangan
     if (game[opp].hp <= 0) {
       win(pid);
       return true;
