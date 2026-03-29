@@ -300,7 +300,7 @@ function startGame() {
       const maxHP = p === "bot" ? 200 : 100; // --> HP BOT/PLAYER
       if (game[p].sHeal > 0) {
         game[p].sHeal -= 0.1;
-        let healPerTick = (maxHP * 1) / 75;
+        let healPerTick = (maxHP * 1) / 45;
         game[p].hp = Math.min(maxHP, game[p].hp + healPerTick);
 
         createHealParticle(p);
@@ -529,7 +529,7 @@ function useSkill(sid, pid) {
       setTimeout(() => createHealParticle(pid), i * 50);
     createSuperHealVisual(pid);
     log(
-      `✨ ${pid.toUpperCase()} mengaktifkan SUPER HEAL! (Regen 70% HP selama 10 detik)`,
+      `✨ ${pid.toUpperCase()} mengaktifkan SUPER HEAL! (Heal Berkala)`,
     );
   }
 
