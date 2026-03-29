@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="base.css" />
     <link rel="stylesheet" href="effect.css" />
     <link rel="stylesheet" href="skin-player.css" />
+    <link rel="stylesheet" href="mail.css" />
 
     <script src="ai-controller.js" defer></script>
     <script src="core.js" defer></script>
     <script src="effect.js" defer></script>
+    <script src="mail.js" defer></script>
 
     <link
       href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
@@ -43,12 +45,12 @@
 
         <div class="info-grid">
           <div class="info-item">
-            <strong>PLAYER</strong>
-            HP: 100 &nbsp;|&nbsp; Mana: 30
+            <strong>YOU</strong>
+            HP: 100 &nbsp;|&nbsp; Mana: 100
           </div>
           <div class="info-item" style="border-left-color: var(--bot)">
-            <strong>JOVITA</strong>
-            HP: 200 &nbsp;|&nbsp; Mana: 40
+            <strong>SHIELD</strong>
+            Defflect 2 attacks
           </div>
           <div class="info-item">
             <strong>STRIKE</strong>
@@ -56,7 +58,7 @@
           </div>
           <div class="info-item">
             <strong>SUPER HEAL</strong>
-            Aktif saat HP &lt; 30%
+            Triggers at &lt; 30%
           </div>
           <div class="info-item">
             <strong>HEAL COMBO</strong>
@@ -126,11 +128,14 @@
             id="btn-pve"
             onclick="setMode('pve')"
           >
-            SOLO (VS BOT)
+            SOLO (PvE)
           </button>
 
           <button class="diff-btn" id="btn-pvp" onclick="setMode('pvp')">
-            DUEL (PVP)
+            DUEL (PvP)
+          </button>
+          <button class="diff-btn" id="btn-multiplayer" onclick="setMode('multiplayer')" disabled>
+            Multiplayer
           </button>
         </div>
 
@@ -233,5 +238,52 @@
         </button>
       </div>
     </div>
+
+
+    <!-- MAIL -->
+<button id="mail-trigger" onclick="openMail()">
+  <span class="notification-dot"></span>
+  ✉
+</button>
+
+<div id="mail-overlay" class="modal-overlay" style="display: none;">
+  <div class="modal-content mail-content">
+    <div class="mail-header">
+      <h2 class="mail-title">ANCIENT NOTES</h2>
+    </div>
+    
+    <div class="mail-body">
+      <p class="mail-instruction">A Message from Developer</p>
+      
+      <div class="mail-list">
+        <div class="mail-item unread" onclick="viewMailDetail('v250')">
+          <span class="mail-item-icon">📜</span>
+          <div class="mail-item-info">
+            <span class="mail-item-subject">Update v2.50.0: The Omniscient</span>
+            <span class="mail-item-date">29 March 2026</span>
+          </div>
+        </div>
+
+        <div class="mail-item" onclick="viewMailDetail('dev_note')">
+          <span class="mail-item-icon">📜</span>
+          <div class="mail-item-info">
+            <span class="mail-item-subject">A Note from Qabilied</span>
+            <span class="mail-item-date">28 March 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <button class="modal-close" onclick="closeMail()">CLOSE INBOX</button>
+  </div>
+</div>
+
+<div id="mail-detail-overlay" class="modal-overlay" style="display: none; z-index: 10005 !important;">
+  <div class="modal-content mail-content detail-content">
+    <div id="detail-content-area">
+      </div>
+    <button class="modal-close" onclick="closeMailDetail()">BACK TO INBOX</button>
+  </div>
+</div>
   </body>
 </html>
