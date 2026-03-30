@@ -21,7 +21,7 @@ const mailData = {
     'dev_note': {
         title: "A Note from Developer",
         date: "28 March 2026",
-        body: 'Terima kasih sudah mendukung game ini. Jangan lupa cek mode PvP jika kamu ingin menantang temanmu secara langsung!<br><br>Berikan Saranmu!<br><b>IG: <span style="color: #bba934;">@qabilied</span></b>',
+        body: 'Terima kasih sudah mendukung game ini. Jangan lupa cek mode PvP jika kamu ingin menantang temanmu secara langsung!<br><br> Multiplayer penuh saat ini sedang dalam proses pengerjaan, jadi nantikan update selanjutnya!<br><br>Berikan Saranmu!<br><b>IG: <span style="color: #bba934;">@qabilied</span></b>',
         sig: "— Developer"
     },
     'jovita_note': {
@@ -135,6 +135,8 @@ function viewMailDetail(id) {
     const data = mailData[id];
     const area = document.getElementById('detail-content-area');
     
+    // area.scrollTop = 0;
+    
     area.innerHTML = `
         <div class="mail-header">
             <h2 class="mail-title">${data.title}</h2>
@@ -146,8 +148,91 @@ function viewMailDetail(id) {
         </div>
     `;
     document.getElementById('mail-detail-overlay').style.display = 'flex';
+
+    // Reset ke atas
+    setTimeout(() => {
+        area.scrollTo({
+            top: 0,
+            behavior: 'instant'
+        });
+        area.scrollTop = 0;
+    }, 10);
 }
 
 function closeMailDetail() {
     document.getElementById('mail-detail-overlay').style.display = 'none';
 }
+
+// >> Logic Button Assistive Ball buat mail
+const ball = document.getElementById("mail-trigger");
+let isDragging = false;
+let isMoving = false;
+let startX, startY, offsetX, offsetY;
+const threshold = 8;
+
+function dragStart(e) {
+    const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+    
+    startX = clientX;
+    startY = clientY;
+    
+    const rect = ball.getBoundingClientRect();
+    offsetX = clientX - rect.left;
+    offsetY = clientY - rect.top;
+
+    isDragging = true;
+    isMoving = false; 
+    ball.style.transition = "none";
+}
+
+function dragMove(e) {
+    if (!isDragging) return;
+
+    const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+
+
+    const dist = Math.hypot(clientX - startX, clientY - startY);
+    if (dist > threshold) {
+        isMoving = true;
+    }
+
+    if (isMoving) {
+        e.preventDefault();
+        
+        let x = clientX - offsetX;
+        let y = clientY - offsetY;
+
+
+        const maxX = window.innerWidth - ball.offsetWidth;
+        const maxY = window.innerHeight - ball.offsetHeight;
+
+        x = Math.max(0, Math.min(x, maxX));
+        y = Math.max(0, Math.min(y, maxY));
+
+        ball.style.left = x + "px";
+        ball.style.top = y + "px";
+        ball.style.right = "auto";
+        ball.style.bottom = "auto";
+    }
+}
+
+function dragEnd() {
+    if (!isDragging) return;
+
+    if (!isMoving) {
+        openMail();
+    }
+
+    isDragging = false;
+    isMoving = false;
+}
+
+ball.addEventListener("mousedown", dragStart);
+window.addEventListener("mousemove", dragMove);
+window.addEventListener("mouseup", dragEnd);
+
+ball.addEventListener("touchstart", dragStart, { passive: false });
+window.addEventListener("touchmove", dragMove, { passive: false });
+window.addEventListener("touchend", dragEnd);

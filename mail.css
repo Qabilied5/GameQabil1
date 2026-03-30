@@ -59,20 +59,36 @@
 }
 
 #mail-trigger {
-  position: fixed; bottom: 20px; right: 20px;
-  width: 50px; height: 50px; border-radius: 50%;
-  background: linear-gradient(135deg, #4b0082, #1a0033);
-  border: 2px solid #ffcc00; color: #ffcc00;
-  font-size: 24px; cursor: pointer;
-  z-index: 9999 !important;
-  display: flex; justify-content: center; align-items: center;
-  box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
-  transition: all 0.3s ease;
+    position: fixed; 
+    /* Hapus bottom/top/right/left lama agar tidak konflik dengan posisi JS nanti */
+    top: 20px; 
+    right: 20px;
+    
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4b0082, #1a0033);
+    border: 2px solid #ffcc00; 
+    color: #ffcc00;
+    font-size: 24px; 
+    cursor: grab; /* Ubah cursor agar user tahu bisa ditarik */
+    z-index: 9999 !important;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transition posisi dihapus agar tidak delay saat ditarik */
+    
+    user-select: none; 
+    touch-action: none; /* Penting untuk mobile dragging */
+}
+
+#mail-trigger:active {
+    cursor: grabbing;
 }
 
 #mail-trigger:hover { transform: scale(1.1) rotate(10deg); box-shadow: 0 0 20px rgba(255, 204, 0, 0.6); }
 
-/* Daftar Pesan (Inbox) */
 .mail-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
 
 .mail-item-info {
