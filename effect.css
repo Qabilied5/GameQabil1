@@ -732,23 +732,57 @@
       @media screen and (max-width: 768px) {
         /* DIFFICULT BUTTON */
 
+        #event-banner {
+            position: fixed;
+            min-width: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 8px 35px;
+            border-radius: 50px;
+            font-family: "Cinzel", serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10005;
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .event-active {
+            opacity: 1 !important;
+            transform: translateX(-50%) translateY(0) !important;
+            border-color: var(--gold) !important;
+            box-shadow:
+                0 0 25px rgba(212, 175, 55, 0.5),
+                inset 0 0 15px rgba(212, 175, 55, 0.1);
+            color: var(--gold-light);
+            pointer-events: auto;
+        }
+
         .difficulty-selector {
             display: grid;
-            /* Membuat 3 kolom sama besar */
+      
             grid-template-columns: repeat(3, 1fr); 
             gap: 8px;
         }
 
-        /* Targetkan WRAPPER-nya, bukan button-nya */
         .insanity-wrapper {
-            grid-column: 1 / -1; /* Rentangkan dari kiri ke kanan */
+            grid-column: 1 / -1;
             width: 100%;
         }
 
-        /* Pastikan button di dalamnya juga full width terhadap wrapper */
         #insanity-btn {
             width: 100%;
-            display: block; /* Menghilangkan behavior inline-block jika ada */
+            display: block;
         }
 
         .start-btn {
@@ -766,12 +800,22 @@
           top: 5px;
         }
         #global-timer {
-          font-size: 2rem;
-          margin: 42px 0 8px;
+            position: fixed; /* Ubah ke fixed */
+            top: 30px;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); /* Gradasi agar teks timer terbaca */
+            font-size: 1.8rem; /* Sedikit diperkecil agar tidak terlalu menutup layar */
+            margin: 0; /* Reset margin karena sudah pakai top/left */
+            padding: 10px 0;
+            text-align: center;
+            z-index: 10000; /* Di bawah event-banner tapi di atas kartu game */
+            pointer-events: none; /* Biar tidak menghalangi klik jika ada elemen di bawahnya */
+            text-shadow: 0 0 10px var(--gold);
         }
         .game-wrapper {
           flex-direction: column;
-          gap: 12px;
+          gap: 25px;
           align-items: center;
           width: 100%;
         }
@@ -802,7 +846,7 @@
         }
         #log-container {
           width: 88%;
-          margin-top: 12px;
+          margin-top: 35px;
           order: 3;
         }
         #log {
