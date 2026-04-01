@@ -50,8 +50,17 @@ let game = {
   timer: 5.0,
   active: true,
   event: { type: "none", time: 0 },
-  p1: { hp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} },
-  bot: { hp: 200, mana: 40, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {} },
+  p1: { hp: 100, maxHp: 100, mana: 30, shield: 0, freeze: 0, burn: 0, sHeal: 0, cds: {}, isShielded: false, shieldTurns: 0 },
+  bot: { 
+    hp: 200, 
+    maxHp: 200,
+    mana: 40, 
+    shield: 0, 
+    freeze: 0, 
+    burn: 0, 
+    sHeal: 0, 
+    cds: {} 
+  },
 };
 
 // let isPVP = false; // true = main 2 player
@@ -129,6 +138,7 @@ const SKILLS = [
 function setMode(mode) {
   isPVP = mode === "pvp";
   const botLabel = document.getElementById("bot-name-label");
+  // const sentinelUI = document.getElementById("display-my-sentinel")?.parentElement;
   const gameWrapper = document.querySelector(".game-wrapper");
   const logContainer = document.getElementById("log-container");
   const cards = document.querySelectorAll(".card, .ornate-card");
@@ -141,6 +151,8 @@ function setMode(mode) {
     .forEach((btn) => btn.classList.remove("active-diff"));
 
   if (isPVP) {
+    // if (sentinelUI) sentinelUI.style.display = "none";
+
     document.getElementById("btn-pvp").classList.add("active-diff");
     game.bot.hp = 100;
     if (botLabel) botLabel.innerText = "PLAYER 2";
@@ -149,12 +161,15 @@ function setMode(mode) {
     if (logContainer) logContainer.classList.add("pvp-log");
     cards.forEach((card) => card.classList.add("pvp-card"));
 
-    // DISABLE tombol difficulty
     diffButtons.forEach((btn) => {
       btn.disabled = true;
       btn.classList.add("btn-disabled");
     });
   } else {
+
+    // if (sentinelUI) sentinelUI.style.display = "block";
+    updateSentinelUI();
+
     document.getElementById("btn-pve").classList.add("active-diff");
     game.bot.hp = 200;
     if (botLabel) botLabel.innerText = "JOVITA";
@@ -247,12 +262,36 @@ function init() {
 }
 
 function startGame() {
-  const startBtn = document.querySelector(".start-btn");
+  game.active = true;
 
+  game.p1.hp = 100;
+  game.p1.mana = 30;
+  game.p1.freeze = 0;
+  game.p1.burn = 0;
+  game.p1.sHeal = 0;
+
+  game.p1.isShielded = false; 
+  game.p1.shieldTurns = 0;
+
+  const startBtn = document.querySelector(".start-btn");
+  
+  if (typeof startSentinelLoop === "function" && !isPVP) {
+    startSentinelLoop();
+    console.log("Sentinel system initiated for PvE battle.");
+  } else {
+    if (typeof sentinelTimer !== 'undefined' && sentinelTimer) {
+        clearInterval(sentinelTimer);
+        sentinelTimer = null;
+    }
+    console.log("Sentinel system disabled for Duel (PVP).");
+  }
+  
   if (!isPVP) {
     game.bot.hp = 200;
+    game.bot.maxHp = 200;
   } else {
     game.bot.hp = 100;
+    game.bot.maxHp = 100;
   }
 
   if (startBtn) {
@@ -544,6 +583,15 @@ function changeTurn() {
   game.timer = 5.0;
   document.body.className = `active-${game.turn}`;
 
+  // Durasi shield sentinel - THALOR
+  if (game.p1.isShielded) {
+    game.p1.shieldTurns--;
+    if (game.p1.shieldTurns <= 0) {
+      game.p1.isShielded = false;
+      log("🛡️ Efek perlindungan Thalor telah habis.");
+    }
+  }
+  
   // Update label untuk kedua pihak agar angka turn sinkron
   updateDebuffLabel("p1");
   updateDebuffLabel("bot");
@@ -552,7 +600,6 @@ function changeTurn() {
   if (game[game.turn].freeze > 0) return;
 
   if (game.turn === "bot" && !isPVP) {
-    // Memberikan jeda 1 detik sebelum bot berpikir agar tidak kaku
     setTimeout(() => {
       if (selectedDiff === "easy") {
         botAIEasy();
@@ -650,7 +697,16 @@ function updateUI() {
 
 function calc(min, max, t) {
   let b = Math.floor(Math.random() * (max - min + 1)) + min;
-  return game[t].shield > 0 ? Math.floor(b * 0.25) : b;
+  
+  if (game[t].shield > 0) {
+    return Math.floor(b * 0.25);
+  }
+  
+  if (game[t].isShielded) {
+    return Math.floor(b * 0.25); 
+  }
+
+  return b;
 }
 
 function log(m) {
@@ -671,9 +727,17 @@ function win(id) {
     resWinner.innerText = "THE ENTITY IS VANQUISHED";
     resWinner.style.color = "#4ade80";
     if (!isPVP && selectedDiff === "expert") {
-      unlockInsanityMode(); // Panggil fungsi unlock
+      unlockInsanityMode();
       resMsg.innerText = "The whispers grow louder... The INSANITY has been unleashed. There is no turning back.";
       resMsg.style.color = "#ff4444";
+
+      const gachaBtn = document.createElement("button");
+      gachaBtn.className = "start-btn";
+      gachaBtn.style.marginTop = "10px";
+      gachaBtn.innerText = "✨ SUMMON SENTINEL ✨";
+      gachaBtn.onclick = () => openGacha();
+      document.querySelector("#result-overlay .popup-content").appendChild(gachaBtn);
+
     } else {
       resMsg.innerText = "The entity Jovita is banished back into the starless void. Your soul remains... for now.";
       resMsg.style.color = "";

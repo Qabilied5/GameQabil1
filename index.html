@@ -12,14 +12,18 @@
       href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
       rel="stylesheet"
     />
+    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Creepster&family=Piedra&family=Eater&family=Almendra+Display:wght@700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="base.css?v=2.61.0" />
     <link rel="stylesheet" href="effect.css?v=2.61.0" />
     <link rel="stylesheet" href="skin-player.css?v=2.61.0" />
     <link rel="stylesheet" href="mail.css?v=2.61.0" />
+    <link rel="stylesheet" href="sentinel.css" />
+    <link rel="stylesheet" href="sentinel" />
 
     <script src="ai-controller.js?v=20260330" defer></script>
     <script src="core.js?v=20260330" defer></script>
+    <script src="sentinel.js" defer></script>
     <script src="effect.js?v=20260330" defer></script>
     <script src="mail.js?v=20260330" defer></script>
 
@@ -49,29 +53,23 @@
 
         <div class="info-grid">
           <div class="info-item">
-            <strong>YOU</strong>
-            HP: 100 &nbsp;|&nbsp; Mana: 100
+            <strong>SENTINELS</strong>
+            <div id="display-my-sentinel" style="font-size: 0.85rem; margin-top: 5px; color: #aaa;">
+              None (Defeat Expert Mode)
+            </div>
           </div>
           <div class="info-item" style="border-left-color: var(--bot)">
-            <strong>SHIELD</strong>
-            Defflect 2 attacks
+            <strong>INSANITY MODE!</strong>
+            Bring Your Sentinel!
           </div>
-          <div class="info-item">
+          <!-- <div class="info-item">
             <strong>STRIKE</strong>
             Damage 12+ | (+25) Mana gain
           </div>
           <div class="info-item">
             <strong>SUPER HEAL</strong>
             Triggers at &lt; 30%
-          </div>
-          <div class="info-item">
-            <strong>HEAL COMBO</strong>
-            Heal + Vampire + Super Punch
-          </div>
-          <div class="info-item">
-            <strong>EXECUTE COMBO</strong>
-            Ulti + Vampire + Strike
-          </div>
+          </div> -->
         </div>
 
         <p class="diff-label">— Difficulty —</p>
@@ -147,7 +145,7 @@
           ⚔ BEGIN BATTLE ⚔
         </button>
         <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px">
-          v2.50.0 — The Omniscient Insanity
+          v3.0.0 — The Sentinel Awakening
         </p>
       </div>
     </div>
@@ -169,7 +167,23 @@
           ></div>
         </div>
         <button class="start-btn" onclick="location.reload()">TRY AGAIN</button>
+        <!-- <button class="start-btn" onclick="resetGameUI()">TRY AGAIN</button> -->
       </div>
+    </div>
+
+    <!-- Sentinels Gacha -->
+     <div id="gacha-overlay" class="modal-overlay" style="display: none; background: rgba(0,0,0,0.9);">
+        <div class="modal-content" style="border: 2px solid var(--p1); box-shadow: 0 0 20px var(--p1);">
+            <h2 class="modal-title">SENTINEL SUMMONING</h2>
+            <p>Expert mode conquered. Claim your ancient guardian.</p>
+            
+            <div id="gacha-result-display" style="margin: 20px 0; min-height: 150px;">
+                <div class="gacha-placeholder">?</div>
+            </div>
+
+            <button id="gacha-btn-roll" class="start-btn" onclick="rollGacha()">SUMMON SENTINEL</button>
+            <button id="gacha-btn-close" class="start-btn" style="display:none" onclick="location.reload()">CLAIM & CONTINUE</button>
+        </div>
     </div>
 
     <!-- ========== ARENA ========== -->
@@ -224,8 +238,7 @@
         <div class="log-header-line"></div>
       </div>
       <div id="log">
-        v2.50.0 — The Omniscient Insanity<br />> > Battle Start! Gunakan BURNING
-        dan SUPER PUNCH untuk damage berkala!<br />>
+        v3.0.0 — The Sentinel Awakening<br />> > Battle Start! Dapatkan Sentinel!<br />>
       </div>
     </div>
 
@@ -266,11 +279,11 @@
       <p class="mail-instruction">A Message from Developer</p>
       
       <div class="mail-list">
-        <div class="mail-item unread" onclick="viewMailDetail('v250')">
+        <div class="mail-item unread" onclick="viewMailDetail('v300')">
           <span class="mail-item-icon">📜</span>
           <div class="mail-item-info">
-            <span class="mail-item-subject">Update v2.50.0: The Omniscient</span>
-            <span class="mail-item-date">29 March 2026</span>
+            <span class="mail-item-subject">Update v3.0.0: The Sentinel Awakening</span>
+            <span class="mail-item-date">1 April 2026</span>
           </div>
         </div>
 
@@ -312,5 +325,25 @@
     <button class="modal-close" onclick="closeMailDetail()">BACK TO CODEX</button>
   </div>
 </div>
+
+<!-- Full Screen Offer -->
+  <!-- <div id="fs-popup-overlay" class="modal-overlay">
+    <div class="modal-content">
+      <h2 class="modal-title">IMMERSIVE EXPERIENCE</h2>
+      <p class="modal-text">
+        Aktifkan mode <b>Full Screen</b> untuk pengalaman pertempuran yang lebih epik dan luas?
+      </p>
+      
+      <div class="fs-button-group">
+        <button class="start-btn" onclick="handleFSChoice(true)">
+          YES, ENABLE FULL SCREEN
+        </button>
+        <button class="modal-close" onclick="handleFSChoice(false)">
+          No, thanks
+        </button>
+      </div>
+    </div>
+  </div> -->
+
   </body>
 </html>

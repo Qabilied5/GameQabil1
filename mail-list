@@ -1,0 +1,9 @@
+
+March 30 2026
+<div class="mail-item unread" onclick="viewMailDetail('v250')">
+  <span class="mail-item-icon">📜</span>
+  <div class="mail-item-info">
+    <span class="mail-item-subject">Update v2.50.0: The Omniscient</span>
+    <span class="mail-item-date">29 March 2026</span>
+  </div>
+</div>

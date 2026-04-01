@@ -841,13 +841,101 @@
       .diff-btn.locked {
         filter: grayscale(1) brightness(0.5);
         opacity: 0.6;
-        cursor: pointer; /* Tetap pointer agar user tahu ini bisa diklik */
+        cursor: pointer;
       }
 
-      /* Opsional: Efek menyala saat sudah terbuka dan dipilih */
       .diff-btn.active#insanity-btn {
         background: rgba(255, 0, 0, 0.2) !important;
         border-color: #ff0000 !important;
         box-shadow: 0 0 15px #ff0000;
         color: #ff0000;
       }
+
+      /* FULLSCREEN BUTTON */
+/* Container Overlay */
+#fs-popup-overlay {
+    background: rgba(15, 5, 25, 0.92); /* Ungu sangat gelap */
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.4s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Kotak Modal */
+#fs-popup-overlay .modal-content {
+    background: linear-gradient(135deg, #1a0b2e 0%, #0f0519 100%); /* Gradasi Ungu Tua */
+    border: 2px solid #ffd700; /* Border Kuning Emas */
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.2), inset 0 0 15px rgba(138, 43, 226, 0.3);
+    color: #eee;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Judul Modal */
+#fs-popup-overlay .modal-title {
+    color: #ffd700; /* Kuning Emas */
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+}
+
+/* Tombol Utama (Full Screen) */
+#fs-popup-overlay .start-btn {
+    background: #ffd700;
+    color: #1a0b2e;
+    font-weight: bold;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+#fs-popup-overlay .start-btn:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Tombol No Thanks */
+#fs-popup-overlay .modal-close {
+    background: transparent;
+    color: #a855f7; /* Ungu Terang */
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    margin-top: 10px;
+    padding: 8px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+#fs-popup-overlay .modal-close:hover {
+    color: #ffd700;
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.05);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Sembunyikan di Mobile (CSS Guard) */
+@media screen and (max-width: 767px) {
+    #fs-popup-overlay {
+        display: none !important;
+    }
+}

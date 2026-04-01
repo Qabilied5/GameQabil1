@@ -145,7 +145,7 @@
       }
 
       /**
- * Efek ledakan perisai saat skill diaktifkan
+ * Efek ledakan Shield
  * @param {string} pid - 'p1' atau 'bot'
  */
 function createShieldBurst(pid) {
@@ -181,7 +181,60 @@ function createShieldBurst(pid) {
     setTimeout(() => p.remove(), 800);
   }
 
-  // Tambahkan guncangan kecil pada kartu (feedback mekanik)
   card.classList.add("shake");
   setTimeout(() => card.classList.remove("shake"), 300);
+}
+
+
+// SENTINEL-VISUAL
+function createSoulSiphonEffect() {
+    const botCard = document.getElementById("bot-card");
+    const p1Card = document.getElementById("p1-card");
+    if (!botCard || !p1Card) return;
+
+    const botRect = botCard.getBoundingClientRect();
+    const p1Rect = p1Card.getBoundingClientRect();
+
+    const targetX = p1Rect.left + p1Rect.width / 2;
+    const targetY = p1Rect.top + p1Rect.height / 2;
+
+    const vignette = document.createElement("div");
+    vignette.className = "hades-vignette";
+    document.body.appendChild(vignette);
+    setTimeout(() => vignette.remove(), 2000);
+
+    const arena = document.getElementById("arena");
+    arena.classList.add("hades-active");
+    setTimeout(() => arena.classList.remove("hades-active"), 2000);
+
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const p = document.createElement("div");
+            p.className = "soul-particle";
+
+            const startX = botRect.left + Math.random() * botRect.width;
+            const startY = botRect.top + Math.random() * botRect.height;
+            p.style.left = startX + "px";
+            p.style.top = startY + "px";
+
+            document.body.appendChild(p);
+
+            // Animasikan partikel bergerak ke p1
+            const duration = 800 + Math.random() * 400; // Durasi acak agar tidak seragam
+            
+            p.animate([
+                // Keyframes
+                { transform: `translate(0, 0) scale(1)`, opacity: 1 },
+                { transform: `translate(${(targetX - startX) * 0.5}px, ${(targetY - startY) * 0.5 - 50}px) scale(1.5)`, opacity: 1 }, // Melengkung ke atas sedikit
+                { transform: `translate(${targetX - startX}px, ${targetY - startY}px) scale(0)`, opacity: 0 } // Sampai di tujuan & hilang
+            ], {
+                duration: duration,
+                easing: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)', // Gerakan menyeret/menyedot
+                fill: 'forwards'
+            });
+
+            // Hapus partikel setelah animasi
+            setTimeout(() => p.remove(), duration);
+        }, i * 50); // Jeda waktu antar partikel agar mengalir
+    }
 }

@@ -1,22 +1,141 @@
 const mailData = {
-    'v250': {
-        title: "Update v2.50.0",
-        date: "29 March 2026",
+'v300': {
+        title: "NEW UPDATE - The Ancient Awakening",
+        date: "April 1, 2026",
         body: `
-            Greetings, Mage! <br><br>
-            Iterasi <b>"The Omniscient Insanity"</b> telah tiba. Update ini berfokus pada peningkatan kecerdasan taktis BOT dan penyeimbangan mekanik combat untuk memberikan tantangan yang lebih adil namun mematikan. <br><br>
-            <b>What's New?</b><br>
-            • <b>Intelligent Shielding:</b> Bot INSANITY MODE kini mampu memprediksi serangan berdasarkan sisa Mana pemain. Ia tidak akan membuang Shield jika seranganmu tidak mematikan.<br>
-            • <b>Insanity Mode:</b> Pengurangan cooldown (Max 10s) untuk semua skill BOT di Mode Insanity. Penambahan damage pada skill bot<br>
-            - <b>Skill BOT lebih sakit!</b>:<br>
-            >> ULTI | 35-50 > 50-75.<br>
-            >> SUPER PUNCH | 15 > 20<br>
-            >> Strike | 10-16 > 15-20<br>
-            • <b>Bot Nerfed:</b> Pengurangan amount skill: {heal} pada bot | 55 > 45
-            <br>
-            <br>
+        <style>
+
+            @keyframes insanity-glow {
+                from { text-shadow: 0 0 10px #7b2cbf, 0 0 20px #9d4edd; filter: brightness(1); }
+                to { text-shadow: 0 0 20px #9d4edd, 0 0 40px #240046, 0 0 60px #5a189a; filter: brightness(1.4); }
+            }
+
+            @keyframes flame-glow {
+                0% { text-shadow: 0 0 5px #ff4500, 0 0 10px #ff4500; }
+                50% { text-shadow: 0 0 10px #ff8c00, 0 0 20px #ff4500; }
+                100% { text-shadow: 0 0 5px #ff4500, 0 0 10px #ff4500; }
+            }
+            .fire-text {
+                color: #fff; font-weight: 900;
+                background: linear-gradient(to bottom, #ffea00, #ff4500);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                animation: flame-glow 1.5s infinite alternate;
+                font-family: "Cinzel Decorative", serif; letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+            .mail-section { margin-bottom: 15px; line-height: 1.6; font-size: 0.95rem; }
+            .ritual-box { 
+                border: 1px solid #ff4500; 
+                background: rgba(20, 0, 0, 0.6); 
+                padding: 15px; 
+                margin: 15px 0;
+                border-radius: 4px;
+            }
+            .sentinel-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+            .sentinel-table th { border-bottom: 1px solid #ff4500; padding: 8px; text-align: left; color: #ffd700; }
+            .sentinel-table td { padding: 8px; border-bottom: 1px solid #333; }
+        </style>
+
+        <div class="mail-section">
+            Greetings, mage!. The celestial seals have crumbled. 
+            The primordial <span class="fire-text">SENTINELS</span> have awoken from their timeless slumber to serve those who possess the strength to command them.
+        </div>
+
+        <div class="ritual-box">
+            <b>THE RITUAL OF SUMMONING:</b><br>
+            These ancient entities only heed the call of those who have conquered the <b style="
+    color: #ff0000; 
+    text-transform: uppercase; 
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #8b0000, 0 0 20px #000; 
+    background: rgba(139, 0, 0, 0.2); 
+    padding: 0 4px; 
+    border-radius: 2px;
+    animation: pulse-red 1s infinite alternate;
+">EXPERT MODE</b>. Once bound to your soul, they shall accompany you even into the depths of <b style="
+    color: #e0aaff; 
+    text-transform: uppercase; 
+    letter-spacing: 2px;
+    background: rgba(45, 0, 94, 0.4);
+    padding: 0 5px;
+    border-radius: 3px;
+    text-shadow: 0 0 8px #7b2cbf, 0 0 15px #9d4edd, 0 0 25px #240046;
+    animation: insanity-tremor 0.2s infinite, insanity-glow 2s infinite alternate;
+    display: inline-block;
+">INSANITY MODE</b>.
+        </div>
+
+        <div class="mail-section">
+            <b>THE ETERNAL CYCLE:</b><br>
+            A <span class="fire-text">SENTINEL</span> breathes with the rhythm of battle. They remain <b>ACTIVE for 30s</b> to unleash their powers every 5s, followed by a <b>30s RESTING</b> period to recover their essence.
+        </div>
+
+        <div class="mail-section">
+            <strong>The Primordial Lineage:</strong>
+            <table class="sentinel-table">
+                <thead>
+                    <tr>
+                        <th>Sentinel</th>
+                        <th>Core Power</th>
+                        <th>Passive Curse</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color:#4da6ff"><b>THALOR</b></td>
+                        <td>Dual Shield (Every 10s)</td>
+                        <td>5% Chance: 15 DMG Strike</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#0ff040"><b>HERA</b></td>
+                        <td>+13 HP Regeneration</td>
+                        <td>10% Chance: 15 DMG Strike</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#ff4444"><b>HADES</b></td>
+                        <td>15-25 Oblivion Damage</td>
+                        <td>1% Chance: 80% HP Execution</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mail-section">
+            <strong>The Gacha Forge Probabilities:</strong><br>
+            <span style="font-size: 0.8rem; opacity: 0.8;">Your current Sentinel is not eternal. If you wishest to experience the might of another Sentinel, you mayest return to the Forge and invoke the Gacha anew to replace your current Sentinel.</span>
+            <table class="sentinel-table" style="margin-top: 10px;">
+                <thead>
+                    <tr>
+                        <th>Sentinel Entity</th>
+                        <th>Summon Chance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color:#4da6ff">THALOR</td>
+                        <td>33.3%</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#0ff040">HERA</td>
+                        <td>33.3%</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#ff4444">HADES</td>
+                        <td>33.3%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mail-section">
+            Step into the <b>Gacha Forge</b>, claim your destiny, and let the world tremble as the <span class="fire-text">SENTINELS</span> rise!
+            <br><br>
+            <i style="color: #bbb; font-size: 0.85rem;">
+                Dost thou seek to bind a different soul? The ritual can be performed infinitely. Vanquish the <b>EXPERT</b> trial once more to invoke another <b>GACHA RITUAL</b> and command a new power.
+            </i>
+        </div>
         `,
-        sig: "— Developer"
+        sig: "— DEVELOPER"
     },
     'dev_note': {
         title: "A Note from Developer",
