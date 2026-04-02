@@ -36,6 +36,73 @@
         position: relative;
       }
 
+      body.insanity-active {
+          background: #120000 !important;
+      }
+
+      body.insanity-active .bg-gradient {
+          background: 
+              radial-gradient(
+                  circle at center, 
+                  rgba(153, 27, 27, 0.6) 0%, /* Merah gelap pekat */
+                  rgba(40, 0, 0, 0.9) 70%, 
+                  #1a0000 100%
+              ) !important; /* Gunakan !important jika ada bentrokan class */
+          
+          /* Tambahan efek kilatan merah */
+          animation: pulse-insanity-bg 1s infinite alternate;
+      }
+
+body.insanity-active .rune {
+    color: #ff0000 !important;
+    opacity: 0.8 !important;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #8b0000 !important;
+    filter: drop-shadow(0 0 5px #ff0000) !important;
+    font-weight: bold;
+  
+    animation-name: rune-float, insanity-shake !important;
+    animation-iteration-count: infinite !important;
+    animation-timing-function: linear !important;
+}
+
+    body.insanity-active {
+        --rune-glow: rgba(255, 0, 0, 0.6);
+        --gold: #8b0000;
+    }
+
+body.insanity-active .rune {
+
+    animation-name: rune-float, insanity-shake !important;
+    animation-iteration-count: infinite !important;
+    animation-timing-function: linear !important;
+    
+    color: #ff0000 !important;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #8b0000 !important;
+}
+
+    @keyframes rune-glitch {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-2px) skewX(5deg); }
+        50% { transform: translateX(2px) skewX(-5deg); }
+        100% { transform: translateX(0); }
+    }
+
+      @keyframes pulse-insanity-bg {
+          from { opacity: 0.7; }
+          to { opacity: 1; }
+      }
+
+      .insanity-active .skill-box {
+          border-color: rgba(255, 0, 0, 0.5) !important;
+          background: rgba(40, 0, 0, 0.4);
+      }
+
+      .insanity-active button:hover:not(:disabled) {
+          background: rgba(255, 0, 0, 0.2);
+          color: #ff6666;
+          text-shadow: 0 0 10px #ff0000;
+      }
+
       /* ============================================================
            ANIMATED BACKGROUND
         ============================================================ */
@@ -363,6 +430,11 @@
 
       #log-container.pvp-log {
         width: 820px;
+      }
+
+      .insanity-active #log::-webkit-scrollbar-thumb {
+          background: rgba(255, 0, 0, 0.5);
+          box-shadow: 0 0 10px #ff0000;
       }
 
       .active-p1 #p1-card:not(.frozen) {
@@ -938,4 +1010,36 @@
     #fs-popup-overlay {
         display: none !important;
     }
+}
+
+
+/* FOR INSANITY */
+
+/* Efek Guncangan Layar Insanity */
+@keyframes insanity-shake {
+    0% { margin-left: 0px; }
+    25% { margin-left: -4px; }
+    50% { margin-left: 4px; }
+    75% { margin-left: -2px; }
+    100% { margin-left: 0px; }
+}
+
+/* Filter Warna yang Tidak Stabil */
+.insanity-active .game-wrapper {
+    animation: color-distortion 5s infinite;
+    filter: sepia(100%) saturate(300%) hue-rotate(-50deg);
+}
+
+@keyframes color-distortion {
+    0%, 100% { filter: sepia(80%) hue-rotate(0deg); }
+    50% { filter: sepia(100%) hue-rotate(-20deg) contrast(150%); }
+    55% { filter: invert(100%); } /* Flash singkat invert untuk efek kaget */
+    56% { filter: sepia(100%) hue-rotate(-20deg); }
+}
+
+/* Tombol yang 'Berdarah' */
+.insanity-active .skill-box button {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+    border-color: #ff0000 !important;
+    color: #ff4444;
 }

@@ -14,18 +14,19 @@
     />
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Creepster&family=Piedra&family=Eater&family=Almendra+Display:wght@700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="base.css?v=2.61.0" />
-    <link rel="stylesheet" href="effect.css?v=2.61.0" />
-    <link rel="stylesheet" href="skin-player.css?v=2.61.0" />
-    <link rel="stylesheet" href="mail.css?v=2.61.0" />
-    <link rel="stylesheet" href="sentinel.css" />
-    <link rel="stylesheet" href="sentinel" />
+    <link rel="stylesheet" href="cinematic.css?v=3.0.0" />
+    <link rel="stylesheet" href="base.css?v=3.0.0" />
+    <link rel="stylesheet" href="effect.css?v=3.0.0" />
+    <link rel="stylesheet" href="skin-player.css?v=3.0.0" />
+    <link rel="stylesheet" href="mail.css?v=3.0.0" />
+    <link rel="stylesheet" href="sentinel.css?v=3.0.0" />
+    <!-- <link rel="stylesheet" href="sentinel?v=3.0.0" /> -->
 
-    <script src="ai-controller.js?v=20260330" defer></script>
-    <script src="core.js?v=20260330" defer></script>
-    <script src="sentinel.js" defer></script>
-    <script src="effect.js?v=20260330" defer></script>
-    <script src="mail.js?v=20260330" defer></script>
+    <script src="ai-controller.js?v=20260401" defer></script>
+    <script src="core.js?v=20260401" defer></script>
+    <script src="sentinel.js?v=20260401" defer></script>
+    <script src="effect.js?v=20260401" defer></script>
+    <script src="mail.js?v=20260401" defer></script>
 
   </head>
   <body class="active-p1">
@@ -141,7 +142,7 @@
           </button>
         </div>
 
-        <button class="start-btn" onclick="startGame()">
+        <button class="start-btn" onclick="initiateBattle()">
           ⚔ BEGIN BATTLE ⚔
         </button>
         <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px">
@@ -344,6 +345,21 @@
       </div>
     </div>
   </div> -->
+
+  <!-- CINEMATIC -->
+<div id="intro-cinematic">
+    <div class="bg-panel left-panel"></div>
+    <div class="bg-panel right-panel"></div>
+    <div id="yellow-bolt"></div>
+    <div id="intro-text-container"></div>
+    <div id="mortal-split-container" style="display: none;">
+        <div class="mortal-text mortal-top" data-text="MORTAL?">MORTAL?</div>
+        <div class="mortal-text mortal-bottom" data-text="MORTAL?">MORTAL?</div>
+    </div>
+    <div id="lightning-flash"></div>
+    
+    <div id="final-white-out"></div>
+</div>
 
   </body>
 </html>

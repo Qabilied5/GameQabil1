@@ -75,6 +75,10 @@ let game = {
 function selectDifficulty(level) {
   selectedDiff = level;
 
+  document.body.classList.remove("insanity-active");
+  const arena = document.getElementById("arena");
+  if (arena) arena.style.animation = "";
+
   document.querySelectorAll(".difficulty-selector .diff-btn").forEach((btn) => {
     btn.classList.remove("active-diff", "active-insanity");
   });
@@ -83,8 +87,17 @@ function selectDifficulty(level) {
   
   if (targetBtn) {
     if (level === 'insanity') {
+      document.body.classList.add("insanity-active");
+      document.getElementById("arena").style.animation = "insanity-shake 0.2s infinite";
       targetBtn.classList.add("active-insanity");
       targetBtn.classList.remove("locked");
+
+      document.querySelectorAll(".rune").forEach((r) => {
+
+        r.style.animationDelay = -(Math.random() * 30) + "s";
+
+        r.style.left = Math.random() * 100 + "vw";
+      });
     } else {
       targetBtn.classList.add("active-diff");
     }
@@ -393,6 +406,103 @@ function startGame() {
   log(`${icon} MODE: ${selectedDiff.toUpperCase()} DIFFICULTY`);
 }
 
+function playIntro(callback) {
+    const introDiv = document.getElementById("intro-cinematic");
+    const normalCont = document.getElementById("intro-text-container");
+    const splitCont = document.getElementById("mortal-split-container");
+    const words = ["YOU", "CHALLENGE", "ME", "MORTAL?"];
+    
+    introDiv.style.display = "flex";
+    introDiv.style.opacity = "1";
+    introDiv.classList.remove("thunder-shock", "trigger-split", "fire-flash");
+    
+    normalCont.style.display = "flex";
+    splitCont.style.display = "none";
+    
+    let currentWord = 0;
+
+    const wordInterval = setInterval(() => {
+        if (currentWord < words.length) {
+            const word = words[currentWord];
+
+        if (word === "MORTAL?") {
+            clearInterval(wordInterval);
+            normalCont.style.display = "none";
+            splitCont.style.display = "flex";
+
+            if (typeof ultiSound !== 'undefined') {
+                ultiSound.currentTime = 0;
+                ultiSound.play();
+            }
+
+            setTimeout(() => {
+                introDiv.classList.add("thunder-shock");
+
+                setTimeout(() => {
+                    introDiv.classList.add("fire-flash"); 
+                    
+                    if (typeof strikeSound !== 'undefined') {
+                        strikeSound.currentTime = 0;
+                        strikeSound.play();
+                    }
+
+                    setTimeout(() => {
+
+                        introDiv.classList.add("trigger-split");
+                        
+                        document.body.style.animation = "shake-screen 0.4s cubic-bezier(.36,.07,.19,.97) both";
+
+                        setTimeout(() => {
+                            introDiv.classList.add("trigger-final-flash");
+
+                            setTimeout(() => {
+                                introDiv.style.display = "none";
+                                introDiv.classList.remove("thunder-shock", "fire-flash", "trigger-split", "trigger-final-flash");
+                                document.body.style.animation = "";
+                                
+                                if (callback) callback(); 
+                            }, 400);
+                        }, 250);
+                    }, 60);
+                }, 300);
+            }, 800); 
+        } else {
+                    normalCont.innerHTML = `
+                        <span class="glitch-effect" data-text="${word}">
+                            ${word}
+                        </span>`;
+                    
+                    strikeSound.currentTime = 0;
+                    strikeSound.play();
+                    currentWord++;
+                }
+            }
+        }, 1000);
+    }
+
+function initiateBattle() {
+    const overlay = document.getElementById("start-overlay");
+    
+    if (selectedDiff === "insanity") {
+        if (overlay) {
+            overlay.style.opacity = "0";
+            overlay.style.pointerEvents = "none";
+            setTimeout(() => overlay.remove(), 500);
+        }
+        
+        playIntro(startGame);
+        
+    } else {
+        if (overlay) {
+            overlay.style.opacity = "0";
+            overlay.style.pointerEvents = "none";
+            setTimeout(() => overlay.remove(), 500);
+        }
+        
+        startGame();
+    }
+}
+
 function updateDebuffLabel(p) {
   let txt = "";
   if (game[p].shield > 0) {
@@ -581,9 +691,10 @@ function changeTurn() {
 
   game.turn = game.turn === "p1" ? "bot" : "p1";
   game.timer = 5.0;
-  document.body.className = `active-${game.turn}`;
 
-  // Durasi shield sentinel - THALOR
+  document.body.classList.remove("active-p1", "active-bot");
+  document.body.classList.add(`active-${game.turn}`);
+
   if (game.p1.isShielded) {
     game.p1.shieldTurns--;
     if (game.p1.shieldTurns <= 0) {
@@ -592,13 +703,14 @@ function changeTurn() {
     }
   }
   
-  // Update label untuk kedua pihak agar angka turn sinkron
   updateDebuffLabel("p1");
   updateDebuffLabel("bot");
 
   if (game[game.turn].shield > 0) game[game.turn].shield--;
+  
   if (game[game.turn].freeze > 0) return;
 
+  // Logika AI Bot
   if (game.turn === "bot" && !isPVP) {
     setTimeout(() => {
       if (selectedDiff === "easy") {
@@ -611,8 +723,10 @@ function changeTurn() {
         if (typeof botAIExpert === "function") botAIExpert();
         else botAIHard();
       } else if (selectedDiff === "insanity") {
+        // Pastikan fungsi botAIInsanity sudah kamu buat
         if (typeof botAIInsanity === "function") botAIInsanity();
-        else botAIExpert();
+        else if (typeof botAIExpert === "function") botAIExpert();
+        else botAIHard();
       } else {
         botAI();
       }
@@ -711,11 +825,22 @@ function calc(min, max, t) {
 
 function log(m) {
   const l = document.getElementById("log");
+  if (selectedDiff === "insanity" && Math.random() > 0.7) {
+      m = m.replace(/[a-z]/g, "☠");
+  }
   l.innerHTML = `<div>◈ ${m}</div>` + l.innerHTML;
 }
 
 function win(id) {
   game.active = false;
+
+  document.body.classList.remove("insanity-active");
+  const arena = document.getElementById("arena");
+  if (arena) {
+    arena.style.animation = "";
+    arena.classList.remove("shake");
+  }
+
   const resOverlay = document.getElementById("result-overlay");
   const resTitle = document.getElementById("result-title");
   const resMsg = document.getElementById("result-message");
@@ -748,6 +873,12 @@ function win(id) {
     resMsg.innerText = "Your blood shall stain the altar. Die in silence, or rise to fail again.";
     resWinner.innerText = "CRUSHED INTO OBLIVION";
     resWinner.style.color = "#f87171";
+  }
+  const startBtn = document.querySelector(".start-btn");
+  if (startBtn) {
+    startBtn.disabled = false;
+    startBtn.innerText = "TRY AGAIN";
+    startBtn.onclick = () => location.reload();
   }
 }
 
@@ -833,3 +964,4 @@ function executeSuperPunch(pid, opp) {
     hitsDone++;
   }, s.interval);
 }
+
