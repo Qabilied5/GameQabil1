@@ -15,7 +15,7 @@
       /* Corner ornaments */
       .card::before,
       .card::after {
-        content: "";
+        content: "";  
         position: absolute;
         width: 18px;
         height: 18px;

@@ -191,166 +191,166 @@ function botAIEasy() {
 
       /* BOT AI Expert */
       function botAIExpert() {
-        if (game.turn !== "bot" || !game.active || game.bot.freeze > 0) return;
-        const b = game.bot,
-          p = game.p1,
-          now = Date.now();
+      //   if (game.turn !== "bot" || !game.active || game.bot.freeze > 0) return;
+      //   const b = game.bot,
+      //     p = game.p1,
+      //     now = Date.now();
 
-        const getRemCD = (id) => Math.max(0, ((b.cds[id] || 0) - now) / 1000);
-        const isReady = (id) => {
-          const s = SKILLS.find((x) => x.id === id);
-          return s && b.mana >= s.cost && now >= (b.cds[id] || 0);
-        };
+      //   const getRemCD = (id) => Math.max(0, ((b.cds[id] || 0) - now) / 1000);
+      //   const isReady = (id) => {
+      //     const s = SKILLS.find((x) => x.id === id);
+      //     return s && b.mana >= s.cost && now >= (b.cds[id] || 0);
+      //   };
 
-        let targetSkill = null,
-          currentCD = 0;
+      //   let targetSkill = null,
+      //     currentCD = 0;
 
-        if (!targetSkill && p.hp < 50) {
+      //   if (!targetSkill && p.hp < 50) {
 
-          const playerIsSafe = p.shield > 0 || p.isShielded;
+      //     const playerIsSafe = p.shield > 0 || p.isShielded;
           
-          if (!playerIsSafe) {
-            let cdU = getRemCD("ulti");
-            const sUlti = SKILLS.find(x => x.id === "ulti");
+      //     if (!playerIsSafe) {
+      //       let cdU = getRemCD("ulti");
+      //       const sUlti = SKILLS.find(x => x.id === "ulti");
             
-            if (b.mana >= (sUlti ? sUlti.cost : 0)) {
-              if (cdU === 0) {
-                targetSkill = "ulti";
-              } else if (cdU < 4.8) {
-                targetSkill = "ulti";
-                currentCD = cdU;
-                if (Math.random() > 0.5) log("JOVITA: 'Sembunyi saja selagi bisa, ajalmu sebentar lagi...'");
-              }
-            }
-          } else {
-            if (isReady("burning")) targetSkill = "burning";
-          }
-        }
+      //       if (b.mana >= (sUlti ? sUlti.cost : 0)) {
+      //         if (cdU === 0) {
+      //           targetSkill = "ulti";
+      //         } else if (cdU < 4.8) {
+      //           targetSkill = "ulti";
+      //           currentCD = cdU;
+      //           if (Math.random() > 0.5) log("JOVITA: 'Sembunyi saja selagi bisa, ajalmu sebentar lagi...'");
+      //         }
+      //       }
+      //     } else {
+      //       if (isReady("burning")) targetSkill = "burning";
+      //     }
+      //   }
 
-        if (b.hp < 70 && p.hp > 50) {
-        const skillsToTry = ["heal", "vampire", "super_punch", "super_heal"];
+      //   if (b.hp < 70 && p.hp > 50) {
+      //   const skillsToTry = ["heal", "vampire", "super_punch", "super_heal"];
     
-        for (let id of skillsToTry) {
-          let cd = getRemCD(id);
-          const s = SKILLS.find(x => x.id === id);
+      //   for (let id of skillsToTry) {
+      //     let cd = getRemCD(id);
+      //     const s = SKILLS.find(x => x.id === id);
           
-          if (s && b.mana >= s.cost) {
-            if (cd === 0) {
-              targetSkill = id;
-              break;
-            } else if (cd < 4.8) {
-              targetSkill = id;
-              currentCD = cd;
-              break;
-            }
-          }
-        }
+      //     if (s && b.mana >= s.cost) {
+      //       if (cd === 0) {
+      //         targetSkill = id;
+      //         break;
+      //       } else if (cd < 4.8) {
+      //         targetSkill = id;
+      //         currentCD = cd;
+      //         break;
+      //       }
+      //     }
+      //   }
 
-        if (targetSkill === "super_heal" && currentCD === 0) {
-          b.afterSuperHeal = true; 
-        }
+      //   if (targetSkill === "super_heal" && currentCD === 0) {
+      //     b.afterSuperHeal = true; 
+      //   }
 
-        if (!targetSkill && b.afterSuperHeal) {
-          let cdF = getRemCD("freeze");
-          let cdU = getRemCD("ulti");
+      //   if (!targetSkill && b.afterSuperHeal) {
+      //     let cdF = getRemCD("freeze");
+      //     let cdU = getRemCD("ulti");
           
-          if (isReady("freeze") || (cdF > 0 && cdF < 4.8)) {
-            targetSkill = "freeze";
-            currentCD = cdF;
-            b.afterSuperHeal = false;
-          } else if (isReady("ulti") || (cdU > 0 && cdU < 4.8)) {
-            targetSkill = "ulti";
-            currentCD = cdU;
-            b.afterSuperHeal = false;
-          }
-        }
-      }
+      //     if (isReady("freeze") || (cdF > 0 && cdF < 4.8)) {
+      //       targetSkill = "freeze";
+      //       currentCD = cdF;
+      //       b.afterSuperHeal = false;
+      //     } else if (isReady("ulti") || (cdU > 0 && cdU < 4.8)) {
+      //       targetSkill = "ulti";
+      //       currentCD = cdU;
+      //       b.afterSuperHeal = false;
+      //     }
+      //   }
+      // }
 
-        if (p.shield > 0 || p.isShielded) {
-          let cdFreeze = getRemCD("freeze");
-          let cdBurning = getRemCD("burning");
+      //   if (p.shield > 0 || p.isShielded) {
+      //     let cdFreeze = getRemCD("freeze");
+      //     let cdBurning = getRemCD("burning");
 
-          if (isReady("freeze")) {
-            targetSkill = "freeze";
-          } 
+      //     if (isReady("freeze")) {
+      //       targetSkill = "freeze";
+      //     } 
 
-          else if (cdBurning > 0 && cdBurning < 4.8) {
-            const sBurning = SKILLS.find(x => x.id === "burning");
-            if (b.mana >= (sBurning ? sBurning.cost : 0)) {
-              targetSkill = "burning";
-              currentCD = cdBurning;
-            }
-          }
+      //     else if (cdBurning > 0 && cdBurning < 4.8) {
+      //       const sBurning = SKILLS.find(x => x.id === "burning");
+      //       if (b.mana >= (sBurning ? sBurning.cost : 0)) {
+      //         targetSkill = "burning";
+      //         currentCD = cdBurning;
+      //       }
+      //     }
 
-          else if (isReady("burning")) {
-            targetSkill = "burning";
-          }
-        }
+      //     else if (isReady("burning")) {
+      //       targetSkill = "burning";
+      //     }
+      //   }
 
-        if (!targetSkill && b.hp > 80) {
-          if (isReady("burning")) targetSkill = "burning";
-          else if (isReady("super_punch")) targetSkill = "super_punch";
-          else if (isReady("vampire")) targetSkill = "vampire";
-          else if (isReady("ulti")) targetSkill = "ulti";
-        }
+      //   if (!targetSkill && b.hp > 80) {
+      //     if (isReady("burning")) targetSkill = "burning";
+      //     else if (isReady("super_punch")) targetSkill = "super_punch";
+      //     else if (isReady("vampire")) targetSkill = "vampire";
+      //     else if (isReady("ulti")) targetSkill = "ulti";
+      //   }
 
-        if (b.hp < 35) {
-          let cdSH = getRemCD("super_heal");
-          if (cdSH < 4.7 && b.mana >= 10) {
-            targetSkill = "super_heal";
-            currentCD = cdSH;
-          } else if (isReady("heal")) targetSkill = "heal";
-          else if (isReady("vampire")) targetSkill = "vampire";
-        } else if (b.hp >= 35 && b.hp < 100) {
-          if (isReady("heal")) targetSkill = "heal";
-          else if (isReady("vampire")) targetSkill = "vampire";
-        }
+      //   if (b.hp < 35) {
+      //     let cdSH = getRemCD("super_heal");
+      //     if (cdSH < 4.7 && b.mana >= 10) {
+      //       targetSkill = "super_heal";
+      //       currentCD = cdSH;
+      //     } else if (isReady("heal")) targetSkill = "heal";
+      //     else if (isReady("vampire")) targetSkill = "vampire";
+      //   } else if (b.hp >= 35 && b.hp < 100) {
+      //     if (isReady("heal")) targetSkill = "heal";
+      //     else if (isReady("vampire")) targetSkill = "vampire";
+      //   }
 
-        if (!targetSkill) {
-          let cdU = getRemCD("ulti"),
-            cdP = getRemCD("super_punch");
-          if (p.hp <= 55 && b.mana >= 65 && cdU < 4.9) {
-            targetSkill = "ulti";
-            currentCD = cdU;
-          } else if (isReady("burning") && p.hp > 55) targetSkill = "burning";
-          else if (b.mana >= 30 && cdP < 4.7 && cdU > 5) {
-            targetSkill = "super_punch";
-            currentCD = cdP;
-          } else if (isReady("ulti")) targetSkill = "ulti";
-        }
+      //   if (!targetSkill) {
+      //     let cdU = getRemCD("ulti"),
+      //       cdP = getRemCD("super_punch");
+      //     if (p.hp <= 55 && b.mana >= 65 && cdU < 4.9) {
+      //       targetSkill = "ulti";
+      //       currentCD = cdU;
+      //     } else if (isReady("burning") && p.hp > 55) targetSkill = "burning";
+      //     else if (b.mana >= 30 && cdP < 4.7 && cdU > 5) {
+      //       targetSkill = "super_punch";
+      //       currentCD = cdP;
+      //     } else if (isReady("ulti")) targetSkill = "ulti";
+      //   }
 
-        // if (!targetSkill) {
-        //   let cdU = getRemCD("ulti"),
-        //     cdP = getRemCD("super_punch");
-        //   if (p.hp <= 55 && b.mana >= 65 && cdU < 4.9) {
-        //     targetSkill = "ulti";
-        //     currentCD = cdU;
-        //   } else if (isReady("burning") && p.hp > 55) targetSkill = "burning";
-        //   else if (b.mana >= 30 && cdP < 4.7 && cdU > 5) {
-        //     targetSkill = "super_punch";
-        //     currentCD = cdP;
-        //   } else if (isReady("ulti")) targetSkill = "ulti";
-        // }
+      //   // if (!targetSkill) {
+      //   //   let cdU = getRemCD("ulti"),
+      //   //     cdP = getRemCD("super_punch");
+      //   //   if (p.hp <= 55 && b.mana >= 65 && cdU < 4.9) {
+      //   //     targetSkill = "ulti";
+      //   //     currentCD = cdU;
+      //   //   } else if (isReady("burning") && p.hp > 55) targetSkill = "burning";
+      //   //   else if (b.mana >= 30 && cdP < 4.7 && cdU > 5) {
+      //   //     targetSkill = "super_punch";
+      //   //     currentCD = cdP;
+      //   //   } else if (isReady("ulti")) targetSkill = "ulti";
+      //   // }
 
-        if (!targetSkill) {
-          targetSkill = "strike";
-          currentCD = getRemCD("strike");
-        }
+      //   if (!targetSkill) {
+      //     targetSkill = "strike";
+      //     currentCD = getRemCD("strike");
+      //   }
 
-        const execute = () => {
-          if (game.turn !== "bot" || !game.active) return;
-          const s = SKILLS.find((x) => x.id === targetSkill);
-          if (s && b.mana >= s.cost && Date.now() >= (b.cds[targetSkill] || 0))
-            useSkill(targetSkill, "bot");
-          else if (targetSkill !== "strike") useSkill("strike", "bot");
-        };
-        if (currentCD === 0) execute();
-        else if (currentCD < 4.7) setTimeout(execute, currentCD * 1000 + 100);
-        else {
-          targetSkill = "strike";
-          let cdS = getRemCD("strike");
-          setTimeout(execute, cdS * 1000 + 100);
-        }
+      //   const execute = () => {
+      //     if (game.turn !== "bot" || !game.active) return;
+      //     const s = SKILLS.find((x) => x.id === targetSkill);
+      //     if (s && b.mana >= s.cost && Date.now() >= (b.cds[targetSkill] || 0))
+      //       useSkill(targetSkill, "bot");
+      //     else if (targetSkill !== "strike") useSkill("strike", "bot");
+      //   };
+      //   if (currentCD === 0) execute();
+      //   else if (currentCD < 4.7) setTimeout(execute, currentCD * 1000 + 100);
+      //   else {
+      //     targetSkill = "strike";
+      //     let cdS = getRemCD("strike");
+      //     setTimeout(execute, cdS * 1000 + 100);
+      //   }
       }
 
   window.addEventListener('load', () => {
