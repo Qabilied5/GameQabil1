@@ -38,31 +38,37 @@
 
       body.insanity-active {
           background: #120000 !important;
+          --rune-glow: rgba(255, 0, 0, 0.4);
+          --gold: #8b0000;
       }
 
       body.insanity-active .bg-gradient {
-          background: 
-              radial-gradient(
-                  circle at center, 
-                  rgba(153, 27, 27, 0.6) 0%, /* Merah gelap pekat */
-                  rgba(40, 0, 0, 0.9) 70%, 
-                  #1a0000 100%
-              ) !important; /* Gunakan !important jika ada bentrokan class */
-          
-          /* Tambahan efek kilatan merah */
-          animation: pulse-insanity-bg 1s infinite alternate;
+          background: radial-gradient(
+              circle at center, 
+              rgba(153, 27, 27, 0.4) 0%, 
+              rgba(30, 0, 0, 0.9) 70%, 
+              #120000 100%
+          ) !important;
+          animation: none !important;
       }
 
-body.insanity-active .rune {
-    color: #ff0000 !important;
-    opacity: 0.8 !important;
-    text-shadow: 0 0 10px #ff0000, 0 0 20px #8b0000 !important;
-    filter: drop-shadow(0 0 5px #ff0000) !important;
-    font-weight: bold;
-  
-    animation-name: rune-float, insanity-shake !important;
-    animation-iteration-count: infinite !important;
-    animation-timing-function: linear !important;
+      body.insanity-active .rune {
+        
+          animation-name: rune-float !important;
+          animation-iteration-count: infinite !important;
+          animation-timing-function: linear !important;
+          
+          filter: none !important; 
+          text-shadow: 2px 2px 0px rgba(139, 0, 0, 0.8) !important;
+          
+          color: #ff3333 !important;
+          opacity: 0.6 !important; 
+          font-weight: bold;
+      }
+
+      body.insanity-active #arena {
+    animation: none !important;
+    transform: none !important;
 }
 
     body.insanity-active {
