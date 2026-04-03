@@ -88,7 +88,8 @@ function selectDifficulty(level) {
   if (targetBtn) {
     if (level === 'insanity') {
       document.body.classList.add("insanity-active");
-      document.getElementById("arena").style.animation = "insanity-shake 0.2s infinite";
+      
+      // document.getElementById("arena").style.animation = "insanity-shake 0.2s infinite";
       targetBtn.classList.add("active-insanity");
       targetBtn.classList.remove("locked");
 

@@ -40,6 +40,16 @@
           background: #120000 !important;
           --rune-glow: rgba(255, 0, 0, 0.4);
           --gold: #8b0000;
+          animation: insanity-ambient-shake 0.4s infinite;
+          overflow-x: hidden;
+      }
+      
+      @keyframes insanity-ambient-shake {
+        0% { transform: translate(0, 0); }
+        25% { transform: translate(1px, 1px); }
+        50% { transform: translate(-1px, 1px); }
+        75% { transform: translate(1px, -1px); }
+        100% { transform: translate(0, 0); }
       }
 
       body.insanity-active .bg-gradient {
@@ -69,7 +79,7 @@
       body.insanity-active #arena {
     animation: none !important;
     transform: none !important;
-}
+} 
 
     body.insanity-active {
         --rune-glow: rgba(255, 0, 0, 0.6);
@@ -98,10 +108,10 @@ body.insanity-active .rune {
           to { opacity: 1; }
       }
 
-      .insanity-active .skill-box {
+      /* .insanity-active .skill-box {
           border-color: rgba(255, 0, 0, 0.5) !important;
           background: rgba(40, 0, 0, 0.4);
-      }
+      } */
 
       .insanity-active button:hover:not(:disabled) {
           background: rgba(255, 0, 0, 0.2);
@@ -905,13 +915,12 @@ body.insanity-active .rune {
         color: #000;
       }
 
-      /* Animasi Getar - pas insanity diklik */
       @keyframes impactShake {
         10%, 90% { transform: translate3d(-1px, 0, 0); }
         20%, 80% { transform: translate3d(2px, 0, 0); }
         30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
         40%, 60% { transform: translate3d(4px, 0, 0); }
-        100% { transform: translate3d(0, 0, 0); } /* Berhenti total */
+        100% { transform: translate3d(0, 0, 0); }
       }
 
       /* INSANITY BUTTON LOCKED */
@@ -1021,7 +1030,6 @@ body.insanity-active .rune {
 
 /* FOR INSANITY */
 
-/* Efek Guncangan Layar Insanity */
 @keyframes insanity-shake {
     0% { margin-left: 0px; }
     25% { margin-left: -4px; }
@@ -1030,7 +1038,6 @@ body.insanity-active .rune {
     100% { margin-left: 0px; }
 }
 
-/* Filter Warna yang Tidak Stabil */
 .insanity-active .game-wrapper {
     animation: color-distortion 5s infinite;
     filter: sepia(100%) saturate(300%) hue-rotate(-50deg);
