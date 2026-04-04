@@ -157,17 +157,33 @@ const SKILLS = [
 function setMode(mode) {
   currentGameMode = mode;
   isPVP = (mode === 'pvp');
+
+  if (isPVP && selectedDiff === "insanity") {
+    selectedDiff = "normal";
+    document.body.classList.remove("insanity-active");
+    
+    const arena = document.getElementById("arena");
+    if (arena) arena.style.animation = "";
+
+    document.querySelectorAll(".difficulty-selector .diff-btn").forEach((btn) => {
+      btn.classList.remove("active-insanity", "active-diff");
+    });
+    
+    const normalBtn = document.getElementById("normal-btn");
+    if (normalBtn) normalBtn.classList.add("active-diff");
+    
+    log("SYSTEM: Insanity mode is restricted in Duel. Resetting to Normal.");
+  }
+
   const allModeButtons = document.querySelectorAll('.mode-selector .diff-btn, #battle-mode-selector .diff-btn');
   allModeButtons.forEach(btn => btn.classList.remove('active-diff'));
 
-  // 3. AMBIL ELEMEN-ELEMEN UI
   const botLabel = document.getElementById("bot-name-label");
   const gameWrapper = document.querySelector(".game-wrapper");
   const logContainer = document.getElementById("log-container");
   const cards = document.querySelectorAll(".card, .ornate-card");
   const diffButtons = document.querySelectorAll(".difficulty-selector .diff-btn");
 
-  // 4. LOGIKA PERUBAHAN MODE
   if (isPVP) {
     const btnPvp = document.getElementById("btn-pvp");
     if (btnPvp) btnPvp.classList.add("active-diff");
@@ -188,7 +204,6 @@ function setMode(mode) {
     log("MODE: PLAYER VS PLAYER (DUEL)");
   } else {
     localStorage.removeItem("pvpSentinel");
-    // --- MODE PVE ---
     const btnPve = document.getElementById("btn-pve");
     if (btnPve) btnPve.classList.add("active-diff");
 
@@ -202,7 +217,6 @@ function setMode(mode) {
     logContainer?.classList.remove("pvp-log");
     cards.forEach((card) => card.classList.remove("pvp-card"));
 
-
     diffButtons.forEach((btn) => {
       btn.disabled = false;
       btn.classList.remove("btn-disabled");
@@ -211,7 +225,6 @@ function setMode(mode) {
     log("MODE: PLAYER VS BOT (JOVITA)");
   }
 
-  // key hint (seperti [7], [8], [9]) muncul atau hilang sesuai mode
   if (document.getElementById("p1-skills")) {
     init();
   }
@@ -959,6 +972,7 @@ function log(m) {
 function win(id) {
   game.active = false;
 
+  // Reset efek visual Insanity dan guncangan arena
   document.body.classList.remove("insanity-active");
   const arena = document.getElementById("arena");
   if (arena) {
@@ -970,39 +984,67 @@ function win(id) {
   const resTitle = document.getElementById("result-title");
   const resMsg = document.getElementById("result-message");
   const resWinner = document.getElementById("winner-name");
-  resOverlay.style.display = "flex";
-  if (id === "p1") {
-    resTitle.innerText = "VICTORY";
-    resTitle.style.color = "#4ade80";
-    resWinner.innerText = "THE ENTITY IS VANQUISHED";
-    resWinner.style.color = "#4ade80";
-    if (!isPVP && selectedDiff === "expert") {
-      unlockInsanityMode();
-      resMsg.innerText = "The whispers grow louder... The INSANITY has been unleashed. There is no turning back.";
-      resMsg.style.color = "#ff4444";
+  
+  if (resOverlay) resOverlay.style.display = "flex";
 
-      const gachaBtn = document.createElement("button");
-      gachaBtn.className = "start-btn";
-      gachaBtn.style.marginTop = "10px";
-      gachaBtn.innerText = "✨ SUMMON SENTINEL ✨";
-      gachaBtn.onclick = () => openGacha();
-      document.querySelector("#result-overlay .popup-content").appendChild(gachaBtn);
-
+  if (isPVP) {
+    // --- LOGIKA MENANG MODE PVP ---
+    resTitle.innerText = "BATTLE ENDED";
+    resTitle.style.color = "#ffffff";
+    
+    if (id === "p1") {
+      resWinner.innerText = "PLAYER 1 VICTORIOUS";
+      resWinner.style.color = "#00d4ff"; // Warna tema Player 1
+      resMsg.innerText = "The first mage stands supreme. Player 2 has been cast into the shadows.";
     } else {
-      resMsg.innerText = "The entity Jovita is banished back into the starless void. Your soul remains... for now.";
-      resMsg.style.color = "";
+      resWinner.innerText = "PLAYER 2 VICTORIOUS";
+      resWinner.style.color = "#ff0040"; // Warna tema Player 2
+      resMsg.innerText = "The rival mage claims the throne. Player 1's journey ends in ash.";
     }
   } else {
-    resTitle.innerText = "DEFEAT";
-    resTitle.style.color = "#f87171";
-    resMsg.innerText = "Your blood shall stain the altar. Die in silence, or rise to fail again.";
-    resWinner.innerText = "CRUSHED INTO OBLIVION";
-    resWinner.style.color = "#f87171";
+    // --- LOGIKA MENANG MODE PVE (SOLO) ---
+    if (id === "p1") {
+      resTitle.innerText = "VICTORY";
+      resTitle.style.color = "#4ade80";
+      resWinner.innerText = "THE ENTITY IS VANQUISHED";
+      resWinner.style.color = "#4ade80";
+
+      if (selectedDiff === "expert") {
+        // Fitur khusus setelah mengalahkan Expert Mode
+        if (typeof unlockInsanityMode === "function") unlockInsanityMode();
+        
+        resMsg.innerText = "The whispers grow louder... The INSANITY has been unleashed. There is no turning back.";
+        resMsg.style.color = "#ff4444";
+
+        // Tambahkan tombol Gacha jika belum ada
+        if (!document.getElementById("gacha-trigger-btn")) {
+          const gachaBtn = document.createElement("button");
+          gachaBtn.id = "gacha-trigger-btn";
+          gachaBtn.className = "start-btn";
+          gachaBtn.style.marginTop = "10px";
+          gachaBtn.innerText = "✨ SUMMON SENTINEL ✨";
+          gachaBtn.onclick = () => typeof openGacha === "function" && openGacha();
+          document.querySelector("#result-overlay .popup-content")?.appendChild(gachaBtn);
+        }
+      } else {
+        resMsg.innerText = "The entity Jovita is banished back into the starless void. Your soul remains... for now.";
+        resMsg.style.color = "";
+      }
+    } else {
+      // Logika Kalah (Player 1 kalah oleh Bot)
+      resTitle.innerText = "DEFEAT";
+      resTitle.style.color = "#f87171";
+      resMsg.innerText = "Your blood shall stain the altar. Die in silence, or rise to fail again.";
+      resWinner.innerText = "CRUSHED INTO OBLIVION";
+      resWinner.style.color = "#f87171";
+    }
   }
+
+  // Pengaturan tombol untuk mengulang permainan
   const startBtn = document.querySelector(".start-btn");
   if (startBtn) {
     startBtn.disabled = false;
-    startBtn.innerText = "TRY AGAIN";
+    startBtn.innerText = isPVP ? "RETURN TO MENU" : "TRY AGAIN";
     startBtn.onclick = () => location.reload();
   }
 }
@@ -1016,13 +1058,11 @@ window.addEventListener("keydown", (e) => {
 
   const key = e.key.toLowerCase();
 
-  // Kontrol Player 1
   if (P1_KEYS.includes(key)) {
     const index = P1_KEYS.indexOf(key);
     if (SKILLS[index]) useSkill(SKILLS[index].id, "p1");
   }
 
-  // Kontrol Player 2 (Hanya jika isPVP aktif)
   if (isPVP && P2_KEYS.includes(key)) {
     const index = P2_KEYS.indexOf(key);
     if (SKILLS[index]) useSkill(SKILLS[index].id, "bot");
