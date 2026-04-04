@@ -17,3 +17,43 @@
     color: rgba(255,255,255,0.1);
     font-family: "Cinzel Decorative";
 }
+
+.sentinel-active-popup {
+    position: fixed;
+    pointer-events: none;
+    font-family: 'Cinzel', serif; /* Sesuaikan dengan font game Anda */
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--sentinel-color);
+    text-shadow: 0 0 10px var(--sentinel-color), 0 0 20px #000;
+    z-index: 1000;
+    animation: sentinel-float 2s ease-out forwards;
+}
+
+@keyframes sentinel-float {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+    80% { transform: translate(-50%, -50px) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -70px) scale(0.8); opacity: 0; }
+}
+
+
+/* SENTINEL PVP DRAFTPICK STYLE */
+.sentinel-pick-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.sentinel-pick-card:active {
+    transform: scale(0.95);
+}
+
+#pvp-pick-overlay .modal-content {
+    animation: fadeInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}

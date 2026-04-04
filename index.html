@@ -14,19 +14,19 @@
     />
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Creepster&family=Piedra&family=Eater&family=Almendra+Display:wght@700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="cinematic.css?v=3.0.0" />
-    <link rel="stylesheet" href="base.css?v=3.0.0" />
-    <link rel="stylesheet" href="effect.css?v=3.0.0" />
-    <link rel="stylesheet" href="skin-player.css?v=3.0.0" />
-    <link rel="stylesheet" href="mail.css?v=3.0.0" />
-    <link rel="stylesheet" href="sentinel.css?v=3.0.0" />
+    <link rel="stylesheet" href="cinematic.css?v=3.5.0" />
+    <link rel="stylesheet" href="base.css?v=3.5.0" />
+    <link rel="stylesheet" href="effect.css?v=3.5.0" />
+    <link rel="stylesheet" href="skin-player.css?v=3.5.0" />
+    <link rel="stylesheet" href="mail.css?v=3.5.0" />
+    <link rel="stylesheet" href="sentinel.css?v=3.5.0" />
     <!-- <link rel="stylesheet" href="sentinel?v=3.0.0" /> -->
 
-    <script src="ai-controller.js?v=20260401" defer></script>
-    <script src="core.js?v=20260401" defer></script>
-    <script src="sentinel.js?v=20260401" defer></script>
-    <script src="effect.js?v=20260401" defer></script>
-    <script src="mail.js?v=20260401" defer></script>
+    <script src="ai-controller.js?v=20260403" defer></script>
+    <script src="core.js?v=20260403" defer></script>
+    <script src="sentinel.js?v=20260403" defer></script>
+    <script src="effect.js?v=20260403" defer></script>
+    <script src="mail.js?v=20260403" defer></script>
 
   </head>
   <body class="active-p1">
@@ -359,6 +359,33 @@
     <div id="lightning-flash"></div>
     
     <div id="final-white-out"></div>
+</div>
+
+<!-- PVP SENTINEL DRAFT PICK -->
+<div id="pvp-pick-overlay" class="modal-overlay" style="display: none; background: rgba(0,0,0,0.95); z-index: 10000;">
+    <div class="modal-content" style="max-width: 600px; border: 2px solid gold;">
+        <h2 class="modal-title" id="pvp-pick-title">PLAYER 1: PICK YOUR SENTINEL</h2>
+        <p id="pvp-pick-subtitle">Ancient guardians await your command.</p>
+
+        <div class="sentinel-selection-grid" style="display: flex; gap: 15px; justify-content: center; margin: 25px 0;">
+            <div class="sentinel-pick-card" onclick="selectPvPSentinel('hera')" style="border: 1px solid #0ff040d8; padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s;">
+                <h3 style="color: #0ff040d8; margin: 0;">HERA</h3>
+                <small>The Ancient Healer</small>
+            </div>
+            <div class="sentinel-pick-card" onclick="selectPvPSentinel('thalor')" style="border: 1px solid #4da6ff; padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s;">
+                <h3 style="color: #4da6ff; margin: 0;">THALOR</h3>
+                <small>Eternal Warden</small>
+            </div>
+            <div class="sentinel-pick-card" onclick="selectPvPSentinel('hades')" style="border: 1px solid #ff0000cd; padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s;">
+                <h3 style="color: #ff0000cd; margin: 0;">HADES</h3>
+                <small>Soul Reaper</small>
+            </div>
+        </div>
+
+        <div id="pvp-status-indicator" style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 10px;">
+            Waiting for Player 1...
+        </div>
+    </div>
 </div>
 
   </body>

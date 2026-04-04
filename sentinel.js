@@ -5,97 +5,73 @@ const SENTINELS = {
         name: "Hera",
         color: "#0ff040d8",
         desc: "The Ancient Healer",
+        action: function(ownerId, targetId) {
+            const owner = game[ownerId];
+            const target = game[targetId];
 
-        action: function(owner, target) {
             owner.hp = Math.min(owner.maxHp, owner.hp + 13);
-            createSentinelVisual("p1", "+13HP", "#22af24d3"); // -- SENTINEL POPUP
-            log(`Hera: Healing +13 HP Berkala!`);
-            for (let i = 0; i < 3; i++) {
-                createHealParticle("p1"); 
-            }
+            createSentinelVisual(ownerId, "+13HP", "#22af24d3");
+            log(`Hera (${ownerId.toUpperCase()}): Healing +13 HP!`);
             
-            const card = document.getElementById("p1-card");
+            for (let i = 0; i < 3; i++) createHealParticle(ownerId);
+            
+            const card = document.getElementById(`${ownerId}-card`);
             card.classList.add("healing-active");
             setTimeout(() => card.classList.remove("healing-active"), 500);
             
-            if (Math.random() < 0.1) {
+            if (Math.random() < 0.15) {
                 target.hp -= 15;
-                createStrikeVisual("bot");
-                createSentinelVisual("p1", "PASSIVE STRIKE", "#cc1414d3"); // -- SENTINEL POPUP
-                createSentinelVisual("bot", "-15HP", "#cc1414d3"); // -- SENTINEL POPUP
-                log("Hera: Ooopss, I wont hurt you.. STRIKE!");
+                createStrikeVisual(targetId);
+                createSentinelVisual(ownerId, "PASSIVE STRIKE", "#cc1414d3");
+                createSentinelVisual(targetId, "-15HP", "#cc1414d3");
+                log(`Hera (${ownerId.toUpperCase()}): Surprise Strike!`);
             }
         }
     },
     thalor: {
-    name: "Thalor",
-    color: "#4da6ff",
-    desc: "Eternal Warden - Defender",
-    action: (owner, target, elapsed) => {
-        if (elapsed % 10 === 0) { 
-            
-            game[pid].shield = 2;
-            updateDebuffLabel(pid);
-            
-            createSentinelVisual("p1", "SHIELDED!", "#e6cf23d3");
+        name: "Thalor",
+        color: "#4da6ff",
+        desc: "Eternal Warden - Defender",
+        action: (ownerId, targetId, elapsed) => {
+            if (elapsed % 10 === 0) {
+                game[ownerId].shield = 2;
+                updateDebuffLabel(ownerId);
+                createSentinelVisual(ownerId, "SHIELDED!", "#e6cf23d3");
 
-            const card = document.getElementById(`${pid}-card`);
-            if (card) {
-                card.style.transition = "all 0.3s ease";
-                card.style.transform = "scale(1.1)";
-                setTimeout(() => (card.style.transform = "scale(1.02)"), 300);
-
-                for (let i = 0; i < 3; i++) {
-                    const p = document.createElement("div");
-                    p.className = "heal-particle";
-                    p.innerText = "🛡️";
-                    p.style.left = card.getBoundingClientRect().left + Math.random() * 100 + "px";
-                    p.style.top = card.getBoundingClientRect().top + "px";
-                    p.style.color = "#60a5fa";
-                    document.body.appendChild(p);
-                    setTimeout(() => p.remove(), 1000);
+                const card = document.getElementById(`${ownerId}-card`);
+                if (card) {
+                    card.style.transform = "scale(1.1)";
+                    setTimeout(() => (card.style.transform = ""), 300);
                 }
+                log(`🛡️ Thalor (${ownerId.toUpperCase()}): GREAT SHIELD!`);
             }
-
-            if (typeof createShieldBurst === "function") {
-                createShieldBurst(pid);
+            
+            if (Math.random() < 0.1) {
+                game[targetId].hp -= 15;
+                createStrikeVisual(targetId);
+                createSentinelVisual(targetId, "-15HP", "#e62323d3");
             }
-
-            log(`🛡️ Thalor: GREAT SHIELD ACTIVATED!`);
-        } else {
-            log("Thalor: Standing guard...");
         }
-        
-        if (Math.random() < 0.05) { 
-            target.hp -= 15;
-            createStrikeVisual("bot");
-            createSentinelVisual("p1", "PASSIVE ACTIVE", "#e6cf23d3");
-            createSentinelVisual("bot", "-15HP", "#e62323d3");
-            log("Thalor strikes for 15 DMG!");
-        }
-    }
-},
+    },
     hades: {
         name: "Hades",
         color: "#ff0000cd",
         desc: "Soul Reaper - Executor",
-        action: (owner, target) => {
-            let dmg = Math.floor(Math.random() * (25 - 15 + 1)) + 15;
-            target.hp -= dmg;
-            createStrikeVisual("bot");
-            createSoulSiphonEffect();
-            createSentinelVisual("p1", "OBLIVION STRIKE!", "#c81818d3");
-            log(`Hades: OBLIVION ${dmg} DMG!`);
+        action: (ownerId, targetId) => {
+            let dmg = Math.floor(Math.random() * 11) + 15;
+            game[targetId].hp -= dmg;
+            createStrikeVisual(targetId);
+            createSentinelVisual(ownerId, "OBLIVION!", "#c81818d3");
+            createSentinelVisual(targetId, `-${dmg}HP`, "#c81818d3");
+            log(`Hades (${ownerId.toUpperCase()}): OBLIVION ${dmg} DMG!`);
             
-            if (Math.random() < 0.01) {
-                let executeDmg = Math.floor(target.hp * 0.8);
-                target.hp -= executeDmg;
-                
+            if (Math.random() < 0.02) {
+                let executeDmg = Math.floor(game[targetId].hp * 0.5);
+                game[targetId].hp -= executeDmg;
                 document.getElementById("arena").classList.add("shake");
                 setTimeout(() => document.getElementById("arena").classList.remove("shake"), 500);
-                createSentinelVisual("p1", "YOUR SOUL IS MINE!", "#c81818d3");    
-                createSoulSiphonEffect();
-                log("HADES: REAPS THE SOUL (80% HP)!");
+                createSentinelVisual(ownerId, "DIE!", "#000");
+                log(`HADES (${ownerId.toUpperCase()}): EXECUTION!`);
             }
         }
     }
@@ -180,67 +156,67 @@ let sentinelTimer = null;
 let isSentinelActivePeriod = true;
 let elapsedInCycle = 0;
 
+// sentinel.js
+
 function startSentinelLoop() {
-    // --- PERBAIKAN UTAMA: Hentikan interval lama jika ada ---
+
     if (sentinelTimer) {
         clearInterval(sentinelTimer);
-        sentinelTimer = null; // Reset ke null
+        sentinelTimer = null;
     }
 
-    const savedKey = localStorage.getItem("mySentinel");
-    if (!savedKey || !SENTINELS[savedKey]) return;
+    let activeSentinels = [];
 
-    const currentSentinel = SENTINELS[savedKey];
-    console.log("Sentinel System Initiated:", currentSentinel.name);
+    if (isPVP) {
+        const pvpData = JSON.parse(localStorage.getItem("pvpSentinel"));
+        if (pvpData) {
+            if (pvpData.p1 && SENTINELS[pvpData.p1]) {
+                activeSentinels.push({ owner: "p1", target: "bot", key: pvpData.p1 });
+            }
+            if (pvpData.p2 && SENTINELS[pvpData.p2]) {
+                activeSentinels.push({ owner: "bot", target: "p1", key: pvpData.p2 });
+            }
+        }
+    } else {
+        // --- LOGIKA PVE ---
+        const savedKey = localStorage.getItem("mySentinel");
+        if (savedKey && SENTINELS[savedKey]) {
+            activeSentinels.push({ owner: "p1", target: "bot", key: savedKey });
+        }
+    }
 
-    isSentinelActivePeriod = true;
+    if (activeSentinels.length === 0) return;
+
     elapsedInCycle = 0;
+    isSentinelActivePeriod = true;
 
     sentinelTimer = setInterval(() => {
-        // Jika game sudah tidak aktif, bersihkan interval
         if (!game.active) {
             clearInterval(sentinelTimer);
-            sentinelTimer = null;
             return;
         }
 
         elapsedInCycle += 5;
-
-        // Logika Pergantian Siklus
         if (elapsedInCycle > 30) {
             isSentinelActivePeriod = !isSentinelActivePeriod;
-            elapsedInCycle = 5; 
-            
-            if (isSentinelActivePeriod) {
-                createSentinelVisual("p1", "SENTINEL ACTIVE!", "#ffd900d3");
-                log(`${currentSentinel.name}: I'm back! (ACTIVE)`);
-            } else {
-                createSentinelVisual("p1", "SENTINEL RESTING!", "#ffd900d3");
-                // createSentinelVisual("bot", "IT'S MY TURN!", "#d71919d3");
-                log(`${currentSentinel.name}: Resting... (COOLDOWN)`);
-            }
+            elapsedInCycle = 5;
         }
 
-        // Eksekusi Aksi (1 blok only biar g double)
         if (isSentinelActivePeriod) {
-            currentSentinel.action(game.p1, game.bot, elapsedInCycle); 
-            // createSentinelVisual("p1", "ACTIVE", currentSentinel.color); -- [NGETEST ACTIVE ATAU ENGGA]
-            
-            // Cek darah bot
-            if (game.bot.hp <= 0) {
-                game.bot.hp = 0;
-                updateUI();
-                log(`${currentSentinel.name} has finished the enemy!`);
-                win("p1"); 
-                
-                clearInterval(sentinelTimer);
-                sentinelTimer = null;
-                return;
-            }
+            activeSentinels.forEach(s => {
+                const config = SENTINELS[s.key];
+                if (config && config.action) {
+                    config.action(s.owner, s.target, elapsedInCycle);
+                }
+            });
 
+            // Cek kematian setelah aksi sentinel
+            if (game.p1.hp <= 0) win("bot");
+            if (game.bot.hp <= 0) win("p1");
+            
             updateUI();
         }
-    }, 5000); 
+    }, 5000);
 }
 
 

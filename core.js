@@ -1,5 +1,10 @@
 const hasWonExpert = localStorage.getItem("expertWinner") === "true";
 
+let currentGameMode = 'pve';
+let pickingStep = 1;
+let pvpTempP1 = null;
+let pvpTempP2 = null;
+
 if (!hasWonExpert) {
     localStorage.setItem("insanityUnlocked", "false");
     console.log("Mode Insanity dikunci (Belum ada rekor menang Expert).");
@@ -150,56 +155,69 @@ const SKILLS = [
 ];
 
 function setMode(mode) {
-  isPVP = mode === "pvp";
+  // 1. UPDATE LOGIKA UTAMA
+  currentGameMode = mode;
+  isPVP = (mode === 'pvp'); // Sinkronkan variabel global isPVP dengan mode yang dipilih
+
+  // 2. RESET SEMUA TOMBOL MODE (Hapus class active dari semua tombol mode)
+  // Gabungkan selector agar lebih efisien
+  const allModeButtons = document.querySelectorAll('.mode-selector .diff-btn, #battle-mode-selector .diff-btn');
+  allModeButtons.forEach(btn => btn.classList.remove('active-diff'));
+
+  // 3. AMBIL ELEMEN-ELEMEN UI
   const botLabel = document.getElementById("bot-name-label");
-  // const sentinelUI = document.getElementById("display-my-sentinel")?.parentElement;
   const gameWrapper = document.querySelector(".game-wrapper");
   const logContainer = document.getElementById("log-container");
   const cards = document.querySelectorAll(".card, .ornate-card");
-  const diffButtons = document.querySelectorAll(
-    ".difficulty-selector .diff-btn",
-  );
+  const diffButtons = document.querySelectorAll(".difficulty-selector .diff-btn");
 
-  document
-    .querySelectorAll(".mode-selector .diff-btn")
-    .forEach((btn) => btn.classList.remove("active-diff"));
-
+  // 4. LOGIKA PERUBAHAN MODE
   if (isPVP) {
-    // if (sentinelUI) sentinelUI.style.display = "none";
+    const btnPvp = document.getElementById("btn-pvp");
+    if (btnPvp) btnPvp.classList.add("active-diff");
 
-    document.getElementById("btn-pvp").classList.add("active-diff");
     game.bot.hp = 100;
+    game.bot.maxHp = 100;
     if (botLabel) botLabel.innerText = "PLAYER 2";
 
-    gameWrapper.classList.add("pvp-mode");
-    if (logContainer) logContainer.classList.add("pvp-log");
+    gameWrapper?.classList.add("pvp-mode");
+    logContainer?.classList.add("pvp-log");
     cards.forEach((card) => card.classList.add("pvp-card"));
 
+    // Matikan tombol tingkat kesulitan (karena hanya untuk Bot)
     diffButtons.forEach((btn) => {
       btn.disabled = true;
       btn.classList.add("btn-disabled");
     });
+    
+    log("MODE: PLAYER VS PLAYER (DUEL)");
   } else {
+    localStorage.removeItem("pvpSentinel");
+    // --- MODE PVE ---
+    const btnPve = document.getElementById("btn-pve");
+    if (btnPve) btnPve.classList.add("active-diff");
 
-    // if (sentinelUI) sentinelUI.style.display = "block";
-    updateSentinelUI();
-
-    document.getElementById("btn-pve").classList.add("active-diff");
+    updateSentinelUI(); // Jika kamu menggunakan sistem sentinel
+    
     game.bot.hp = 200;
+    game.bot.maxHp = 200;
     if (botLabel) botLabel.innerText = "JOVITA";
 
-    gameWrapper.classList.remove("pvp-mode");
-    if (logContainer) logContainer.classList.remove("pvp-log");
+    gameWrapper?.classList.remove("pvp-mode");
+    logContainer?.classList.remove("pvp-log");
     cards.forEach((card) => card.classList.remove("pvp-card"));
 
-    // ENABLE kembali tombol difficulty saat PvE
+    // Aktifkan kembali tombol tingkat kesulitan
     diffButtons.forEach((btn) => {
       btn.disabled = false;
       btn.classList.remove("btn-disabled");
     });
+    
     log("MODE: PLAYER VS BOT (JOVITA)");
   }
 
+  // 5. RE-INITIALIZE SKILLS
+  // Ini penting agar key hint (seperti [7], [8], [9]) muncul atau hilang sesuai mode
   if (document.getElementById("p1-skills")) {
     init();
   }
@@ -289,15 +307,8 @@ function startGame() {
 
   const startBtn = document.querySelector(".start-btn");
   
-  if (typeof startSentinelLoop === "function" && !isPVP) {
+  if (typeof startSentinelLoop === "function") {
     startSentinelLoop();
-    console.log("Sentinel system initiated for PvE battle.");
-  } else {
-    if (typeof sentinelTimer !== 'undefined' && sentinelTimer) {
-        clearInterval(sentinelTimer);
-        sentinelTimer = null;
-    }
-    console.log("Sentinel system disabled for Duel (PVP).");
   }
   
   if (!isPVP) {
@@ -484,22 +495,76 @@ function playIntro(callback) {
 function initiateBattle() {
     const overlay = document.getElementById("start-overlay");
     
+    // PERBAIKAN: Cek jika mode adalah PvP
+    if (currentGameMode === 'pvp') {
+        openPvPPicker(); 
+        return;
+    }
+
+    // Logika untuk PvE (Solo)
+    if (overlay) {
+        overlay.style.opacity = "0";
+        overlay.style.pointerEvents = "none";
+        setTimeout(() => overlay.remove(), 500);
+    }
+    
     if (selectedDiff === "insanity") {
-        if (overlay) {
-            overlay.style.opacity = "0";
-            overlay.style.pointerEvents = "none";
-            setTimeout(() => overlay.remove(), 500);
-        }
-        
         playIntro(startGame);
-        
     } else {
-        if (overlay) {
-            overlay.style.opacity = "0";
-            overlay.style.pointerEvents = "none";
-            setTimeout(() => overlay.remove(), 500);
-        }
+        startGame();
+    }
+}
+
+function openPvPPicker() {
+    const startOverlay = document.getElementById("start-overlay");
+    const pvpOverlay = document.getElementById("pvp-pick-overlay");
+
+    if (startOverlay) startOverlay.style.display = "none";
+    if (pvpOverlay) {
+        pvpOverlay.style.display = "flex";
+        pickingStep = 1;
+        pvpTempP1 = null;
+        pvpTempP2 = null;
+        updatePvPPickerUI();
+    }
+}
+
+function updatePvPPickerUI() {
+    const title = document.getElementById("pvp-pick-title");
+    const status = document.getElementById("pvp-status-indicator");
+    
+    if (!title || !status) return;
+
+    if (pickingStep === 1) {
+        title.innerText = "PLAYER 1: PICK YOUR SENTINEL";
+        title.style.color = "var(--p1)";
+        status.innerText = "Player 2, please look away!";
+    } else {
+        title.innerText = "PLAYER 2: PICK YOUR SENTINEL";
+        title.style.color = "var(--bot)"; // Warna untuk player 2
+        status.innerText = "Player 1 has chosen! Now it's Player 2's turn.";
+    }
+}
+
+function selectPvPSentinel(sentinelKey) {
+    if (pickingStep === 1) {
+        pvpTempP1 = sentinelKey;
+        pickingStep = 2;
+        updatePvPPickerUI();
+    } else {
+        pvpTempP2 = sentinelKey;
         
+        // Simpan hasil ke localStorage
+        localStorage.setItem("pvpSentinel", JSON.stringify({
+            p1: pvpTempP1,
+            p2: pvpTempP2
+        }));
+
+        // Tutup overlay pemilihan
+        const pvpOverlay = document.getElementById("pvp-pick-overlay");
+        if (pvpOverlay) pvpOverlay.remove();
+
+        // Mulai game!
         startGame();
     }
 }
