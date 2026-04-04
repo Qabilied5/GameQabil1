@@ -49,6 +49,7 @@ const SENTINELS = {
             if (Math.random() < 0.1) {
                 game[targetId].hp -= 15;
                 createStrikeVisual(targetId);
+                createSentinelVisual(ownerId, "PASSIVE STRIKE!", "#e62323d3");
                 createSentinelVisual(targetId, "-15HP", "#e62323d3");
             }
         }
@@ -66,7 +67,7 @@ const SENTINELS = {
             log(`Hades (${ownerId.toUpperCase()}): OBLIVION ${dmg} DMG!`);
             
             if (Math.random() < 0.02) {
-                let executeDmg = Math.floor(game[targetId].hp * 0.5);
+                let executeDmg = Math.floor(game[targetId].hp * 0.75);
                 game[targetId].hp -= executeDmg;
                 document.getElementById("arena").classList.add("shake");
                 setTimeout(() => document.getElementById("arena").classList.remove("shake"), 500);

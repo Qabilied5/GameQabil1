@@ -233,23 +233,20 @@
     box-shadow: 
         0 0 20px rgba(15, 240, 64, 0.5),
         inset 0 0 15px rgba(15, 240, 64, 0.3);
-    transform: translateY(-15px) rotateZ(1deg); /* Sedikit miring agar tidak kaku */
+    transform: translateY(-15px) rotateZ(1deg);
 }
 
-/* Aura Membesar & Berdenyut */
 .hera-card:hover::before {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.1);
     animation: heraPulse 2s infinite ease-in-out;
 }
 
-/* Partikel Mulai Bergerak Liar */
 .hera-card:hover::after {
     opacity: 0.6;
     animation: heraParticles 3s linear infinite;
 }
 
-/* Teks Menyala Terang */
 .hera-card:hover .sentinel-name {
     color: #fff;
     text-shadow: 
@@ -258,21 +255,16 @@
         0 0 40px #22af24;
 }
 
-/* --- ANIMASI GILA HERA --- */
-
-/* Animasi Aura Berdenyut */
 @keyframes heraPulse {
     0%, 100% { transform: translate(-50%, -50%) scale(1.1); filter: blur(30px); opacity: 0.7; }
     50% { transform: translate(-50%, -50%) scale(1.3); filter: blur(20px); opacity: 1; }
 }
 
-/* Animasi Partikel Kehidupan Mengalir ke Atas */
 @keyframes heraParticles {
     from { background-position: 0 0, 10px 10px; }
     to { background-position: 0 -100px, 10px -150px; }
 }
 
-/* Efek "Shockwave" Hijau saat pertama kali di-hover */
 .hera-card:hover::before {
     animation: 
         heraPulse 2s infinite ease-in-out, 
@@ -282,6 +274,51 @@
 @keyframes heraShockwave {
     0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+#pvp-pick-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(20, 10, 30, 0.98) 0%, rgba(5, 2, 10, 1) 100%);
+    z-index: 10000;
+    transition: all 0.5s ease;
+    isolation: isolate; 
+}
+
+#pvp-pick-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    background-image: 
+        linear-gradient(to right, rgba(13, 2, 22, 0) 30%, rgba(13, 2, 22, 0.9) 80%),
+        url('image/HERA-SENTINEL-BACKGROUND.png');
+        
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1; 
+    filter: drop-shadow(0 0 20px rgba(15, 240, 64, 0.2));
+}
+
+#pvp-pick-overlay:has(.hera-card:hover)::after {
+    opacity: 0.3;
+    visibility: visible;
+}
+
+#pvp-pick-overlay:has(.hera-card:hover)::after {
+    animation: heraEntrance 10s ease-in-out infinite alternate;
+}
+
+@keyframes heraEntrance {
+    from { transform: scale(1) translateX(0); }
+    to { transform: scale(1.05) translateX(10px); }
 }
 
 /* =========================================
@@ -323,6 +360,58 @@
 @keyframes thalorShieldPulse {
     0% { opacity: 0.6; transform: scale(1); }
     100% { opacity: 1; transform: scale(1.02); }
+}
+
+#pvp-pick-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    
+    background-image: 
+        linear-gradient(to left, rgba(13, 2, 22, 0) 30%, rgba(13, 2, 22, 0.9) 80%),
+        url('image/THALOR-SENTINEL-BACKGROUND.png');
+    
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    opacity: 0;
+    visibility: hidden;
+    
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease-in-out;
+    z-index: -1; 
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.2));
+}
+
+#pvp-pick-overlay:has(.thalor-card:hover)::before {
+    opacity: 0.4;
+    visibility: visible;
+}
+
+#pvp-pick-overlay:has(.thalor-card:hover)::before {
+    animation: thalorEntrance 12s ease-in-out infinite alternate;
+}
+
+@keyframes thalorEntrance {
+    from { transform: scale(1) translateX(0); }
+    to { transform: scale(1.03) translateX(10px); }
+}
+
+#pvp-pick-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(20, 10, 30, 0.98) 0%, rgba(5, 2, 10, 1) 100%);
+    z-index: 10000;
+
+    isolation: isolate; 
+}
+
+#pvp-pick-overlay .modal-content.ancient-border,
+.ancient-ritual-ring {
+    position: relative;
+    z-index: 10;
 }
 
 /* =========================================
@@ -423,3 +512,46 @@
         0 0 10px #ff0040, 
         0 0 20px #ff4500;
 }
+
+.hades-overlay-layer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(to left, rgba(13, 2, 22, 0) 30%, rgba(20, 5, 5, 0.9) 80%),
+        url('image/HADES-SENTINEL-BACKGROUND.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.6s ease;
+    z-index: -1;
+    pointer-events: none;
+}
+
+#pvp-pick-overlay:has(.hades-card:hover) .hades-overlay-layer {
+    opacity: 0.4; /* Sedikit lebih redup agar subtle */
+    visibility: visible;
+    /* Gerakan lambat: 6 detik per siklus */
+    animation: hadesSubtleMove 6s ease-in-out infinite alternate;
+}
+.modal-content.ancient-border {
+    position: relative;
+    z-index: 10;
+}
+
+@keyframes hadesSubtleMove {
+    0% {
+        transform: scale(1) translateY(0) translateX(0);
+        filter: brightness(1) saturate(1);
+    }
+    100% {
+        /* Hanya naik 8px dan membesar 1% */
+        transform: scale(1.01) translateY(-8px) translateX(-2px);
+        filter: brightness(1.1) saturate(1.1);
+    }
+

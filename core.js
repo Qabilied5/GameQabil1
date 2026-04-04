@@ -532,7 +532,7 @@ function openPvPPicker() {
         pickingStep = 1;
         pvpTempP1 = null;
         pvpTempP2 = null;
-        updatePvPPickerUI();
+        if (typeof updatePvPPickerUI === "function") updatePvPPickerUI();
     }
 }
 
