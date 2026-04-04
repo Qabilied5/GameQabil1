@@ -156,8 +156,6 @@ let sentinelTimer = null;
 let isSentinelActivePeriod = true;
 let elapsedInCycle = 0;
 
-// sentinel.js
-
 function startSentinelLoop() {
 
     if (sentinelTimer) {

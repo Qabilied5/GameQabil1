@@ -259,10 +259,10 @@
 
 
     <!-- MAIL OLD --> 
-<!-- <button id="mail-trigger" onclick="openMail()">
-  <span class="notification-dot"></span>
-  ✉
-</button> -->
+    <!-- <button id="mail-trigger" onclick="openMail()">
+      <span class="notification-dot"></span>
+      ✉
+    </button> -->
 
 <!-- MAIL NEW -->
  <button id="mail-trigger">
@@ -362,30 +362,46 @@
 </div>
 
 <!-- PVP SENTINEL DRAFT PICK -->
-<div id="pvp-pick-overlay" class="modal-overlay" style="display: none; background: rgba(0,0,0,0.95); z-index: 10000;">
-    <div class="modal-content" style="max-width: 600px; border: 2px solid gold;">
-        <h2 class="modal-title" id="pvp-pick-title">PLAYER 1: PICK YOUR SENTINEL</h2>
-        <p id="pvp-pick-subtitle">Ancient guardians await your command.</p>
+<div id="pvp-pick-overlay" class="modal-overlay" style="display: none; background: radial-gradient(circle, rgba(20, 10, 30, 0.98) 0%, rgba(5, 2, 10, 1) 100%); z-index: 10000;">
+    <div class="ancient-ritual-ring"></div>
+    
+    <div class="modal-content ancient-border">
+        <div class="arcane-glow"></div>
+        <h2 class="ancient-title" id="pvp-pick-title">PLAYER 1: AWAKEN YOUR GUARDIAN</h2>
+        <p id="pvp-pick-subtitle" style="font-family: 'Cinzel', serif; color: #b08dff; letter-spacing: 2px;">The void whispers their names...</p>
 
-        <div class="sentinel-selection-grid" style="display: flex; gap: 15px; justify-content: center; margin: 25px 0;">
-            <div class="sentinel-pick-card" onclick="selectPvPSentinel('hera')" style="border: 1px solid #0ff040d8; padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s;">
-                <h3 style="color: #0ff040d8; margin: 0;">HERA</h3>
-                <small>The Ancient Healer</small>
+        <div class="sentinel-selection-grid">
+            <div class="sentinel-pick-card hera-card" onclick="selectPvPSentinel('hera')">
+                <div class="card-inner">
+                    <h3 class="sentinel-name">HERA</h3>
+                    <div class="divider"></div>
+                    <small class="sentinel-desc">The Ancient Healer</small>
+                </div>
             </div>
-            <div class="sentinel-pick-card" onclick="selectPvPSentinel('thalor')" style="border: 1px solid #4da6ff; padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s;">
-                <h3 style="color: #4da6ff; margin: 0;">THALOR</h3>
-                <small>Eternal Warden</small>
+            <div class="sentinel-pick-card thalor-card" onclick="selectPvPSentinel('thalor')">
+                <div class="card-inner">
+                    <h3 class="sentinel-name">THALOR</h3>
+                    <div class="divider"></div>
+                    <small class="sentinel-desc">Eternal Warden</small>
+                </div>
             </div>
-            <div class="sentinel-pick-card" onclick="selectPvPSentinel('hades')" style="border: 1px solid #ff0000cd; padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s;">
-                <h3 style="color: #ff0000cd; margin: 0;">HADES</h3>
-                <small>Soul Reaper</small>
+            <div class="sentinel-pick-card hades-card" onclick="selectPvPSentinel('hades')">
+                <div class="card-inner">
+                    <h3 class="sentinel-name">HADES</h3>
+                    <div class="divider"></div>
+                    <small class="sentinel-desc">Soul Reaper</small>
+                </div>
             </div>
         </div>
 
-        <div id="pvp-status-indicator" style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 10px;">
-            Waiting for Player 1...
+        <div id="pvp-status-indicator" class="ancient-status">
+            COMMUNING WITH THE VOID...
         </div>
     </div>
+</div>
+
+<div id="match-intro-overlay" class="modal-overlay" style="display: none; background: radial-gradient(circle, #1a052d 0%, #000 100%); z-index: 20000; flex-direction: column; justify-content: center; align-items: center;">
+    <div id="match-intro-text" style="text-align: center;"></div>
 </div>
 
   </body>

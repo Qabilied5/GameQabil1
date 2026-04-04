@@ -155,12 +155,8 @@ const SKILLS = [
 ];
 
 function setMode(mode) {
-  // 1. UPDATE LOGIKA UTAMA
   currentGameMode = mode;
-  isPVP = (mode === 'pvp'); // Sinkronkan variabel global isPVP dengan mode yang dipilih
-
-  // 2. RESET SEMUA TOMBOL MODE (Hapus class active dari semua tombol mode)
-  // Gabungkan selector agar lebih efisien
+  isPVP = (mode === 'pvp');
   const allModeButtons = document.querySelectorAll('.mode-selector .diff-btn, #battle-mode-selector .diff-btn');
   allModeButtons.forEach(btn => btn.classList.remove('active-diff'));
 
@@ -184,7 +180,6 @@ function setMode(mode) {
     logContainer?.classList.add("pvp-log");
     cards.forEach((card) => card.classList.add("pvp-card"));
 
-    // Matikan tombol tingkat kesulitan (karena hanya untuk Bot)
     diffButtons.forEach((btn) => {
       btn.disabled = true;
       btn.classList.add("btn-disabled");
@@ -197,7 +192,7 @@ function setMode(mode) {
     const btnPve = document.getElementById("btn-pve");
     if (btnPve) btnPve.classList.add("active-diff");
 
-    updateSentinelUI(); // Jika kamu menggunakan sistem sentinel
+    updateSentinelUI();
     
     game.bot.hp = 200;
     game.bot.maxHp = 200;
@@ -207,7 +202,7 @@ function setMode(mode) {
     logContainer?.classList.remove("pvp-log");
     cards.forEach((card) => card.classList.remove("pvp-card"));
 
-    // Aktifkan kembali tombol tingkat kesulitan
+
     diffButtons.forEach((btn) => {
       btn.disabled = false;
       btn.classList.remove("btn-disabled");
@@ -216,8 +211,7 @@ function setMode(mode) {
     log("MODE: PLAYER VS BOT (JOVITA)");
   }
 
-  // 5. RE-INITIALIZE SKILLS
-  // Ini penting agar key hint (seperti [7], [8], [9]) muncul atau hilang sesuai mode
+  // key hint (seperti [7], [8], [9]) muncul atau hilang sesuai mode
   if (document.getElementById("p1-skills")) {
     init();
   }
@@ -532,40 +526,57 @@ function openPvPPicker() {
 function updatePvPPickerUI() {
     const title = document.getElementById("pvp-pick-title");
     const status = document.getElementById("pvp-status-indicator");
+    const modalContent = document.querySelector("#pvp-pick-overlay .modal-content");
     
     if (!title || !status) return;
 
+    title.classList.remove("text-transition");
+    status.classList.remove("text-transition");
+    modalContent?.classList.remove("picker-shake");
+
+    void title.offsetWidth; 
+
     if (pickingStep === 1) {
-        title.innerText = "PLAYER 1: PICK YOUR SENTINEL";
-        title.style.color = "var(--p1)";
-        status.innerText = "Player 2, please look away!";
+        title.innerText = "PLAYER 1: CHOOSE YOUR GUARDIAN";
+        title.style.color = "#00d4ff";
+        status.innerText = "The Void awaits your first command...";
     } else {
-        title.innerText = "PLAYER 2: PICK YOUR SENTINEL";
-        title.style.color = "var(--bot)"; // Warna untuk player 2
-        status.innerText = "Player 1 has chosen! Now it's Player 2's turn.";
+        title.innerText = "PLAYER 2: CHOOSE YOUR GUARDIAN";
+        title.style.color = "#ff0040";
+        status.innerText = "The Ancient Powers now call for a rival...";
     }
+
+    // 3. Tambahkan kembali class animasi
+    title.classList.add("text-transition");
+    status.classList.add("text-transition");
+    modalContent?.classList.add("picker-shake");
 }
 
 function selectPvPSentinel(sentinelKey) {
     if (pickingStep === 1) {
+
         pvpTempP1 = sentinelKey;
+
         pickingStep = 2;
+
         updatePvPPickerUI();
     } else {
+
         pvpTempP2 = sentinelKey;
         
-        // Simpan hasil ke localStorage
         localStorage.setItem("pvpSentinel", JSON.stringify({
             p1: pvpTempP1,
             p2: pvpTempP2
         }));
 
-        // Tutup overlay pemilihan
         const pvpOverlay = document.getElementById("pvp-pick-overlay");
-        if (pvpOverlay) pvpOverlay.remove();
+        if (pvpOverlay) {
+            pvpOverlay.style.display = "none";
+        }
+        
+        pickingStep = 1;
 
-        // Mulai game!
-        startGame();
+        startMatchIntro();
     }
 }
 
@@ -584,6 +595,54 @@ function updateDebuffLabel(p) {
   else if (game[p].shield > 0) el.style.color = "#fdff6bb0";
   else if (game[p].sHeal > 0) el.style.color = "#4ade80";
   else el.style.color = "";
+}
+
+function startMatchIntro() {
+    const overlay = document.getElementById("match-intro-overlay");
+    const container = document.getElementById("match-intro-text"); 
+    const pvpPicker = document.getElementById("pvp-pick-overlay");
+
+    if (pvpPicker) pvpPicker.style.display = "none";
+    
+    overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+
+    const sequences = [
+        { text: "THE ANCIENT VOWS AWAKEN", class: "intro-animate", duration: 1500 },
+        { text: "III", class: "intro-animate", duration: 800 },
+        { text: "II", class: "intro-animate", duration: 800 },
+        { text: "I", class: "intro-animate", duration: 800 },
+        { text: "SEAL THEIR FATE!", class: "battle-begin-animate", duration: 1200 }
+    ];
+
+    let currentStep = 0;
+
+    function runSequence() {
+        if (currentStep < sequences.length) {
+            const step = sequences[currentStep];
+            
+            container.innerHTML = ""; 
+            const el = document.createElement("h1");
+            el.className = step.class;
+            el.innerText = step.text;
+            container.appendChild(el);
+      
+            setTimeout(() => {
+                currentStep++;
+                runSequence();
+            }, step.duration);
+        } else {
+            overlay.style.transition = "opacity 0.5s ease";
+            overlay.style.opacity = "0";
+            
+            setTimeout(() => {
+                overlay.style.display = "none";
+                if (typeof startGame === "function") startGame(); 
+            }, 500);
+        }
+    }
+
+    runSequence();
 }
 
 function startEvent() {

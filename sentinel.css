@@ -39,21 +39,387 @@
 
 
 /* SENTINEL PVP DRAFTPICK STYLE */
+#pvp-pick-overlay .modal-content.ancient-border {
+    max-width: 700px;
+    background: #0d0216;
+    border: 2px solid #5a32a8; /* Ungu gelap */
+    box-shadow: 0 0 30px rgba(138, 43, 226, 0.3), inset 0 0 20px rgba(0, 0, 0, 1);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    border-image: linear-gradient(to bottom, #d4af37, #5a32a8) 1;
+}
+
+/* Efek Cahaya Arcane */
+.arcane-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(138, 43, 226, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    animation: pulseGlow 6s infinite alternate;
+}
+
+/* Judul Kuno */
+.ancient-title {
+    font-family: 'Cinzel', serif;
+    color: #e0d5ff;
+    text-shadow: 0 0 10px rgba(176, 141, 255, 0.8);
+    letter-spacing: 4px;
+    margin-bottom: 5px;
+}
+
+/* Grid Kartu */
+.sentinel-selection-grid {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 35px 0;
+}
+
+/* Style Kartu Sentinel */
+.sentinel-pick-card {
+    position: relative;
+    background: rgba(20, 5, 35, 0.8);
+    padding: 20px;
+    width: 160px;
+    border: 1px solid rgba(176, 141, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-inner {
+    position: relative;
+    z-index: 2;
+}
+
+.sentinel-name {
+    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #b08dff, transparent);
+    margin: 10px 0;
+    opacity: 0.5;
+}
+
+.sentinel-desc {
+    font-style: italic;
+    color: #9d8dbf;
+    font-size: 0.75rem;
+}
+
+/* Warna Spesifik per Sentinel dengan Nuansa Ungu */
 .sentinel-pick-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transform: translateY(-12px);
+    background: rgba(30, 10, 60, 0.95); /* Sedikit lebih terang saat dihover */
 }
 
-.sentinel-pick-card:active {
-    transform: scale(0.95);
+.card-inner {
+    position: relative;
+    z-index: 2; /* Di atas efek ::before/::after */
 }
 
-#pvp-pick-overlay .modal-content {
-    animation: fadeInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.sentinel-name {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: #f0eaff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-@keyframes fadeInScale {
-    from { opacity: 0; transform: scale(0.8); }
-    to { opacity: 1; transform: scale(1); }
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(176, 141, 255, 0.5), transparent);
+    margin: 12px 0;
+}
+
+.sentinel-desc {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    color: #a899c9;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* Draft Pick Change Turn Style */
+
+.text-transition {
+    animation: switchPlayer 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes switchPlayer {
+    0% { 
+        opacity: 0; 
+        transform: translateY(-10px) scale(0.9);
+        filter: blur(10px) brightness(2);
+    }
+    50% {
+        opacity: 0.5;
+        filter: blur(5px) brightness(1.5);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+        filter: blur(0) brightness(1);
+    }
+}
+
+/* Efek tambahan untuk kotak picker agar bergetar saat ganti turn */
+.picker-shake {
+    animation: shakeContainer 0.4s ease-in-out;
+}
+
+@keyframes shakeContainer {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+
+/* =========================================
+   1. HERA (Green Heal Flow Effect)
+   ========================================= */
+.hera-card {
+    position: relative;
+    z-index: 5;
+    overflow: visible !important; /* Agar partikel bisa melayang keluar */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 1. Efek Aura Hijau Mistis di Belakang */
+.hera-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(15, 240, 64, 0.25) 0%, transparent 70%);
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    z-index: -1;
+    filter: blur(30px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+}
+
+/* 2. Partikel Cahaya "Life Essence" (Melayang) */
+.hera-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    /* Membuat titik-titik cahaya hijau */
+    background-image: 
+        radial-gradient(circle, #0ff040 1px, transparent 1px),
+        radial-gradient(circle, #0ff040 2px, transparent 2px);
+    background-size: 20px 20px, 35px 35px;
+    background-position: 0 0, 10px 10px;
+    opacity: 0;
+    z-index: -2;
+    transition: opacity 0.4s;
+}
+
+/* --- HOVER STATE --- */
+.hera-card:hover {
+    border-color: #0ff040;
+    box-shadow: 
+        0 0 20px rgba(15, 240, 64, 0.5),
+        inset 0 0 15px rgba(15, 240, 64, 0.3);
+    transform: translateY(-15px) rotateZ(1deg); /* Sedikit miring agar tidak kaku */
+}
+
+/* Aura Membesar & Berdenyut */
+.hera-card:hover::before {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+    animation: heraPulse 2s infinite ease-in-out;
+}
+
+/* Partikel Mulai Bergerak Liar */
+.hera-card:hover::after {
+    opacity: 0.6;
+    animation: heraParticles 3s linear infinite;
+}
+
+/* Teks Menyala Terang */
+.hera-card:hover .sentinel-name {
+    color: #fff;
+    text-shadow: 
+        0 0 10px #0ff040, 
+        0 0 25px #0ff040,
+        0 0 40px #22af24;
+}
+
+/* --- ANIMASI GILA HERA --- */
+
+/* Animasi Aura Berdenyut */
+@keyframes heraPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1.1); filter: blur(30px); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.3); filter: blur(20px); opacity: 1; }
+}
+
+/* Animasi Partikel Kehidupan Mengalir ke Atas */
+@keyframes heraParticles {
+    from { background-position: 0 0, 10px 10px; }
+    to { background-position: 0 -100px, 10px -150px; }
+}
+
+/* Efek "Shockwave" Hijau saat pertama kali di-hover */
+.hera-card:hover::before {
+    animation: 
+        heraPulse 2s infinite ease-in-out, 
+        heraShockwave 0.5s ease-out;
+}
+
+@keyframes heraShockwave {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+/* =========================================
+   2. THALOR (Yellow Shield Boundary Effect)
+   ========================================= */
+.thalor-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    box-sizing: border-box;
+    z-index: 1;
+    transition: all 0.3s;
+}
+
+.thalor-card:hover {
+    border-color: #d4af37; /* Emas Tua Kuno */
+    /* Layered Gold Glow */
+    box-shadow: 
+        0 0 15px rgba(212, 175, 55, 0.5),
+        0 0 30px rgba(212, 175, 55, 0.3),
+        inset 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.thalor-card:hover .sentinel-name {
+    color: #fff;
+    text-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37;
+}
+
+/* Efek Perisai Menguning di Pinggiran saat Hover */
+.thalor-card:hover::before {
+    top: -5px; left: -5px; width: calc(100% + 10px); height: calc(100% + 10px);
+    border-color: #ffea00; /* Kuning Terang */
+    box-shadow: 0 0 20px #ffea00, inset 0 0 10px #ffea00;
+    animation: thalorShieldPulse 1.5s infinite alternate;
+}
+
+@keyframes thalorShieldPulse {
+    0% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.02); }
+}
+
+/* =========================================
+   3. HADES (Red-Orange Fire Effect)
+   ========================================= */
+
+.hades-card {
+    position: relative;
+    /* Pastikan z-index card utama lebih tinggi dari api */
+    z-index: 5; 
+    /* Hapus overflow: hidden jika sebelumnya ada, 
+       agar api bisa menjalar keluar batas kotak */
+    overflow: visible !important; 
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Pseudo-element untuk Efek Api (Background) */
+.hades-card::before {
+    content: '';
+    position: absolute;
+    /* Posisi di tengah belakang */
+    top: 50%;
+    left: 50%;
+    width: 140%; /* Lebih lebar dari kartu */
+    height: 140%; /* Lebih tinggi dari kartu */
+    transform: translate(-50%, -50%) scale(0.8);
+    
+    /* Warna gradien api yang lebih tajam */
+    background: radial-gradient(
+        circle, 
+        rgba(255, 69, 0, 0.8) 0%, 
+        rgba(255, 0, 0, 0.4) 40%, 
+        transparent 70%
+    );
+    
+    filter: blur(25px);
+    opacity: 0;
+    z-index: -1; /* DI BELAKANG KONTEN KARTU */
+    transition: opacity 0.5s, transform 0.5s;
+    pointer-events: none;
+}
+
+/* Tambahan: Efek Bara Api Kecil di Belakang */
+.hades-card::after {
+    content: '🔥'; /* Opsional: Bisa dikosongkan jika hanya ingin cahaya */
+    font-size: 3rem;
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: blur(15px);
+    opacity: 0;
+    z-index: -2;
+    transition: all 0.5s;
+}
+
+/* HOVER STATE */
+.hades-card:hover {
+    border-color: #ff0040;
+    box-shadow: 
+        0 0 20px rgba(255, 0, 64, 0.4),
+        inset 0 0 15px rgba(255, 69, 0, 0.2);
+    transform: translateY(-12px) scale(1.02);
+}
+
+.hades-card:hover::before {
+    opacity: 1;
+    /* Animasi membesar dan bergetar seperti api */
+    transform: translate(-50%, -60%) scale(1.1); 
+    animation: hadesInferno 2s infinite alternate;
+}
+
+.hades-card:hover::after {
+    opacity: 0.6;
+    bottom: 20px;
+}
+
+/* Animasi Kobaran Api di Belakang */
+@keyframes hadesInferno {
+    0% {
+        transform: translate(-50%, -60%) scale(1.1) skewX(-2deg);
+        filter: blur(25px) brightness(1);
+    }
+    50% {
+        transform: translate(-50%, -65%) scale(1.2) skewX(2deg);
+        filter: blur(20px) brightness(1.3);
+    }
+    100% {
+        transform: translate(-50%, -60%) scale(1.15) skewX(-1deg);
+        filter: blur(28px) brightness(1.1);
+    }
+}
+
+/* Glow pada Teks Hades agar tetap terbaca tapi terkesan panas */
+.hades-card:hover .sentinel-name {
+    color: #fff;
+    text-shadow: 
+        0 0 10px #ff0040, 
+        0 0 20px #ff4500;
 }
