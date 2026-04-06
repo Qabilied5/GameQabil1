@@ -51,11 +51,12 @@ const SENTINELS = {
                 log(`🛡️ Thalor (${ownerId.toUpperCase()}): GREAT SHIELD!`);
             }
             
-            if (Math.random() < 0.1) {
-                game[targetId].hp -= 15;
+            if (Math.random() < 0.15) {
+                game[ownerId].hp += 20;
                 createStrikeVisual(targetId);
-                createSentinelVisual(ownerId, "PASSIVE STRIKE!", "#e62323d3");
-                createSentinelVisual(targetId, "-15HP", "#e62323d3");
+                createSentinelVisual(ownerId, "PASSIVE HEAL!!", "#25ad34d3");
+                createSentinelVisual(ownerId, "+20HP", "#25ad34d3");
+                log(`🛡️ Thalor (${ownerId.toUpperCase()}): PASSIVE HEAL +20HP!`);
             }
         }
     },
@@ -74,13 +75,14 @@ const SENTINELS = {
                 log(`Hades (${ownerId.toUpperCase()}): OBLIVION ${dmg} DMG!`);
             }
             
-            if (Math.random() < 0.02) {
+            if (Math.random() < 0.05) {
                 let executeDmg = Math.floor(game[targetId].hp * 0.75);
                 game[targetId].hp -= executeDmg;
                 document.getElementById("arena").classList.add("shake");
                 setTimeout(() => document.getElementById("arena").classList.remove("shake"), 500);
                 createSentinelVisual(ownerId, "DIE!", "#000");
-                log(`HADES (${ownerId.toUpperCase()}): EXECUTION!`);
+                createSentinelVisual(targetId, `-${executeDmg}HP`, "#ff0000");
+                log(`HADES (${ownerId.toUpperCase()}): EXECUTION! -${executeDmg} DMG`);
             }
         }
     }

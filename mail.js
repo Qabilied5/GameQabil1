@@ -84,17 +84,17 @@ const mailData = {
                     <tr>
                         <td style="color:#4da6ff"><b>THALOR</b></td>
                         <td>Dual Shield (Every 10s)</td>
-                        <td>5% Chance: 15 DMG Strike</td>
+                        <td>15% Chance: Heal +20HP</td>
                     </tr>
                     <tr>
                         <td style="color:#0ff040"><b>HERA</b></td>
-                        <td>+13 HP Regeneration</td>
-                        <td>10% Chance: 15 DMG Strike</td>
+                        <td>13-25 HP Regeneration</td>
+                        <td>15% Chance: 15 DMG Strike</td>
                     </tr>
                     <tr>
                         <td style="color:#ff4444"><b>HADES</b></td>
                         <td>15-25 Oblivion Damage</td>
-                        <td>1% Chance: 80% HP Execution</td>
+                        <td>5% Chance: 75% HP Execution</td>
                     </tr>
                 </tbody>
             </table>
