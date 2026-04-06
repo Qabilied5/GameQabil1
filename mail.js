@@ -67,7 +67,7 @@ const mailData = {
 
         <div class="mail-section">
             <b>THE ETERNAL CYCLE:</b><br>
-            A <span class="fire-text">SENTINEL</span> breathes with the rhythm of battle. They remain <b>ACTIVE for 30s</b> to unleash their powers every 5s, followed by a <b>30s RESTING</b> period to recover their essence.
+            A <span class="fire-text">SENTINEL</span> breathes with the rhythm of battle. They remain <b>ACTIVE for 30s, with a</b> 60% chance to unleash their powers every 5s, followed by a <b>30s RESTING</b> period to recover their essence.
         </div>
 
         <div class="mail-section">

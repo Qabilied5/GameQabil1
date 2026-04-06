@@ -6,6 +6,79 @@
     animation: glow-pulse 2s infinite;
 }
 
+/* SENTINEL INFORMATION PVP */
+.sentinel-badge {
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    padding: 4px 15px;
+    
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    
+    margin: 0 auto 12px auto;
+    width: fit-content;
+    text-transform: uppercase;
+    
+    animation: badge-pulse 3s infinite ease-in-out;
+    display: none; 
+}
+
+
+.sentinel-badge.resting {
+    background: rgba(20, 0, 30, 0.6);
+    color: #777 !important; 
+    border-color: rgba(168, 85, 247, 0.3) !important;
+    box-shadow: none !important;
+    
+    filter: grayscale(0.8) brightness(0.6); 
+    animation: none;
+    opacity: 1;
+    position: relative;
+}
+
+.sentinel-badge.resting::after {
+    content: " (RESTING)";
+    font-size: 0.55rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+
+    color: #bf40ff; 
+    
+    display: inline-block;
+    filter: grayscale(0) brightness(1.5); 
+    text-shadow: 0 0 10px rgba(191, 64, 255, 0.8);
+}
+
+.sentinel-name-hera { 
+    color: #4ade80; 
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.3), inset 0 0 10px rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.4);
+}
+
+.sentinel-name-thalor { 
+    color: #60a5fa; 
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.3), inset 0 0 10px rgba(96, 165, 250, 0.2);
+    border-color: rgba(96, 165, 250, 0.4);
+}
+
+.sentinel-name-hades { 
+    color: #f87171; 
+    box-shadow: 0 0 15px rgba(248, 113, 113, 0.3), inset 0 0 10px rgba(248, 113, 113, 0.2);
+    border-color: rgba(248, 113, 113, 0.4);
+}
+
+@keyframes badge-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; filter: brightness(1.2); }
+}
+
+/* ------------------------------------ */
+
 @keyframes glow-pulse {
     0% { transform: scale(1); box-shadow: 0 0 5px currentColor; }
     50% { transform: scale(1.05); box-shadow: 0 0 20px currentColor; }

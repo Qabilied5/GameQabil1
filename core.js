@@ -313,6 +313,7 @@ function startGame() {
   game.p1.shieldTurns = 0;
 
   const startBtn = document.querySelector(".start-btn");
+  updateSentinelDisplay();
   
   if (typeof startSentinelLoop === "function") {
     startSentinelLoop();
@@ -502,9 +503,10 @@ function playIntro(callback) {
 function initiateBattle() {
     const overlay = document.getElementById("start-overlay");
     
-    // PERBAIKAN: Cek jika mode adalah PvP
+    // jika mode adalah PvP
     if (currentGameMode === 'pvp') {
-        openPvPPicker(); 
+        // openPvPPicker(); // --> Ganti OVERLAY HINT dlu
+        document.getElementById("pvp-hint-modal").style.display = "flex"; 
         return;
     }
 
@@ -534,6 +536,13 @@ function openPvPPicker() {
         pvpTempP2 = null;
         if (typeof updatePvPPickerUI === "function") updatePvPPickerUI();
     }
+}
+
+function closePvPHint() {
+    const hintModal = document.getElementById("pvp-hint-modal");
+    if (hintModal) hintModal.style.display = "none";
+    
+    openPvPPicker();
 }
 
 function updatePvPPickerUI() {

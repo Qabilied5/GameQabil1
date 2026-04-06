@@ -9,15 +9,20 @@ const SENTINELS = {
             const owner = game[ownerId];
             const target = game[targetId];
 
-            owner.hp = Math.min(owner.maxHp, owner.hp + 13);
-            createSentinelVisual(ownerId, "+13HP", "#22af24d3");
-            log(`Hera (${ownerId.toUpperCase()}): Healing +13 HP!`);
-            
-            for (let i = 0; i < 3; i++) createHealParticle(ownerId);
-            
-            const card = document.getElementById(`${ownerId}-card`);
-            card.classList.add("healing-active");
-            setTimeout(() => card.classList.remove("healing-active"), 500);
+            if (Math.random() < 0.65) {
+                
+                const heraHealAmount = Math.floor(Math.random() * (25 - 15 + 1)) + 15;
+                
+                owner.hp = Math.min(owner.maxHp, owner.hp + heraHealAmount);
+                createSentinelVisual(ownerId, `+${heraHealAmount}HP`, "#22af24d3");
+                log(`Hera (${ownerId.toUpperCase()}): Healing +${heraHealAmount} HP!`);
+                
+                for (let i = 0; i < 3; i++) createHealParticle(ownerId);
+                
+                const card = document.getElementById(`${ownerId}-card`);
+                card.classList.add("healing-active");
+                setTimeout(() => card.classList.remove("healing-active"), 500);
+            }
             
             if (Math.random() < 0.15) {
                 target.hp -= 15;
@@ -59,12 +64,15 @@ const SENTINELS = {
         color: "#ff0000cd",
         desc: "Soul Reaper - Executor",
         action: (ownerId, targetId) => {
-            let dmg = Math.floor(Math.random() * 11) + 15;
-            game[targetId].hp -= dmg;
-            createStrikeVisual(targetId);
-            createSentinelVisual(ownerId, "OBLIVION!", "#c81818d3");
-            createSentinelVisual(targetId, `-${dmg}HP`, "#c81818d3");
-            log(`Hades (${ownerId.toUpperCase()}): OBLIVION ${dmg} DMG!`);
+            
+            if (Math.random() < 0.65) {
+                let dmg = Math.floor(Math.random() * 11) + 15;
+                game[targetId].hp -= dmg;
+                createStrikeVisual(targetId);
+                createSentinelVisual(ownerId, "OBLIVION!", "#c81818d3");
+                createSentinelVisual(targetId, `-${dmg}HP`, "#c81818d3");
+                log(`Hades (${ownerId.toUpperCase()}): OBLIVION ${dmg} DMG!`);
+            }
             
             if (Math.random() < 0.02) {
                 let executeDmg = Math.floor(game[targetId].hp * 0.75);
@@ -100,6 +108,31 @@ const SENTINELS = {
 
 };
 
+function updateSentinelDisplay() {
+    const p1Badge = document.getElementById("p1-sentinel-info");
+    const p2Badge = document.getElementById("bot-sentinel-info");
+    
+    if (isPVP) {
+        const pvpData = JSON.parse(localStorage.getItem("pvpSentinel"));
+        if (pvpData) {
+            const icons = { hera: "🌿", thalor: "🛡️", hades: "🔥" };
+
+            // Player 1
+            p1Badge.innerHTML = `${icons[pvpData.p1]} ${pvpData.p1}`;
+            p1Badge.className = `sentinel-badge sentinel-name-${pvpData.p1}`;
+            p1Badge.style.display = "block";
+
+            // Player 2
+            p2Badge.innerHTML = `${icons[pvpData.p2]} ${pvpData.p2}`;
+            p2Badge.className = `sentinel-badge sentinel-name-${pvpData.p2}`;
+            p2Badge.style.display = "block";
+        }
+    } else {
+        if (p1Badge) p1Badge.style.display = "none";
+        if (p2Badge) p2Badge.style.display = "none";
+    }
+}
+
 function createSentinelVisual(targetId, text, color) {
     const card = document.getElementById(`${targetId}-card`);
     if (!card) return;
@@ -110,19 +143,30 @@ function createSentinelVisual(targetId, text, color) {
     popup.className = "sentinel-active-popup";
     popup.innerText = text;
     popup.setAttribute("data-text", text); 
-
-
     popup.style.setProperty('--sentinel-color', color);
 
-    popup.style.left = (rect.left + rect.width / 2) + "px";
-    popup.style.top = (rect.top + 10) + "px"; 
-    popup.style.transform = "translateX(-50%)";
+    const randomX = (Math.random() * 140) - 70; 
+    const randomY = (Math.random() * 60) - 30;
+
+    const randomScale = 0.8 + (Math.random() * 0.5);
+    
+    const randomRotate = (Math.random() * 40) - 20;
+
+    const randomDuration = 1.5 + (Math.random() * 1);
+
+    // Set Style
+    popup.style.left = (rect.left + rect.width / 2 + randomX) + "px";
+    popup.style.top = (rect.top + 30 + randomY) + "px"; 
+    popup.style.zIndex = "1000";
+    
+    popup.style.transform = `translateX(-50%) rotate(${randomRotate}deg) scale(${randomScale})`;
+    popup.style.animationDuration = `${randomDuration}s`;
 
     document.body.appendChild(popup);
     
     setTimeout(() => {
         if (popup.parentNode) popup.remove();
-    }, 2000);
+    }, randomDuration * 1000);
 }
 
 let playerSentinel = localStorage.getItem("mySentinel") || null;
@@ -158,30 +202,24 @@ let isSentinelActivePeriod = true;
 let elapsedInCycle = 0;
 
 function startSentinelLoop() {
-
     if (sentinelTimer) {
         clearInterval(sentinelTimer);
         sentinelTimer = null;
     }
 
     let activeSentinels = [];
+    const p1Badge = document.getElementById("p1-sentinel-info");
+    const p2Badge = document.getElementById("bot-sentinel-info");
 
     if (isPVP) {
         const pvpData = JSON.parse(localStorage.getItem("pvpSentinel"));
         if (pvpData) {
-            if (pvpData.p1 && SENTINELS[pvpData.p1]) {
-                activeSentinels.push({ owner: "p1", target: "bot", key: pvpData.p1 });
-            }
-            if (pvpData.p2 && SENTINELS[pvpData.p2]) {
-                activeSentinels.push({ owner: "bot", target: "p1", key: pvpData.p2 });
-            }
+            if (pvpData.p1 && SENTINELS[pvpData.p1]) activeSentinels.push({ owner: "p1", target: "bot", key: pvpData.p1 });
+            if (pvpData.p2 && SENTINELS[pvpData.p2]) activeSentinels.push({ owner: "bot", target: "p1", key: pvpData.p2 });
         }
     } else {
-        // --- LOGIKA PVE ---
         const savedKey = localStorage.getItem("mySentinel");
-        if (savedKey && SENTINELS[savedKey]) {
-            activeSentinels.push({ owner: "p1", target: "bot", key: savedKey });
-        }
+        if (savedKey && SENTINELS[savedKey]) activeSentinels.push({ owner: "p1", target: "bot", key: savedKey });
     }
 
     if (activeSentinels.length === 0) return;
@@ -196,9 +234,20 @@ function startSentinelLoop() {
         }
 
         elapsedInCycle += 5;
+        
         if (elapsedInCycle > 30) {
             isSentinelActivePeriod = !isSentinelActivePeriod;
             elapsedInCycle = 5;
+
+            if (isSentinelActivePeriod) {
+                if (p1Badge) p1Badge.classList.remove("resting");
+                if (p2Badge) p2Badge.classList.remove("resting");
+                log("✨ THE SENTINELS HAVE AWAKENED!");
+            } else {
+                if (p1Badge) p1Badge.classList.add("resting");
+                if (p2Badge) p2Badge.classList.add("resting");
+                log("🌑 THE SENTINELS ARE RESTING...");
+            }
         }
 
         if (isSentinelActivePeriod) {
@@ -209,10 +258,8 @@ function startSentinelLoop() {
                 }
             });
 
-            // Cek kematian setelah aksi sentinel
             if (game.p1.hp <= 0) win("bot");
             if (game.bot.hp <= 0) win("p1");
-            
             updateUI();
         }
     }, 5000);
