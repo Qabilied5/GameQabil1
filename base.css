@@ -1212,3 +1212,120 @@ body.insanity-active .rune {
 .start-btn {
     margin-top: 30px;
 }
+
+/* MATCH TOTAL BAR */
+/* Container Utama - Border Diperbarui menjadi lebih Simple & Elegan */
+#damage-tracker-container {
+    padding: 10px;
+    background: rgba(10, 5, 5, 0.75);
+    border-radius: 4px;
+    /* Border tipis dengan gradasi gelap ke emas redup */
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    /* Efek bayangan dalam untuk kedalaman */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.05);
+    position: relative;
+    overflow: visible;
+    margin: 20px auto;
+}
+
+/* Ornamen Sudut (Menambah kesan Ancient tanpa terlihat mencolok) */
+#damage-tracker-container::before,
+#damage-tracker-container::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 1px solid #ffd700;
+}
+
+#damage-tracker-container::before {
+    top: -2px;
+    left: -2px;
+    border-right: none;
+    border-bottom: none;
+}
+
+#damage-tracker-container::after {
+    bottom: -2px;
+    right: -2px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Label Teks di Atas Bar */
+.bar-label {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 700;
+    text-shadow: 0 0 8px #ff4500, 2px 2px 2px #000;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: #ffd700;
+}
+
+/* Angka Damage */
+#total-dmg-value {
+    color: #fff;
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 2px #ffd700);
+}
+
+/* Background Bar (Slot Kosong) */
+.damage-bar-bg {
+    height: 14px;
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    /* Efek sudut terpotong minimalis */
+    clip-path: polygon(1% 0%, 99% 0%, 100% 50%, 99% 100%, 1% 100%, 0% 50%);
+    box-shadow: inset 0 0 10px #000;
+}
+
+/* Progress Bar (Isian Damage) */
+#damage-progress-bar {
+    height: 100%;
+    width: 0%;
+    /* Gradasi: Merah Tua -> Merah Menyala -> Emas */
+    background: linear-gradient(90deg, 
+        #4d0000 0%, 
+        #ff0000 50%, 
+        #ffd700 100%);
+    background-size: 200% 100%;
+    animation: pulseGlow 3s infinite linear;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+/* Efek Kilat Magic pada Bar */
+#damage-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        rgba(255, 255, 255, 0.15) 0%, 
+        transparent 50%, 
+        rgba(0, 0, 0, 0.2) 100%
+    );
+}
+
+/* Animasi Mengalir */
+@keyframes pulseGlow {
+    0% { background-position: 100% 0%; }
+    100% { background-position: -100% 0%; }
+}
+
+/* Efek Bergetar & Glow saat mencapai 2000 DMG */
+.bar-completed {
+    animation: shake 0.5s infinite;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4) !important;
+    border-color: rgba(255, 215, 0, 0.8) !important;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    20% { transform: translate(-1px, -2px) rotate(-1deg); }
+    40% { transform: translate(-3px, 0px) rotate(1deg); }
+    60% { transform: translate(3px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -1px) rotate(0deg); }
+}

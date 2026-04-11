@@ -59,10 +59,17 @@
               None (Defeat Expert Mode)
             </div>
           </div>
-          <div class="info-item" style="border-left-color: var(--bot)">
+
+          <div class="info-item" style="border-left-color: #ffd700">
+            <strong>TREASURY</strong>
+            <span id="gold-display" style="color: #ffd700; font-weight: bold;">0</span> GOLD
+          </div>
+
+          <!-- <div class="info-item" style="border-left-color: var(--bot)">
             <strong>INSANITY MODE!</strong>
             Bring Your Sentinel!
-          </div>
+          </div> -->
+
           <!-- <div class="info-item">
             <strong>STRIKE</strong>
             Damage 12+ | (+25) Mana gain
@@ -184,6 +191,18 @@
 
             <button id="gacha-btn-roll" class="start-btn" onclick="rollGacha()">SUMMON SENTINEL</button>
             <button id="gacha-btn-close" class="start-btn" style="display:none" onclick="location.reload()">CLAIM & CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- TOTAL MATCH DAMAGE BAR -->
+    <div id="damage-tracker-container">
+        <div class="bar-label">
+            <span style="color: #ff4500;">⚔</span> 
+            Total Match Essence: 
+            <span id="total-dmg-value">0</span> / 2000
+        </div>
+        <div class="damage-bar-bg">
+            <div id="damage-progress-bar"></div>
         </div>
     </div>
 

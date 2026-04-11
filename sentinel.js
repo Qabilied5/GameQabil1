@@ -25,7 +25,9 @@ const SENTINELS = {
             }
             
             if (Math.random() < 0.15) {
-                target.hp -= 15;
+                let passiveHera = 15;
+                target.hp -= passiveHera;
+                updateDamageTracker(passiveHera);
                 createStrikeVisual(targetId);
                 createSentinelVisual(ownerId, "PASSIVE STRIKE", "#cc1414d3");
                 createSentinelVisual(targetId, "-15HP", "#cc1414d3");
@@ -69,6 +71,7 @@ const SENTINELS = {
             if (Math.random() < 0.65) {
                 let dmg = Math.floor(Math.random() * 11) + 15;
                 game[targetId].hp -= dmg;
+                updateDamageTracker(dmg);
                 createStrikeVisual(targetId);
                 createSentinelVisual(ownerId, "OBLIVION!", "#c81818d3");
                 createSentinelVisual(targetId, `-${dmg}HP`, "#c81818d3");
@@ -78,6 +81,7 @@ const SENTINELS = {
             if (Math.random() < 0.05) {
                 let executeDmg = Math.floor(game[targetId].hp * 0.75);
                 game[targetId].hp -= executeDmg;
+                updateDamageTracker(executeDmg);
                 document.getElementById("arena").classList.add("shake");
                 setTimeout(() => document.getElementById("arena").classList.remove("shake"), 500);
                 createSentinelVisual(ownerId, "DIE!", "#000");

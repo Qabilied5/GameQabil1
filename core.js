@@ -5,6 +5,22 @@ let pickingStep = 1;
 let pvpTempP1 = null;
 let pvpTempP2 = null;
 
+// MATCH TOTAL CALCULATION
+let totalMatchDamage = 0;
+const MAX_DAMAGE_EVENT = 2000;
+
+let playerGold = parseInt(localStorage.getItem("playerGold")) || 0;
+
+function updateGoldUI() {
+    const goldEl = document.getElementById("gold-display");
+    if (goldEl) goldEl.innerText = localStorage.getItem("playerGold") || "0";
+}
+
+function updateGoldDisplay() {
+    const goldEl = document.getElementById("gold-display");
+    if (goldEl) goldEl.innerText = playerGold;
+}
+
 if (!hasWonExpert) {
     localStorage.setItem("insanityUnlocked", "false");
     console.log("Mode Insanity dikunci (Belum ada rekor menang Expert).");
@@ -361,7 +377,10 @@ function startGame() {
     ["p1", "bot"].forEach((p) => {
       if (game[p].burn > 0) {
         game[p].burn -= 0.1;
-        game[p].hp -= 0.5;
+        let burnDmg = 0.5;
+        game[p].hp -= burnDmg;
+        updateDamageTracker(burnDmg);
+
         document.getElementById(`${p}-card`).classList.add("burning");
         if (game[p].hp <= 0) win(p === "p1" ? "bot" : "p1");
         if (game[p].burn <= 0) {
@@ -521,6 +540,60 @@ function initiateBattle() {
         playIntro(startGame);
     } else {
         startGame();
+    }
+}
+
+
+let hasReachedMidEvent = false;
+
+function updateDamageTracker(amount) {
+    if (isNaN(amount) || amount <= 0) return;
+    
+    totalMatchDamage += amount;
+    
+    // Update teks angka
+    const textElement = document.getElementById('total-dmg-value');
+    if (textElement) textElement.innerText = Math.floor(totalMatchDamage).toLocaleString();
+
+    const progressBar = document.getElementById('damage-progress-bar');
+    if (progressBar) {
+        let percentage = Math.min((totalMatchDamage / MAX_DAMAGE_EVENT) * 100, 100);
+        progressBar.style.width = percentage + "%";
+        
+        if (totalMatchDamage >= 1000 && !hasReachedMidEvent) {
+            hasReachedMidEvent = true; // Kunci agar tidak spam heal
+            
+            ["p1", "bot"].forEach((pid) => {
+                const currentMaxHP = (pid === "bot" && !isPVP) ? 200 : 100;
+                
+                game[pid].hp = Math.min(currentMaxHP, game[pid].hp + 50);
+                
+                createSentinelVisual(ownerId, "REACH 1000DMG : +50HP", "#12ed92d3");
+
+                const card = document.getElementById(`${pid}-card`);
+                if (card) {
+                    card.classList.add("healing-active");
+                    setTimeout(() => card.classList.remove("healing-active"), 1000);
+                }
+                
+                if (typeof createHealParticle === "function") {
+                    for (let i = 0; i < 8; i++) createHealParticle(pid);
+                }
+            });
+            
+            log("✨ EVENT: Ancient Power restored 50 HP to both fighters!");
+        }
+        // --------------------------------------------------
+
+        // Efek visual jika mencapai target 2000
+        if (totalMatchDamage >= MAX_DAMAGE_EVENT) {
+            progressBar.style.background = "linear-gradient(90deg, #ffd700, #fff)";
+            progressBar.style.boxShadow = "0 0 20px #ffd700";
+            
+            // Tambahkan class shake atau animasi selesai jika diinginkan
+            const container = document.getElementById('damage-tracker-container');
+            if (container) container.classList.add("bar-completed");
+        }
     }
 }
 
@@ -706,6 +779,7 @@ function useSkill(sid, pid) {
   if (sid === "strike") {
     let d = (selectedDiff === "insanity" && pid === "bot") ? calc(15, 20, opp) : calc(10, 16, opp);
     game[opp].hp -= d;
+    updateDamageTracker(d);
     
     strikeSound.currentTime = 0;
     strikeSound.play();
@@ -765,6 +839,8 @@ function useSkill(sid, pid) {
     let d = game[opp].shield > 0 ? Math.floor(baseDamage * 0.25) : baseDamage;
     game[opp].hp -= d;
 
+    updateDamageTracker(d);
+
     let vampHeal = 25;
     const maxHP_vamp = (pid === "bot" && !isPVP) ? 200 : 100;
     game[pid].hp = Math.min(maxHP_vamp, game[pid].hp + vampHeal);
@@ -777,6 +853,7 @@ function useSkill(sid, pid) {
     log(`❄️ ${pid.toUpperCase()} membekukan ${opp.toUpperCase()}!`);
   } else if (sid === "ulti") {
     let d = (selectedDiff === "insanity" && pid === "bot") ? calc(50, 75, opp) : calc(35, 50, opp);
+    updateDamageTracker(d);
     ultiSound.currentTime = 0;
     ultiSound.play();
     setTimeout(() => {
@@ -1013,6 +1090,20 @@ function win(id) {
   } else {
     // --- LOGIKA MENANG MODE PVE (SOLO) ---
     if (id === "p1") {
+
+      // GOLD LOGIC
+      let reward = 0;
+      if (selectedDiff === "normal") reward = 25;
+      else if (selectedDiff === "hard") reward = 150;
+      else if (selectedDiff === "expert") reward = 450;
+      else if (selectedDiff === "insanity") reward = 1000;
+
+      playerGold += reward;
+      localStorage.setItem("playerGold", playerGold.toString());
+
+      updateGoldDisplay();
+
+      // POPUP WIN LOGIC
       resTitle.innerText = "VICTORY";
       resTitle.style.color = "#4ade80";
       resWinner.innerText = "THE ENTITY IS VANQUISHED";
@@ -1025,7 +1116,6 @@ function win(id) {
         resMsg.innerText = "The whispers grow louder... The INSANITY has been unleashed. There is no turning back.";
         resMsg.style.color = "#ff4444";
 
-        // Tambahkan tombol Gacha jika belum ada
         if (!document.getElementById("gacha-trigger-btn")) {
           const gachaBtn = document.createElement("button");
           gachaBtn.id = "gacha-trigger-btn";
@@ -1036,11 +1126,10 @@ function win(id) {
           document.querySelector("#result-overlay .popup-content")?.appendChild(gachaBtn);
         }
       } else {
-        resMsg.innerText = "The entity Jovita is banished back into the starless void. Your soul remains... for now.";
+        resMsg.innerText = 'The entity Jovita is banished back into the starless void. Your soul remains... for now.';
         resMsg.style.color = "";
       }
     } else {
-      // Logika Kalah (Player 1 kalah oleh Bot)
       resTitle.innerText = "DEFEAT";
       resTitle.style.color = "#f87171";
       resMsg.innerText = "Your blood shall stain the altar. Die in silence, or rise to fail again.";
@@ -1089,6 +1178,7 @@ function executeSuperPunch(pid, opp) {
     let d = calc(baseDmg, baseDmg, opp);
 
     game[opp].hp -= d;
+    updateDamageTracker(d);
 
     const currentMaxHP = (pid === "bot" && !isPVP) ? 200 : 100;
 
@@ -1139,3 +1229,4 @@ function executeSuperPunch(pid, opp) {
   }, s.interval);
 }
 
+updateGoldUI();
