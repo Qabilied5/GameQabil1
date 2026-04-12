@@ -1,0 +1,62 @@
+/* ============================================================
+   SKIN: VOID WALKER
+   ============================================================ */
+
+.card.skin-void {
+    background: rgba(10, 0, 20, 0.6); /* Gelap Pekat */
+    backdrop-filter: blur(25px) saturate(150%);
+    border: 1px solid rgba(138, 43, 226, 0.4);
+    box-shadow: 0 0 30px rgba(75, 0, 130, 0.5), 
+                inset 0 0 20px rgba(138, 43, 226, 0.2);
+    overflow: hidden;
+}
+
+/* Ornamen Pojok Void (Ungu Menyala) */
+.card.skin-void::before,
+.card.skin-void::after {
+    border-color: #8a2be2; 
+    filter: drop-shadow(0 0 5px #8a2be2);
+    opacity: 0.9;
+}
+
+/* Judul Skin Void */
+.card.skin-void h2 {
+    color: #bc85ff !important;
+    text-shadow: 0 0 15px #8a2be2, 0 0 5px #fff;
+    letter-spacing: 5px;
+}
+
+/* Divider Garis Void */
+.card.skin-void h2::after {
+    background: linear-gradient(90deg, transparent, #8a2be2, transparent);
+}
+
+/* HP Bar Void (Deep Purple to Black) */
+.card.skin-void .hp-fill {
+    background: linear-gradient(90deg, #2e004f, #6a0dad, #a855f7);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+}
+
+/* Mana Bar Void (Abyssal Blue) */
+.card.skin-void .mana-fill {
+    background: linear-gradient(90deg, #000428, #004e92, #00d4ff);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* Efek Partikel Void (Animasi Bayangan melayang) */
+@keyframes void-pulse {
+    0% { box-shadow: 0 0 20px rgba(75, 0, 130, 0.4); }
+    50% { box-shadow: 0 0 40px rgba(138, 43, 226, 0.7); }
+    100% { box-shadow: 0 0 20px rgba(75, 0, 130, 0.4); }
+}
+
+.card.skin-void.active-turn {
+    animation: void-pulse 2s infinite ease-in-out;
+    border-color: #bc85ff;
+}
+
+/* Skill Icon Border khusus Void */
+.card.skin-void .skill-btn {
+    border-color: rgba(138, 43, 226, 0.3);
+    background: rgba(20, 0, 40, 0.5);
+}

@@ -21,6 +21,120 @@ function updateGoldDisplay() {
     if (goldEl) goldEl.innerText = playerGold;
 }
 
+// SKIN SHOP LOGIC
+
+const SKINS_DATA = [
+    { id: 'default', name: 'ORIGINAL', price: 0, class: '' },
+    { id: 'lovely', name: 'LOVELY PINK', price: 500, class: 'skin-lovely' },
+    { id: 'void', name: 'VOID WALKER', price: 1500, class: 'skin-void' }
+];
+
+let ownedSkins = JSON.parse(localStorage.getItem("ownedSkins")) || ['default'];
+let equippedSkin = localStorage.getItem("equippedSkin") || 'default';
+
+function openSkinShop() {
+    const modal = document.getElementById("skin-shop-modal");
+    const goldDisplay = document.getElementById("shop-gold");
+    
+    if (modal) {
+        // Gunakan flex karena kita ingin kontennya di tengah
+        modal.style.display = "flex"; 
+        
+        // Update tampilan emas di dalam shop
+        if (goldDisplay) {
+            goldDisplay.innerText = playerGold; 
+        }
+        
+        // Render item skin
+        renderSkins(); 
+    } else {
+        console.error("Elemen skin-shop-modal tidak ditemukan!");
+    }
+}
+
+function closeSkinShop() {
+    const modal = document.getElementById("skin-shop-modal");
+    if (modal) modal.style.display = "none";
+}
+
+function closeSkinShop() {
+    document.getElementById("skin-shop-modal").style.display = "none";
+}
+
+function renderSkins() {
+    const list = document.getElementById("skin-list");
+    list.innerHTML = "";
+
+    SKINS_DATA.forEach(skin => {
+        const isOwned = ownedSkins.includes(skin.id);
+        const isEquipped = equippedSkin === skin.id;
+        
+        let buttonText = `BUY ${skin.price}G`;
+        let btnClass = "buy-btn";
+        let onClick = `buySkin('${skin.id}', ${skin.price})`;
+
+        if (isEquipped) {
+            buttonText = "EQUIPPED";
+            btnClass = "buy-btn equipped-label";
+            onClick = "";
+        } else if (isOwned) {
+            buttonText = "EQUIP";
+            btnClass = "buy-btn owned-label";
+            onClick = `equipSkin('${skin.id}')`;
+        }
+
+        list.innerHTML += `
+            <div class="skin-item ${isEquipped ? 'equiped' : ''}">
+                <h3 style="font-family: Cinzel; font-size: 14px;">${skin.name}</h3>
+                <button class="${btnClass}" onclick="${onClick}" ${isEquipped ? 'disabled' : ''}>
+                    ${buttonText}
+                </button>
+            </div>
+        `;
+    });
+}
+
+function buySkin(id, price) {
+    if (playerGold >= price) {
+        playerGold -= price;
+        ownedSkins.push(id);
+        localStorage.setItem("playerGold", playerGold.toString());
+        localStorage.setItem("ownedSkins", JSON.stringify(ownedSkins));
+        updateGoldDisplay();
+        renderSkins();
+        log(`SYSTEM: Skin ${id.toUpperCase()} purchased!`);
+    } else {
+        log("SYSTEM: Not enough gold!");
+    }
+}
+
+function equipSkin(id) {
+    equippedSkin = id;
+    localStorage.setItem("equippedSkin", id);
+    renderSkins();
+    applySkinToCard();
+    log(`SYSTEM: Skin changed to ${id.toUpperCase()}`);
+}
+
+function applySkinToCard() {
+    const p1Card = document.getElementById("p1-card");
+    const skin = SKINS_DATA.find(s => s.id === equippedSkin);
+    
+    SKINS_DATA.forEach(s => { if(s.class) p1Card.classList.remove(s.class) });
+    
+    if (skin && skin.class) {
+        p1Card.classList.add(skin.class);
+    }
+}
+
+window.onload = () => {
+    updateGoldUI();
+    applySkinToCard();
+};
+
+
+// ARENA GAME - LOGIC GAME BELOW
+
 if (!hasWonExpert) {
     localStorage.setItem("insanityUnlocked", "false");
     console.log("Mode Insanity dikunci (Belum ada rekor menang Expert).");
