@@ -236,6 +236,71 @@ const mailData = {
         <i>Pahami cooldown lawan, kuasai Mana, dan menangkan duel!<br><br></i>
     `,
         sig: "— Mortal"
+    },
+    'new-update-gold': {
+        title: "NEW UPDATE! - Player Skins & Gold Method",
+        date: "April 12, 2026",
+        body: `
+        <style>
+            .gold-text {
+                color: #ffd700;
+                font-weight: bold;
+                text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+            .reward-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 15px 0;
+                background: rgba(255, 215, 0, 0.05);
+                border: 1px solid rgba(255, 215, 0, 0.2);
+            }
+            .reward-table td {
+                padding: 10px;
+                border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+                font-family: monospace;
+            }
+            .reward-table tr:last-child td { border: none; }
+            .diff-name { color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+            .gold-amount { color: #ffd700; text-align: right; font-weight: bold; }
+        </style>
+
+        <div class="mail-section">
+            Greetings, Mage! The royal treasury has been unsealed. You may now accumulate <span class="gold-text">GOLD</span> every time you vanquish a foe in the arena.
+        </div>
+
+        <div class="ritual-box" style="border-color: #ffd700;">
+            <b class="gold-text">BOSS REWARD SYSTEM:</b><br>
+            The greater the trial, the larger the treasure you shall claim:
+            <table class="reward-table">
+                <tr>
+                    <td class="diff-name">Normal Mode</td>
+                    <td class="gold-amount">25 GOLD</td>
+                </tr>
+                <tr>
+                    <td class="diff-name" style="color: #4da6ff;">Hard Mode</td>
+                    <td class="gold-amount">150 GOLD</td>
+                </tr>
+                <tr>
+                    <td class="diff-name" style="color: #ff4444;">Expert Mode</td>
+                    <td class="gold-amount">450 GOLD</td>
+                </tr>
+                <tr>
+                    <td class="diff-name" style="color: #e0aaff;">Insanity Mode</td>
+                    <td class="gold-amount">1000 GOLD</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="mail-section">
+            <b>THE SKIN VAULT:</b><br>
+            Use your hard-earned Gold to awaken a new identity in the <span class="gold-text">SKIN VAULT</span>. Change your appearance and display your dominance to all who dare face you.
+            <br><br>
+            <i style="color: #bbb; font-size: 0.85rem;">
+                Prepare yourself, for the vault shall expand with even more skins in the future. The current collection is but the beginning of your journey toward ultimate cosmetic power!
+            </i>
+        </div>
+        `,
+        sig: "— THE TREASURER"
     }
 };
 

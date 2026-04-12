@@ -15,7 +15,6 @@
     --nc-glow-p:   rgba(255,45,120,0.55);
 }
 
-/* ── Card Shell ── */
 .card.skin-neon-cyber {
     background: linear-gradient(145deg, #06090f 0%, #040608 70%, #080c12 100%);
     border: 1px solid var(--nc-cyan);
@@ -29,7 +28,6 @@
         inset 0 0 30px rgba(0,0,0,0.5);
 }
 
-/* Scanline overlay */
 .card.skin-neon-cyber::before {
     content: '';
     position: absolute;
@@ -45,7 +43,6 @@
     z-index: 1;
 }
 
-/* Top corner accent — cut corner effect */
 .card.skin-neon-cyber::after {
     content: '';
     position: absolute;
@@ -58,7 +55,6 @@
     z-index: 3;
 }
 
-/* ── Glitch flicker on card hover ── */
 @keyframes nc-glitch {
     0%, 94%, 100% { clip-path: none; transform: none; }
     95% { clip-path: inset(30% 0 40% 0); transform: translateX(-3px); }
@@ -70,7 +66,6 @@
     animation: nc-glitch 3s infinite;
 }
 
-/* ── Heading ── */
 .card.skin-neon-cyber h2 {
     color: var(--nc-cyan) !important;
     font-family: 'Share Tech Mono', monospace !important;
@@ -84,7 +79,6 @@
     z-index: 2;
 }
 
-/* ── Bar Labels ── */
 .card.skin-neon-cyber .bar-label {
     color: var(--nc-pink);
     font-family: 'Share Tech Mono', monospace;
@@ -96,7 +90,6 @@
     z-index: 2;
 }
 
-/* ── Bar Track ── */
 .card.skin-neon-cyber .bar-bg {
     background: var(--nc-bg2);
     border: 1px solid rgba(0,255,247,0.25);
@@ -106,7 +99,6 @@
     z-index: 2;
 }
 
-/* ── HP Fill ── */
 @keyframes nc-bar-pulse {
     0%, 100% { box-shadow: 0 0 6px var(--nc-glow-p), inset 0 0 4px rgba(255,255,255,0.1); }
     50%       { box-shadow: 0 0 14px var(--nc-glow-p), inset 0 0 8px rgba(255,255,255,0.15); }
@@ -118,7 +110,6 @@
     animation: nc-bar-pulse 2s ease-in-out infinite;
 }
 
-/* ── Mana Fill ── */
 @keyframes nc-mana-pulse {
     0%, 100% { box-shadow: 0 0 6px var(--nc-glow-c), inset 0 0 4px rgba(255,255,255,0.1); }
     50%       { box-shadow: 0 0 14px var(--nc-glow-c), inset 0 0 8px rgba(255,255,255,0.2); }
@@ -130,7 +121,6 @@
     animation: nc-mana-pulse 2.4s ease-in-out infinite;
 }
 
-/* ── Bar Text ── */
 .card.skin-neon-cyber .bar-text {
     color: #ffffff;
     font-family: 'Share Tech Mono', monospace;
@@ -138,7 +128,6 @@
     text-shadow: 0 0 6px rgba(255,255,255,0.6);
 }
 
-/* ── Skills Grid ── */
 .card.skin-neon-cyber #p1-skills,
 .card.skin-neon-cyber #bot-skills {
     gap: 5px;
@@ -146,14 +135,12 @@
     z-index: 2;
 }
 
-/* ── Key Hints ── */
 .card.skin-neon-cyber .key-hint {
     color: var(--nc-yellow) !important;
     font-family: 'Share Tech Mono', monospace;
     text-shadow: 0 0 6px var(--nc-yellow);
 }
 
-/* ── Skill Button ── */
 .card.skin-neon-cyber .skill-btn {
     background: #060a10;
     border: 1px solid rgba(0,255,247,0.35);
@@ -181,7 +168,6 @@
         transform   0.1s;
 }
 
-/* Vertical side accent line */
 .card.skin-neon-cyber .skill-btn::before {
     content: '';
     position: absolute;

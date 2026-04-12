@@ -3,17 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Mage War: Hero vs Bot</title>
-    
+
     <link
       href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
       rel="stylesheet"
     />
-    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Creepster&family=Piedra&family=Eater&family=Almendra+Display:wght@700&display=swap" rel="stylesheet">
-    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Creepster&family=Piedra&family=Eater&family=Almendra+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="cinematic.css?v=7.0.0" />
     <link rel="stylesheet" href="base.css?v=7.0.0" />
     <link rel="stylesheet" href="effect.css?v=7.0.0" />
@@ -34,7 +40,6 @@
     <script src="sentinel.js?v=20280405" defer></script>
     <script src="effect.js?v=20280405" defer></script>
     <script src="mail.js?v=20280405" defer></script>
-
   </head>
   <body class="active-p1">
     <!-- Animated Background -->
@@ -62,19 +67,30 @@
         <div class="info-grid">
           <div class="info-item">
             <strong>SENTINELS</strong>
-            <div id="display-my-sentinel" style="font-size: 0.85rem; margin-top: 5px; color: #aaa;">
+            <div
+              id="display-my-sentinel"
+              style="font-size: 0.85rem; margin-top: 5px; color: #aaa"
+            >
               None (Defeat Expert Mode)
             </div>
           </div>
 
           <div class="info-item" style="border-left-color: #ffd700">
             <strong>TREASURY</strong>
-            <span id="gold-display" style="color: #ffd700; font-weight: bold;">0</span> GOLD
+            <span id="gold-display" style="color: #ffd700; font-weight: bold"
+              >0</span
+            >
+            GOLD
           </div>
-          
+
           <button class="ancient-shop-btn" onclick="openSkinShop()">
-    <span class="icon">✨</span> SKIN VAULT
-</button>
+            <span class="icon"></span>SKIN VAULT
+          </button>
+
+          <div class="info-item" style="border-left-color: #ffd700">
+            <strong>EARN GOLD?</strong>
+            Play Solo (PVE Mode)
+          </div>
 
           <!-- <div class="info-item" style="border-left-color: var(--bot)">
             <strong>INSANITY MODE!</strong>
@@ -118,7 +134,7 @@
           <div class="insanity-wrapper">
             <button
               id="insanity-btn"
-              class="diff-btn locked" 
+              class="diff-btn locked"
               onclick="handleInsanityClick()"
             >
               INSANITY
@@ -155,7 +171,12 @@
           <button class="diff-btn" id="btn-pvp" onclick="setMode('pvp')">
             DUEL (PvP)
           </button>
-          <button class="diff-btn" id="btn-multiplayer" onclick="setMode('multiplayer')" disabled>
+          <button
+            class="diff-btn"
+            id="btn-multiplayer"
+            onclick="setMode('multiplayer')"
+            disabled
+          >
             Multiplayer
           </button>
         </div>
@@ -191,30 +212,49 @@
     </div>
 
     <!-- Sentinels Gacha -->
-     <div id="gacha-overlay" class="modal-overlay" style="display: none; background: rgba(0,0,0,0.9);">
-        <div class="modal-content" style="border: 2px solid var(--p1); box-shadow: 0 0 20px var(--p1);">
-            <h2 class="modal-title">SENTINEL SUMMONING</h2>
-            <p>Expert mode conquered. Claim your ancient guardian.</p>
-            
-            <div id="gacha-result-display" style="margin: 20px 0; min-height: 150px;">
-                <div class="gacha-placeholder">?</div>
-            </div>
+    <div
+      id="gacha-overlay"
+      class="modal-overlay"
+      style="display: none; background: rgba(0, 0, 0, 0.9)"
+    >
+      <div
+        class="modal-content"
+        style="border: 2px solid var(--p1); box-shadow: 0 0 20px var(--p1)"
+      >
+        <h2 class="modal-title">SENTINEL SUMMONING</h2>
+        <p>Expert mode conquered. Claim your ancient guardian.</p>
 
-            <button id="gacha-btn-roll" class="start-btn" onclick="rollGacha()">SUMMON SENTINEL</button>
-            <button id="gacha-btn-close" class="start-btn" style="display:none" onclick="location.reload()">CLAIM & CONTINUE</button>
+        <div
+          id="gacha-result-display"
+          style="margin: 20px 0; min-height: 150px"
+        >
+          <div class="gacha-placeholder">?</div>
         </div>
+
+        <button id="gacha-btn-roll" class="start-btn" onclick="rollGacha()">
+          SUMMON SENTINEL
+        </button>
+        <button
+          id="gacha-btn-close"
+          class="start-btn"
+          style="display: none"
+          onclick="location.reload()"
+        >
+          CLAIM & CONTINUE
+        </button>
+      </div>
     </div>
 
     <!-- TOTAL MATCH DAMAGE BAR -->
     <div id="damage-tracker-container">
-        <div class="bar-label">
-            <span style="color: #ff4500;">⚔</span> 
-            Total Match Essence: 
-            <span id="total-dmg-value">0</span> / 2000
-        </div>
-        <div class="damage-bar-bg">
-            <div id="damage-progress-bar"></div>
-        </div>
+      <div class="bar-label">
+        <span style="color: #ff4500">⚔</span>
+        Total Match Essence:
+        <span id="total-dmg-value">0</span> / 2000
+      </div>
+      <div class="damage-bar-bg">
+        <div id="damage-progress-bar"></div>
+      </div>
     </div>
 
     <!-- ========== ARENA ========== -->
@@ -271,7 +311,8 @@
         <div class="log-header-line"></div>
       </div>
       <div id="log">
-        v3.0.0 — The Sentinel Awakening<br />> > Battle Start! Dapatkan Sentinel!<br />>
+        v3.0.0 — The Sentinel Awakening<br />> > Battle Start! Dapatkan
+        Sentinel!<br />>
       </div>
     </div>
 
@@ -289,78 +330,95 @@
       </div>
     </div>
 
-
-    <!-- MAIL OLD --> 
+    <!-- MAIL OLD -->
     <!-- <button id="mail-trigger" onclick="openMail()">
       <span class="notification-dot"></span>
       ✉
     </button> -->
 
-<!-- MAIL NEW -->
- <button id="mail-trigger">
-  <span class="notification-dot"></span>
-  ✉
-</button>
+    <!-- MAIL NEW -->
+    <button id="mail-trigger">
+      <span class="notification-dot"></span>
+      ✉
+    </button>
 
-<div id="mail-overlay" class="modal-overlay" style="display: none;">
-  <div class="modal-content mail-content">
-    <div class="mail-header">
-      <h2 class="mail-title">ANCIENT NOTES</h2>
-    </div>
-    
-    <div class="mail-body">
-      <p class="mail-instruction">A Message from Developer</p>
-      
-      <div class="mail-list">
-        <div class="mail-item unread" onclick="viewMailDetail('v300')">
-          <span class="mail-item-icon">📜</span>
-          <div class="mail-item-info">
-            <span class="mail-item-subject">Update v3.0.0: The Sentinel Awakening</span>
-            <span class="mail-item-date">1 April 2026</span>
+    <div id="mail-overlay" class="modal-overlay" style="display: none">
+      <div class="modal-content mail-content">
+        <div class="mail-header">
+          <h2 class="mail-title">ANCIENT NOTES</h2>
+        </div>
+
+        <div class="mail-body">
+          <p class="mail-instruction">A Message from Developer</p>
+
+          <div class="mail-list">
+            <div class="mail-item unread" onclick="viewMailDetail('new-update-gold')">
+              <span class="mail-item-icon">🪙</span>
+              <div class="mail-item-info">
+                <span class="mail-item-subject"
+                  >New Update! - Skin Player & Gold Method</span
+                >
+                <span class="mail-item-date">12 April 2026</span>
+              </div>
+            </div>
+
+            <div class="mail-item unread" onclick="viewMailDetail('v300')">
+              <span class="mail-item-icon">📜</span>
+              <div class="mail-item-info">
+                <span class="mail-item-subject"
+                  >Update v3.0.0: The Sentinel Awakening</span
+                >
+                <span class="mail-item-date">1 April 2026</span>
+              </div>
+            </div>
+
+            <div class="mail-item" onclick="viewMailDetail('skills_note')">
+              <span class="mail-item-icon">📜</span>
+              <div class="mail-item-info">
+                <span class="mail-item-subject">Game Skills & Event</span>
+                <span class="mail-item-date">Permanently</span>
+              </div>
+            </div>
+
+            <div class="mail-item" onclick="viewMailDetail('jovita_note')">
+              <span class="mail-item-icon">📜</span>
+              <div class="mail-item-info">
+                <span class="mail-item-subject">A Note from Jovita</span>
+                <span class="mail-item-date">29 March 2026</span>
+              </div>
+            </div>
+
+            <div class="mail-item" onclick="viewMailDetail('dev_note')">
+              <span class="mail-item-icon">📜</span>
+              <div class="mail-item-info">
+                <span class="mail-item-subject">A Note from Developer</span>
+                <span class="mail-item-date">28 March 2026</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="mail-item" onclick="viewMailDetail('skills_note')">
-          <span class="mail-item-icon">📜</span>
-          <div class="mail-item-info">
-            <span class="mail-item-subject">Game Skills & Event</span>
-            <span class="mail-item-date">Permanently</span>
-          </div>
-        </div>
-
-        <div class="mail-item" onclick="viewMailDetail('jovita_note')">
-          <span class="mail-item-icon">📜</span>
-          <div class="mail-item-info">
-            <span class="mail-item-subject">A Note from Jovita</span>
-            <span class="mail-item-date">29 March 2026</span>
-          </div>
-        </div>
-
-        <div class="mail-item" onclick="viewMailDetail('dev_note')">
-          <span class="mail-item-icon">📜</span>
-          <div class="mail-item-info">
-            <span class="mail-item-subject">A Note from Developer</span>
-            <span class="mail-item-date">28 March 2026</span>
-          </div>
-        </div>
-
+        <button class="modal-close" onclick="closeMail()">
+          SEAL THE CODEX
+        </button>
       </div>
     </div>
-    
-    <button class="modal-close" onclick="closeMail()">SEAL THE CODEX</button>
-  </div>
-</div>
 
-<div id="mail-detail-overlay" class="modal-overlay" style="display: none; z-index: 10005 !important;">
-  <div class="modal-content mail-content detail-content">
-    <div id="detail-content-area">
+    <div
+      id="mail-detail-overlay"
+      class="modal-overlay"
+      style="display: none; z-index: 10005 !important"
+    >
+      <div class="modal-content mail-content detail-content">
+        <div id="detail-content-area"></div>
+        <button class="modal-close" onclick="closeMailDetail()">
+          BACK TO CODEX
+        </button>
       </div>
-    <button class="modal-close" onclick="closeMailDetail()">BACK TO CODEX</button>
-  </div>
-</div>
+    </div>
 
-<!-- Full Screen Offer -->
-  <!-- <div id="fs-popup-overlay" class="modal-overlay">
+    <!-- Full Screen Offer -->
+    <!-- <div id="fs-popup-overlay" class="modal-overlay">
     <div class="modal-content">
       <h2 class="modal-title">IMMERSIVE EXPERIENCE</h2>
       <p class="modal-text">
@@ -378,155 +436,286 @@
     </div>
   </div> -->
 
-  <!-- CINEMATIC -->
-<div id="intro-cinematic">
-    <div class="bg-panel left-panel"></div>
-    <div class="bg-panel right-panel"></div>
-    <div id="yellow-bolt"></div>
-    <div id="intro-text-container"></div>
-    <div id="mortal-split-container" style="display: none;">
+    <!-- CINEMATIC -->
+    <div id="intro-cinematic">
+      <div class="bg-panel left-panel"></div>
+      <div class="bg-panel right-panel"></div>
+      <div id="yellow-bolt"></div>
+      <div id="intro-text-container"></div>
+      <div id="mortal-split-container" style="display: none">
         <div class="mortal-text mortal-top" data-text="MORTAL?">MORTAL?</div>
         <div class="mortal-text mortal-bottom" data-text="MORTAL?">MORTAL?</div>
-    </div>
-    <div id="lightning-flash"></div>
-    
-    <div id="final-white-out"></div>
-</div>
+      </div>
+      <div id="lightning-flash"></div>
 
-<!-- PVP SENTINEL DRAFT PICK -->
-<div id="pvp-pick-overlay" class="modal-overlay" style="display: none;">
-    <div class="hades-overlay-layer"></div>
-    
-    <div class="ancient-ritual-ring"></div>
-    
-    <div class="modal-content ancient-border">
+      <div id="final-white-out"></div>
+    </div>
+
+    <!-- PVP SENTINEL DRAFT PICK -->
+    <div id="pvp-pick-overlay" class="modal-overlay" style="display: none">
+      <div class="hades-overlay-layer"></div>
+
+      <div class="ancient-ritual-ring"></div>
+
+      <div class="modal-content ancient-border">
         <div class="arcane-glow"></div>
-        <h2 class="ancient-title" id="pvp-pick-title">PLAYER 1: AWAKEN YOUR GUARDIAN</h2>
-        <p id="pvp-pick-subtitle" style="font-family: 'Cinzel', serif; color: #b08dff; letter-spacing: 2px;">The void whispers their names...</p>
+        <h2 class="ancient-title" id="pvp-pick-title">
+          PLAYER 1: AWAKEN YOUR GUARDIAN
+        </h2>
+        <p
+          id="pvp-pick-subtitle"
+          style="
+            font-family: &quot;Cinzel&quot;, serif;
+            color: #b08dff;
+            letter-spacing: 2px;
+          "
+        >
+          The void whispers their names...
+        </p>
 
         <div class="sentinel-selection-grid">
-            <div class="sentinel-pick-card hera-card" onclick="selectPvPSentinel('hera')">
-                <div class="card-inner">
-                    <h3 class="sentinel-name">HERA</h3>
-                    <div class="divider"></div>
-                    <small class="sentinel-desc">The Ancient Healer</small>
-                </div>
+          <div
+            class="sentinel-pick-card hera-card"
+            onclick="selectPvPSentinel('hera')"
+          >
+            <div class="card-inner">
+              <h3 class="sentinel-name">HERA</h3>
+              <div class="divider"></div>
+              <small class="sentinel-desc">The Ancient Healer</small>
             </div>
-            <div class="sentinel-pick-card thalor-card" onclick="selectPvPSentinel('thalor')">
-                <div class="card-inner">
-                    <h3 class="sentinel-name">THALOR</h3>
-                    <div class="divider"></div>
-                    <small class="sentinel-desc">Eternal Warden</small>
-                </div>
+          </div>
+          <div
+            class="sentinel-pick-card thalor-card"
+            onclick="selectPvPSentinel('thalor')"
+          >
+            <div class="card-inner">
+              <h3 class="sentinel-name">THALOR</h3>
+              <div class="divider"></div>
+              <small class="sentinel-desc">Eternal Warden</small>
             </div>
-            <div class="sentinel-pick-card hades-card" onclick="selectPvPSentinel('hades')">
-                <div class="card-inner">
-                    <h3 class="sentinel-name">HADES</h3>
-                    <div class="divider"></div>
-                    <small class="sentinel-desc">Soul Reaper</small>
-                </div>
+          </div>
+          <div
+            class="sentinel-pick-card hades-card"
+            onclick="selectPvPSentinel('hades')"
+          >
+            <div class="card-inner">
+              <h3 class="sentinel-name">HADES</h3>
+              <div class="divider"></div>
+              <small class="sentinel-desc">Soul Reaper</small>
             </div>
+          </div>
         </div>
 
         <div id="pvp-status-indicator" class="ancient-status">
-            COMMUNING WITH THE VOID...
+          COMMUNING WITH THE VOID...
         </div>
+      </div>
     </div>
-</div>
 
-<!-- OVERLAY KEYBOARD HINT PVP -->
-<div id="pvp-hint-modal" class="modal-overlay" style="display: none; z-index: 25000;">
-    <div class="modal-content ancient-border">
+    <!-- OVERLAY KEYBOARD HINT PVP -->
+    <div
+      id="pvp-hint-modal"
+      class="modal-overlay"
+      style="display: none; z-index: 25000"
+    >
+      <div class="modal-content ancient-border">
         <div class="arcane-glow"></div>
         <h2 class="ancient-title">BATTLE CONTROLS</h2>
-        <p style="font-family: 'Cinzel', serif; color: #b08dff; letter-spacing: 2px;">Prepare your fingers for the duel</p>
+        <p
+          style="
+            font-family: &quot;Cinzel&quot;, serif;
+            color: #b08dff;
+            letter-spacing: 2px;
+          "
+        >
+          Prepare your fingers for the duel
+        </p>
 
         <div class="modal-main-layout">
-            <div class="hint-visual-section">
-                <img src="image/KEYBOARD-HINT-MAGEWAR.png" alt="Keyboard Hint" 
-                     style="width: 100%; border-radius: 8px; box-shadow: 0 0 20px rgba(138, 43, 226, 0.4); border: 1px solid rgba(176, 141, 255, 0.2);">
+          <div class="hint-visual-section">
+            <img
+              src="image/KEYBOARD-HINT-MAGEWAR.png"
+              alt="Keyboard Hint"
+              style="
+                width: 100%;
+                border-radius: 8px;
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+                border: 1px solid rgba(176, 141, 255, 0.2);
+              "
+            />
+          </div>
+
+          <div class="hint-details-section">
+            <div class="players-keys-grid">
+              <div
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  background: rgba(0, 212, 255, 0.05);
+                  border-radius: 8px;
+                  border: 1px solid rgba(0, 212, 255, 0.2);
+                "
+              >
+                <h3
+                  style="
+                    color: #00d4ff;
+                    font-family: &quot;Cinzel&quot;, serif;
+                    font-size: 0.9rem;
+                    margin-bottom: 10px;
+                  "
+                >
+                  PLAYER 1
+                </h3>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 5px;
+                    font-family: monospace;
+                    font-size: 1rem;
+                    text-align: center;
+                  "
+                >
+                  <div style="border: 1px solid #444; padding: 2px">Q</div>
+                  <div style="border: 1px solid #444; padding: 2px">W</div>
+                  <div style="border: 1px solid #444; padding: 2px">E</div>
+                  <div style="border: 1px solid #444; padding: 2px">A</div>
+                  <div style="border: 1px solid #444; padding: 2px">S</div>
+                  <div style="border: 1px solid #444; padding: 2px">D</div>
+                  <div style="border: 1px solid #444; padding: 2px">Z</div>
+                  <div style="border: 1px solid #444; padding: 2px">X</div>
+                  <div style="border: 1px solid #444; padding: 2px">C</div>
+                </div>
+              </div>
+              <div
+                style="
+                  flex: 1;
+                  padding: 12px;
+                  background: rgba(255, 0, 64, 0.05);
+                  border-radius: 8px;
+                  border: 1px solid rgba(255, 0, 64, 0.2);
+                "
+              >
+                <h3
+                  style="
+                    color: #ff0040;
+                    font-family: &quot;Cinzel&quot;, serif;
+                    font-size: 0.9rem;
+                    margin-bottom: 10px;
+                  "
+                >
+                  PLAYER 2
+                </h3>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 5px;
+                    font-family: monospace;
+                    font-size: 1rem;
+                    text-align: center;
+                  "
+                >
+                  <div style="border: 1px solid #444; padding: 2px">7</div>
+                  <div style="border: 1px solid #444; padding: 2px">8</div>
+                  <div style="border: 1px solid #444; padding: 2px">9</div>
+                  <div style="border: 1px solid #444; padding: 2px">4</div>
+                  <div style="border: 1px solid #444; padding: 2px">5</div>
+                  <div style="border: 1px solid #444; padding: 2px">6</div>
+                  <div style="border: 1px solid #444; padding: 2px">1</div>
+                  <div style="border: 1px solid #444; padding: 2px">2</div>
+                  <div style="border: 1px solid #444; padding: 2px">3</div>
+                </div>
+              </div>
             </div>
 
-            <div class="hint-details-section">
-                
-                <div class="players-keys-grid">
-                    <div style="flex: 1; padding: 12px; background: rgba(0, 212, 255, 0.05); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.2);">
-                        <h3 style="color: #00d4ff; font-family: 'Cinzel', serif; font-size: 0.9rem; margin-bottom: 10px;">PLAYER 1</h3>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-family: monospace; font-size: 1rem; text-align: center;">
-                            <div style="border: 1px solid #444; padding: 2px;">Q</div><div style="border: 1px solid #444; padding: 2px;">W</div><div style="border: 1px solid #444; padding: 2px;">E</div>
-                            <div style="border: 1px solid #444; padding: 2px;">A</div><div style="border: 1px solid #444; padding: 2px;">S</div><div style="border: 1px solid #444; padding: 2px;">D</div>
-                            <div style="border: 1px solid #444; padding: 2px;">Z</div><div style="border: 1px solid #444; padding: 2px;">X</div><div style="border: 1px solid #444; padding: 2px;">C</div>
-                        </div>
-                    </div>
-                    <div style="flex: 1; padding: 12px; background: rgba(255, 0, 64, 0.05); border-radius: 8px; border: 1px solid rgba(255, 0, 64, 0.2);">
-                        <h3 style="color: #ff0040; font-family: 'Cinzel', serif; font-size: 0.9rem; margin-bottom: 10px;">PLAYER 2</h3>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-family: monospace; font-size: 1rem; text-align: center;">
-                            <div style="border: 1px solid #444; padding: 2px;">7</div><div style="border: 1px solid #444; padding: 2px;">8</div><div style="border: 1px solid #444; padding: 2px;">9</div>
-                            <div style="border: 1px solid #444; padding: 2px;">4</div><div style="border: 1px solid #444; padding: 2px;">5</div><div style="border: 1px solid #444; padding: 2px;">6</div>
-                            <div style="border: 1px solid #444; padding: 2px;">1</div><div style="border: 1px solid #444; padding: 2px;">2</div><div style="border: 1px solid #444; padding: 2px;">3</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alt-control-box" style="margin-top: 0;">
-                    <div class="alt-control-watermark">🖱️</div>
-                    <div class="alt-control-icon-circle">
-                        <span style="font-size: 1rem;">🖱️</span>
-                    </div>
-                    <div>
-                        <h3 class="alt-control-title" style="font-size: 0.9rem;">NO NUMPAD?</h3>
-                        <p class="alt-control-text" style="font-size: 0.75rem;">
-                            Fear not. Simply <span class="alt-control-highlight">TAP/CLICK</span> the skill icons using <span class="alt-control-device">Mouse/Touchpad</span>.
-                        </p>
-                    </div>
-                </div>
-
+            <div class="alt-control-box" style="margin-top: 0">
+              <div class="alt-control-watermark">🖱️</div>
+              <div class="alt-control-icon-circle">
+                <span style="font-size: 1rem">🖱️</span>
+              </div>
+              <div>
+                <h3 class="alt-control-title" style="font-size: 0.9rem">
+                  NO NUMPAD?
+                </h3>
+                <p class="alt-control-text" style="font-size: 0.75rem">
+                  Fear not. Simply
+                  <span class="alt-control-highlight">TAP/CLICK</span> the skill
+                  icons using
+                  <span class="alt-control-device">Mouse/Touchpad</span>.
+                </p>
+              </div>
             </div>
+          </div>
         </div>
 
-        <button class="start-btn" style="margin-top: 25px; width: 250px;" onclick="closePvPHint()">I AM READY</button>
+        <button
+          class="start-btn"
+          style="margin-top: 25px; width: 250px"
+          onclick="closePvPHint()"
+        >
+          I AM READY
+        </button>
+      </div>
     </div>
-</div>
 
-<div id="match-intro-overlay" class="modal-overlay" style="display: none; background: radial-gradient(circle, #1a052d 0%, #000 100%); z-index: 20000; flex-direction: column; justify-content: center; align-items: center;">
-    <div id="match-intro-text" style="text-align: center;"></div>
-</div>
+    <div
+      id="match-intro-overlay"
+      class="modal-overlay"
+      style="
+        display: none;
+        background: radial-gradient(circle, #1a052d 0%, #000 100%);
+        z-index: 20000;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div id="match-intro-text" style="text-align: center"></div>
+    </div>
 
-<!-- SKIN SHOP OVERLAY -->
+    <!-- SKIN SHOP OVERLAY -->
 
-<div id="skin-shop-modal" class="shop-overlay">
-    <div class="shop-content">
+    <div id="skin-shop-modal" class="shop-overlay">
+      <div class="shop-content">
         <div class="close-vault-x" onclick="closeSkinShop()">&times;</div>
 
         <div class="shop-header">
-            <h1 class="ancient-title" style="margin:0; font-size: 1.8rem;">THE ANCIENT VAULT</h1>
-            <p class="gold-status" style="margin: 10px 0 0;">
-                YOUR WEALTH: <span id="shop-gold" style="color:#fff;">0</span> 
-                <span style="font-size: 0.8rem; color: var(--gold);">GOLD</span>
-            </p>
+          <h1 class="ancient-title" style="margin: 0; font-size: 1.8rem">
+            THE ANCIENT VAULT
+          </h1>
+          <p class="gold-status" style="margin: 10px 0 0">
+            YOUR WEALTH: <span id="shop-gold" style="color: #fff">0</span>
+            <span style="font-size: 0.8rem; color: var(--gold)">GOLD</span>
+          </p>
         </div>
 
         <div class="skin-list-container">
-            <div class="skin-grid" id="skin-list">
-                </div>
+          <div class="skin-grid" id="skin-list"></div>
         </div>
 
         <div class="shop-footer">
-            <button class="close-shop-btn" onclick="closeSkinShop()" style="margin:0;">
-                EXIT VAULT
-            </button>
+          <button
+            class="close-shop-btn"
+            onclick="closeSkinShop()"
+            style="margin: 0"
+          >
+            EXIT VAULT
+          </button>
         </div>
+      </div>
     </div>
-</div>
 
-<!-- CANT AFFORD -->
-<div id="toast-container" style="
-    position: fixed; 
-    top: 30px; 
-    right: 30px; 
-    z-index: 999999 !important; 
-    pointer-events: none;
-"></div>
-
+    <!-- CANT AFFORD -->
+    <div
+      id="toast-container"
+      style="
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        z-index: 999999 !important;
+        pointer-events: none;
+      "
+    ></div>
   </body>
 </html>

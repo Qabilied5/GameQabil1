@@ -5,7 +5,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
-/* ── Custom properties scoped to this skin ── */
 .card.skin-golden {
     --gold-light:   #f5d97a;
     --gold-mid:     #c9a227;
@@ -18,7 +17,6 @@
     --sapphire-bar: #2255cc;
 }
 
-/* ── Card Shell ── */
 .card.skin-golden {
     background:
         radial-gradient(ellipse at 30% 0%,   rgba(201,162,39,0.10) 0%, transparent 60%),
@@ -41,13 +39,11 @@
     overflow: hidden;
 }
 
-/* Shimmer sweep animation */
 @keyframes gold-shimmer {
     0%   { transform: translateX(-120%) skewX(-20deg); }
     100% { transform: translateX(220%)  skewX(-20deg); }
 }
 
-/* Top ornamental sweep */
 .card.skin-golden::before {
     content: '';
     position: absolute;
@@ -65,7 +61,6 @@
     z-index: 0;
 }
 
-/* Corner filigree — top-left */
 .card.skin-golden::after {
     content: '';
     position: absolute;
@@ -79,10 +74,6 @@
     box-shadow: 1px 1px 6px rgba(201,162,39,0.3);
 }
 
-/* Corner filigree — bottom-right via a pseudo on the wrapper */
-/* (We use a box-shadow trick instead to stay single-element) */
-
-/* ── Heading ── */
 .card.skin-golden h2 {
     color: var(--gold-light) !important;
     font-family: 'Cinzel', serif !important;
@@ -99,7 +90,6 @@
     z-index: 2;
 }
 
-/* ── Bar Labels ── */
 .card.skin-golden .bar-label {
     color: var(--gold-mid);
     font-family: 'Cinzel', serif;
@@ -114,7 +104,6 @@
     filter: sepia(1) saturate(2) hue-rotate(10deg) brightness(1.2);
 }
 
-/* ── Bar Track ── */
 .card.skin-golden .bar-bg {
     background: var(--obsidian);
     border: 1px solid var(--gold-deep);
@@ -126,7 +115,6 @@
     z-index: 2;
 }
 
-/* ── HP Fill — crimson-to-ruby with gold edge shimmer ── */
 @keyframes bar-glow {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.80; }
@@ -146,7 +134,6 @@
     animation: bar-glow 2.5s ease-in-out infinite;
 }
 
-/* ── Mana Fill — sapphire-to-azure ── */
 .card.skin-golden .mana-fill {
     background: linear-gradient(90deg,
         #0a1a6b 0%,
@@ -161,7 +148,6 @@
     animation: bar-glow 3s ease-in-out infinite;
 }
 
-/* ── Bar Text ── */
 .card.skin-golden .bar-text {
     color: var(--gold-shine);
     font-family: 'Crimson Text', serif;
@@ -171,7 +157,6 @@
     text-shadow: 0 0 6px rgba(255,240,160,0.6);
 }
 
-/* ── Skills Grid ── */
 .card.skin-golden #p1-skills,
 .card.skin-golden #bot-skills {
     gap: 6px;
@@ -179,7 +164,6 @@
     z-index: 2;
 }
 
-/* Divider above skills */
 .card.skin-golden #p1-skills::before,
 .card.skin-golden #bot-skills::before {
     content: '';
@@ -196,19 +180,16 @@
     margin-bottom: 2px;
 }
 
-/* ── Skill Box ── */
 .card.skin-golden .skill-box {
     position: relative;
 }
 
-/* Key hints inherit gold colour naturally from var(--gold) */
 .card.skin-golden .key-hint {
     color: var(--gold-mid) !important;
     font-family: 'Cinzel', serif;
     letter-spacing: 0.05em;
 }
 
-/* ── Skill Button ── */
 .card.skin-golden .skill-btn {
     background: linear-gradient(160deg,
         #211c0e 0%,
@@ -216,7 +197,7 @@
         #251f0c 100%
     );
     border: 1px solid var(--gold-mid);
-    border-bottom-width: 2px;              /* overridden per-skill by inline style */
+    border-bottom-width: 2px;
     border-radius: 3px;
     color: var(--gold-light);
     font-family: 'Cinzel', serif;
@@ -243,7 +224,6 @@
     overflow: hidden;
 }
 
-/* Inner shimmer on hover setup */
 .card.skin-golden .skill-btn::before {
     content: '';
     position: absolute;
@@ -259,7 +239,6 @@
     pointer-events: none;
 }
 
-/* Hover state */
 .card.skin-golden .skill-btn:hover:not(:disabled) {
     background: linear-gradient(160deg,
         #3b2e07 0%,
@@ -281,7 +260,6 @@
     opacity: 1;
 }
 
-/* Active / press */
 .card.skin-golden .skill-btn:active:not(:disabled) {
     transform: translateY(1px);
     box-shadow:
@@ -290,21 +268,18 @@
         inset 0 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Disabled state */
 .card.skin-golden .skill-btn:disabled {
     opacity: 0.45;
     filter: grayscale(0.4);
     cursor: not-allowed;
 }
 
-/* ── Cooldown Overlay ── */
 .card.skin-golden .cd-overlay {
     background: rgba(5, 4, 2, 0.72);
     border-radius: 3px;
     border: 1px solid rgba(201,162,39,0.15);
 }
 
-/* ── Cooldown Text ── */
 .card.skin-golden .cd-text {
     color: var(--gold-shine);
     font-family: 'Cinzel', serif;
@@ -313,7 +288,6 @@
     text-shadow: 0 0 8px rgba(255,240,160,0.8);
 }
 
-/* ── Debuff / Sentinel badges ── */
 .card.skin-golden .debuff-label {
     color: #e05555;
     font-family: 'Crimson Text', serif;
