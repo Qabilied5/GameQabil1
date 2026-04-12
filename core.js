@@ -127,10 +127,26 @@ function renderSkins() {
 
         list.innerHTML += `
           <div class="skin-item ${isEquipped ? 'equiped' : ''}">
-              <div style="font-size: 2.5rem; filter: drop-shadow(0 0 10px ${skin.id === 'void' ? '#8a2be2' : 'transparent'});">
-                  ${skinIcon}
+              <div class="skin-preview-container">
+                  <div class="skin-visual ${skin.id}"></div>
+                  <div class="skin-glare"></div>
               </div>
-              <h3 style="font-family: Cinzel; margin: 5px 0; color: #fff; font-size: 1rem;">${skin.name}</h3>
+              <div class="skin-info">
+                  <h3 class="skin-name">${skin.name}</h3>
+                  <div class="skin-rarity">
+    ${
+      skin.price > 2000 
+        ? "LEGENDARY" 
+        : skin.price >= 1500 
+          ? "EPIC" 
+          : skin.price >= 1000
+            ? "RARE" 
+            : skin.price >= 500
+              ? "COMMON" 
+              : "BASIC"
+    }
+</div>
+              </div>
               <button class="${btnClass}" onclick="${onClick}" ${isEquipped ? 'disabled' : ''}>
                   ${buttonText}
               </button>
