@@ -1,5 +1,5 @@
 .card.skin-lovely {
-    background: rgba(255, 192, 203, 0.2); /* Pink Glass */
+    background: rgba(255, 192, 203, 0.2);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 105, 180, 0.4);
     box-shadow: 0 0 20px rgba(255, 182, 193, 0.3);
@@ -7,7 +7,7 @@
 
 .card.skin-lovely::before,
 .card.skin-lovely::after {
-    border-color: #ff69b4; /* Pink border corners */
+    border-color: #ff69b4;
     opacity: 0.8;
 }
 
@@ -24,7 +24,6 @@
     background: linear-gradient(90deg, #c0fdff, #70d6ff, #00b4d8);
 }
 
-/* Animasi detak jantung tipis pada skin lovely */
 @keyframes heart-pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.02); }
@@ -32,4 +31,56 @@
 }
 .card.skin-lovely.active-turn {
     animation: heart-pulse 1.5s infinite ease-in-out;
+}
+
+/* SKILLS */
+.card.skin-lovely #p1-skills {
+    gap: 12px;
+    padding: 5px;
+}
+
+.card.skin-lovely #p1-skills .skill-btn {
+    background: #fff0f5; 
+    border: 3px solid #ff69b4;
+    border-radius: 20px;
+    color: #c71585; 
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 0.75rem;
+    
+    text-shadow: 1px 1px 0px #ffffff, -1px -1px 0px #ffffff;
+    box-shadow: 0 4px 0px #ffb6c1; 
+    
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 5;
+}
+
+.card.skin-lovely #p1-skills .skill-btn:hover:not(:disabled) {
+    background: #ff69b4;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+}
+
+.card.skin-lovely .cd-text {
+    color: #ffffff !important;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-shadow: 0 0 8px #ff1493, 0 0 3px #000000;
+    z-index: 11;
+}
+
+.card.skin-lovely .cd-overlay {
+    background: rgba(255, 20, 147, 0.4);
+    border-radius: 15px;
+}
+
+.card.skin-lovely .skill-btn:not(:disabled)::before {
+    content: "🌸";
+    position: absolute;
+    top: -8px;
+    right: -5px;
+    font-size: 12px;
 }

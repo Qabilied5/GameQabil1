@@ -26,11 +26,11 @@ function updateGoldDisplay() {
 // >> REMINDER UPDATED KALO SKIN BARU
 const SKINS_DATA = [
     { id: 'default', name: 'ORIGINAL', price: 0, class: '' },
-    { id: 'lovely', name: 'LOVELY PINK', price: 500, class: 'skin-lovely' },
-    { id: 'digital', name: 'DIGITAL CODE', price: 1000, class: 'skin-digital' },
-    { id: 'retro', name: 'RETRO 8-BIT', price: 1200, class: 'skin-retro' },
+    { id: 'lovely', name: 'LOVELY PINK', price: 550, class: 'skin-lovely' },
+    { id: 'digital', name: 'DIGITAL CODE', price: 1500, class: 'skin-digital' },
+    { id: 'retro', name: 'RETRO 8-BIT', price: 1500, class: 'skin-retro' },
     { id: 'void', name: 'VOID WALKER', price: 1500, class: 'skin-void' },
-    { id: 'darkness', name: 'THE DARKNESS', price: 1500, class: 'skin-darkness' }
+    { id: 'darkness', name: 'THE DARKNESS', price: 500, class: 'skin-darkness' }
 ];
 
 let ownedSkins = JSON.parse(localStorage.getItem("ownedSkins")) || ['default'];
@@ -41,15 +41,12 @@ function openSkinShop() {
     const goldDisplay = document.getElementById("shop-gold");
     
     if (modal) {
-        // Gunakan flex karena kita ingin kontennya di tengah
         modal.style.display = "flex"; 
         
-        // Update tampilan emas di dalam shop
         if (goldDisplay) {
             goldDisplay.innerText = playerGold; 
         }
         
-        // Render item skin
         renderSkins(); 
     } else {
         console.error("Elemen skin-shop-modal tidak ditemukan!");
