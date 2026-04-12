@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="skin-player-darkness.css" />
     <link rel="stylesheet" href="skin-player-retro.css" />
     <link rel="stylesheet" href="skin-player-digital.css" />
+    <link rel="stylesheet" href="skin-player-golden.css" />
+    <link rel="stylesheet" href="skin-player-neoncyber.css" />
     <link rel="stylesheet" href="mail.css?v=7.0.0" />
     <link rel="stylesheet" href="sentinel.css?v=7.0.0" />
     <!-- <link rel="stylesheet" href="sentinel?v=3.0.0" /> -->
@@ -494,13 +496,26 @@
 
 <div id="skin-shop-modal" class="shop-overlay">
     <div class="shop-content">
-        <h1 class="ancient-title">THE ANCIENT VAULT</h1>
-        <p class="gold-status">Your Wealth: <span id="shop-gold">0</span> GOLD</p>
-        
-        <div class="skin-grid" id="skin-list">
-            </div>
+        <div class="close-vault-x" onclick="closeSkinShop()">&times;</div>
 
-        <button class="close-shop-btn" onclick="closeSkinShop()">CLOSE VAULT</button>
+        <div class="shop-header">
+            <h1 class="ancient-title" style="margin:0; font-size: 1.8rem;">THE ANCIENT VAULT</h1>
+            <p class="gold-status" style="margin: 10px 0 0;">
+                YOUR WEALTH: <span id="shop-gold" style="color:#fff;">0</span> 
+                <span style="font-size: 0.8rem; color: var(--gold);">GOLD</span>
+            </p>
+        </div>
+
+        <div class="skin-list-container">
+            <div class="skin-grid" id="skin-list">
+                </div>
+        </div>
+
+        <div class="shop-footer">
+            <button class="close-shop-btn" onclick="closeSkinShop()" style="margin:0;">
+                EXIT VAULT
+            </button>
+        </div>
     </div>
 </div>
 

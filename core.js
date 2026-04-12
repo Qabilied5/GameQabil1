@@ -30,7 +30,9 @@ const SKINS_DATA = [
     { id: 'digital', name: 'DIGITAL CODE', price: 1500, class: 'skin-digital' },
     { id: 'retro', name: 'RETRO 8-BIT', price: 1500, class: 'skin-retro' },
     { id: 'void', name: 'VOID WALKER', price: 1500, class: 'skin-void' },
-    { id: 'darkness', name: 'THE DARKNESS', price: 500, class: 'skin-darkness' }
+    { id: 'darkness', name: 'THE DARKNESS', price: 500, class: 'skin-darkness' },
+    { id: 'golden', name: 'LUXURY GOLDEN', price: 1000, class: 'skin-golden' },
+    { id: 'cyber-saber', name: 'Cyber Saber', price: 1000, class: 'skin-neon-cyber' }
 ];
 
 let ownedSkins = JSON.parse(localStorage.getItem("ownedSkins")) || ['default'];
@@ -86,6 +88,12 @@ function renderSkins() {
         } else if (skin.id === 'darkness') {
             skinIcon = '💀';
             iconColor = '#ff0000';
+        } else if (skin.id === 'golden') {
+            skinIcon = '🪙';
+            iconColor = '#dab919';
+        } else if (skin.id === 'cyber-saber') {
+            skinIcon = '🤖';
+            iconColor = '#772cbe';
         }
 
         // >> ICON SKIN
