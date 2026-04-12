@@ -1,0 +1,394 @@
+/* ============================================================
+   SKIN: VOID SOVEREIGN (ELDRITCH COSMIC)
+   skin-player-void-sovereign.css
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+.card.skin-void-sovereign {
+    --void-black:    #030508;
+    --void-deep:     #06090f;
+    --void-mid:      #0a0f1e;
+    --rift-cyan:     #00e5ff;
+    --rift-cyan-dim: #007a8c;
+    --rift-purple:   #a855f7;
+    --aurora-green:  #00ff9d;
+    --aurora-dim:    #00a865;
+    --plasma-white:  #e0f7ff;
+    --fissure-glow:  #4af0ff;
+    --hp-void:       #ff2d55;
+    --mana-void:     #a855f7;
+}
+
+/* === BASE CARD === */
+.card.skin-void-sovereign {
+    background:
+        radial-gradient(ellipse at 20% 10%,   rgba(0,229,255,0.06)  0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%,   rgba(168,85,247,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%,   rgba(0,255,157,0.03)  0%, transparent 70%),
+        linear-gradient(175deg, #0a0d18 0%, #030508 55%, #070510 100%);
+
+    border: 1px solid var(--rift-cyan-dim);
+    outline: 1px solid rgba(0,229,255,0.12);
+    outline-offset: 3px;
+
+    box-shadow:
+        0 0 0 3px var(--void-black),
+        0 0 0 4px rgba(0,229,255,0.15),
+        0 0 40px rgba(0,229,255,0.08),
+        0 0 80px rgba(168,85,247,0.06),
+        inset 0 1px 0 rgba(0,229,255,0.10),
+        inset 0 -1px 0 rgba(168,85,247,0.08);
+
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* === AURORA SWEEP === */
+@keyframes aurora-sweep {
+    0%   { transform: translateX(-150%) skewX(-25deg); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateX(250%)  skewX(-25deg); opacity: 0; }
+}
+
+.card.skin-void-sovereign::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        110deg,
+        transparent 25%,
+        rgba(0,229,255,0.03)  42%,
+        rgba(0,255,157,0.08)  50%,
+        rgba(168,85,247,0.04) 58%,
+        transparent 75%
+    );
+    pointer-events: none;
+    animation: aurora-sweep 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    z-index: 0;
+}
+
+/* === CORNER RIFT BRACKET === */
+.card.skin-void-sovereign::after {
+    content: '';
+    position: absolute;
+    bottom: 5px; right: 5px;
+    width: 22px; height: 22px;
+    border-bottom: 1px solid var(--rift-cyan);
+    border-right:  1px solid var(--rift-cyan);
+    border-radius: 0 0 2px 0;
+    pointer-events: none;
+    z-index: 1;
+    box-shadow:
+        2px 2px 10px rgba(0,229,255,0.4),
+        inset -1px -1px 6px rgba(0,229,255,0.15);
+    opacity: 0.8;
+}
+
+/* === HORIZONTAL RIFT LINE (top edge) === */
+.card.skin-void-sovereign .card-inner::before {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 100%;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0,229,255,0.6) 15%,
+        var(--aurora-green) 30%,
+        var(--rift-cyan) 50%,
+        var(--rift-purple) 70%,
+        rgba(168,85,247,0.6) 85%,
+        transparent 100%
+    );
+    box-shadow: 0 0 8px rgba(0,229,255,0.5);
+    animation: rift-pulse 3s ease-in-out infinite;
+}
+
+@keyframes rift-pulse {
+    0%, 100% { opacity: 1; filter: brightness(1); }
+    50%       { opacity: 0.6; filter: brightness(1.4); }
+}
+
+/* === TITLE === */
+.card.skin-void-sovereign h2 {
+    color: var(--fissure-glow) !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-shadow:
+        0 0 8px rgba(0,229,255,0.9),
+        0 0 20px rgba(0,229,255,0.5),
+        0 0 45px rgba(0,255,157,0.3),
+        0 1px 0 #000;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 2;
+}
+
+/* === BAR LABELS === */
+.card.skin-void-sovereign .bar-label {
+    color: var(--rift-cyan-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+    opacity: 0.85;
+}
+
+.card.skin-void-sovereign .bar-icon {
+    filter: hue-rotate(160deg) saturate(3) brightness(1.4);
+}
+
+/* === BAR BACKGROUNDS === */
+.card.skin-void-sovereign .bar-bg {
+    background: var(--void-black);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 1px;
+    box-shadow:
+        inset 0 1px 6px rgba(0,0,0,0.9),
+        0 0 4px rgba(0,229,255,0.05);
+    position: relative;
+    z-index: 2;
+}
+
+/* === HP BAR === */
+@keyframes bar-flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96%            { opacity: 0.7; }
+    97%            { opacity: 1; }
+    98%            { opacity: 0.85; }
+}
+
+.card.skin-void-sovereign .hp-fill {
+    background: linear-gradient(90deg,
+        #3d0010 0%,
+        #ff0040 45%,
+        #ff2d55 80%,
+        #ff80a0 100%
+    );
+    box-shadow:
+        0 0 10px rgba(255,45,85,0.7),
+        0 0 20px rgba(255,0,64,0.3),
+        inset 0 1px 0 rgba(255,150,180,0.4);
+    border-radius: 1px;
+    animation: bar-flicker 4s ease-in-out infinite;
+}
+
+/* === MANA BAR === */
+.card.skin-void-sovereign .mana-fill {
+    background: linear-gradient(90deg,
+        #1a0040 0%,
+        #7c3aed 45%,
+        #a855f7 80%,
+        #d8b4fe 100%
+    );
+    box-shadow:
+        0 0 10px rgba(168,85,247,0.7),
+        0 0 20px rgba(124,58,237,0.35),
+        inset 0 1px 0 rgba(216,180,254,0.3);
+    border-radius: 1px;
+    animation: bar-flicker 5s ease-in-out infinite;
+}
+
+/* === BAR TEXT === */
+.card.skin-void-sovereign .bar-text {
+    color: var(--plasma-white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-shadow:
+        0 0 6px rgba(0,229,255,0.7),
+        0 0 12px rgba(0,229,255,0.3);
+}
+
+/* === SKILL GRID DIVIDER === */
+.card.skin-void-sovereign #p1-skills,
+.card.skin-void-sovereign #bot-skills {
+    gap: 5px;
+    position: relative;
+    z-index: 2;
+}
+
+.card.skin-void-sovereign #p1-skills::before,
+.card.skin-void-sovereign #bot-skills::before {
+    content: '';
+    display: block;
+    grid-column: 1 / -1;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        var(--rift-purple) 20%,
+        var(--rift-cyan)   50%,
+        var(--aurora-green) 70%,
+        transparent
+    );
+    margin-bottom: 4px;
+    box-shadow: 0 0 6px rgba(0,229,255,0.35);
+}
+
+/* === SKILL BUTTONS === */
+.card.skin-void-sovereign .skill-box {
+    position: relative;
+}
+
+.card.skin-void-sovereign .key-hint {
+    color: var(--aurora-green) !important;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 6px rgba(0,255,157,0.6);
+}
+
+.card.skin-void-sovereign .skill-btn {
+    background: linear-gradient(155deg,
+        #060c1a 0%,
+        #040810 60%,
+        #070c18 100%
+    );
+    border: 1px solid rgba(0,229,255,0.25);
+    border-bottom: 1px solid rgba(0,229,255,0.4);
+    border-radius: 2px;
+    color: var(--rift-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(0,229,255,0.6);
+    padding: 8px 5px;
+    cursor: pointer;
+
+    box-shadow:
+        0 0 0 1px rgba(0,229,255,0.08),
+        0 2px 10px rgba(0,0,0,0.8),
+        inset 0 1px 0 rgba(0,229,255,0.07);
+
+    transition:
+        background  0.15s ease,
+        box-shadow  0.15s ease,
+        transform   0.10s ease,
+        color       0.15s ease,
+        border-color 0.15s ease;
+
+    position: relative;
+    overflow: hidden;
+}
+
+/* Scan-line sweep on hover */
+.card.skin-void-sovereign .skill-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        110deg,
+        transparent 35%,
+        rgba(0,255,157,0.07)  48%,
+        rgba(0,229,255,0.12) 50%,
+        rgba(168,85,247,0.07) 52%,
+        transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+/* Corner pip accent */
+.card.skin-void-sovereign .skill-btn::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 4px; height: 4px;
+    border-top: 1px solid var(--rift-cyan);
+    border-left: 1px solid var(--rift-cyan);
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.card.skin-void-sovereign .skill-btn:hover:not(:disabled) {
+    background: linear-gradient(155deg,
+        #071222 0%,
+        #050e1c 60%,
+        #081524 100%
+    );
+    color: var(--fissure-glow);
+    text-shadow:
+        0 0 10px rgba(0,229,255,1),
+        0 0 22px rgba(0,255,157,0.5);
+    border-color: var(--rift-cyan);
+    box-shadow:
+        0 0 0 1px rgba(0,229,255,0.3),
+        0 0 12px rgba(0,229,255,0.25),
+        0 4px 16px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(0,229,255,0.15);
+    transform: translateY(-1px);
+}
+
+.card.skin-void-sovereign .skill-btn:hover:not(:disabled)::before {
+    opacity: 1;
+}
+
+.card.skin-void-sovereign .skill-btn:hover:not(:disabled)::after {
+    opacity: 1;
+    box-shadow: 0 0 6px rgba(0,229,255,0.6);
+}
+
+.card.skin-void-sovereign .skill-btn:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow:
+        0 0 0 1px rgba(0,229,255,0.2),
+        0 1px 4px rgba(0,0,0,0.9),
+        inset 0 2px 6px rgba(0,0,0,0.7);
+}
+
+.card.skin-void-sovereign .skill-btn:disabled {
+    opacity: 0.30;
+    filter: grayscale(0.6) brightness(0.6);
+    cursor: not-allowed;
+}
+
+/* === COOLDOWN OVERLAY === */
+.card.skin-void-sovereign .cd-overlay {
+    background: rgba(3, 5, 8, 0.78);
+    border-radius: 2px;
+    border: 1px solid rgba(0,229,255,0.10);
+    backdrop-filter: blur(1px);
+}
+
+.card.skin-void-sovereign .cd-text {
+    color: var(--fissure-glow);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    text-shadow:
+        0 0 8px rgba(0,229,255,0.9),
+        0 0 18px rgba(0,229,255,0.4);
+}
+
+/* === DEBUFF LABEL === */
+.card.skin-void-sovereign .debuff-label {
+    color: #ff2d55;
+    font-family: 'Share Tech Mono', monospace;
+    font-style: normal;
+    letter-spacing: 0.05em;
+    text-shadow:
+        0 0 8px rgba(255,45,85,0.8),
+        0 0 16px rgba(255,0,64,0.4);
+}
+
+/* === SENTINEL BADGE === */
+.card.skin-void-sovereign .sentinel-badge {
+    color: var(--aurora-green);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-shadow:
+        0 0 8px rgba(0,255,157,0.7),
+        0 0 18px rgba(0,255,157,0.3);
+}

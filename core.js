@@ -32,9 +32,12 @@ const SKINS_DATA = [
     { id: 'digital', name: 'DIGITAL CODE', price: 1500, class: 'skin-digital' },
     { id: 'retro', name: 'RETRO 8-BIT', price: 1500, class: 'skin-retro' },
     { id: 'void', name: 'VOID WALKER', price: 1500, class: 'skin-void' },
-    { id: 'darkness', name: 'THE DARKNESS', price: 500, class: 'skin-darkness' },
+    { id: 'darkness', name: 'CREPPY DEATH', price: 500, class: 'skin-darkness' },
     { id: 'golden', name: 'LUXURY GOLDEN', price: 1000, class: 'skin-golden' },
-    { id: 'cyber-saber', name: 'Cyber Saber', price: 1000, class: 'skin-neon-cyber' }
+    { id: 'cyber-saber', name: 'CYBER SABER', price: 1000, class: 'skin-neon-cyber' },
+    { id: 'glassmorphism', name: 'GLASSMORPHISM', price: 200, class: 'skin-glass'},
+    { id: 'void-souverign', name: 'VOID SOUVERIGN', price: 1000, class: 'skin-void-sovereign'},
+    { id: 'primordial-relic', name: 'PRIMORDIAL RELIC', price: 1000, class: 'skin-primordial-relic'}
 ];
 
 let ownedSkins = JSON.parse(localStorage.getItem("ownedSkins")) || ['default'];
@@ -96,10 +99,18 @@ function renderSkins() {
         } else if (skin.id === 'cyber-saber') {
             skinIcon = '🤖';
             iconColor = '#772cbe';
+        } else if (skin.id === 'glassmorphism') {
+            skinIcon = '🍷';
+            iconColor = '#ffffff';
+        } else if (skin.id === 'void-souverign') {
+            skinIcon = '⚫';
+            iconColor = '#ffffff';
+        } else if (skin.id === 'primordial-relic') {
+            skinIcon = '🔱';
+            iconColor = '#ff0000';
         }
 
         // >> ICON SKIN
-        
         let buttonText = `BUY ${skin.price}G`;
         let btnClass = "buy-btn";
         let onClick = `buySkin('${skin.id}', ${skin.price})`;
@@ -1283,10 +1294,10 @@ function win(id) {
 
       // GOLD LOGIC
       let reward = 0;
-      if (selectedDiff === "normal") reward = 25;
+      if (selectedDiff === "normal") reward = 50;
       else if (selectedDiff === "hard") reward = 150;
-      else if (selectedDiff === "expert") reward = 450;
-      else if (selectedDiff === "insanity") reward = 1000;
+      else if (selectedDiff === "expert") reward = 500;
+      else if (selectedDiff === "insanity") reward = 2500;
 
       playerGold += reward;
       localStorage.setItem("playerGold", playerGold.toString());
