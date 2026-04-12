@@ -19,10 +19,12 @@ function updateGoldUI() {
 function updateGoldDisplay() {
     const goldEl = document.getElementById("gold-display");
     if (goldEl) goldEl.innerText = playerGold;
+
+    const shopGoldEl = document.getElementById("shop-gold");
+    if (shopGoldEl) shopGoldEl.innerText = playerGold;
 }
 
 // SKIN SHOP LOGIC
-
 // >> REMINDER UPDATED KALO SKIN BARU
 const SKINS_DATA = [
     { id: 'default', name: 'ORIGINAL', price: 0, class: '' },
@@ -132,12 +134,52 @@ function buySkin(id, price) {
         ownedSkins.push(id);
         localStorage.setItem("playerGold", playerGold.toString());
         localStorage.setItem("ownedSkins", JSON.stringify(ownedSkins));
+        
         updateGoldDisplay();
         renderSkins();
+        
+        showToast(`SUCCESS: Skin ${id.toUpperCase()} Unlocked!`, 'success');
         log(`SYSTEM: Skin ${id.toUpperCase()} purchased!`);
     } else {
+        showToast(`NOT ENOUGH GOLD! You need ${price - playerGold} more.`, 'error');
         log("SYSTEM: Not enough gold!");
     }
+}
+
+function showToast(message, type = 'error') {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+
+    if (container.childElementCount >= 3) {
+        container.removeChild(container.firstChild);
+    }
+
+    const toast = document.createElement("div");
+    
+    toast.style.cssText = `
+    background: ${type === 'error' ? '#ff4b2b' : '#4ade80'};
+    color: white;
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem; /* Sedikit lebih kecil untuk mobile */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
+    width: fit-content;  /* Menyesuaikan dengan panjang teks */
+    max-width: 90vw;     /* Agar tidak melebihi lebar layar hp */
+    border-left: 5px solid rgba(0,0,0,0.2);
+    pointer-events: none;
+`;
+    
+    toast.innerText = message;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode === container) {
+            toast.remove();
+        }
+    }, 3000);
 }
 
 function equipSkin(id) {
