@@ -1,0 +1,53 @@
+.card.skin-darkness {
+    background: linear-gradient(180deg, #000000 0%, #1a0000 100%);
+    backdrop-filter: blur(30px);
+    border: 1px solid #ff0000;
+    box-shadow: 0 0 40px rgba(255, 0, 0, 0.2), 
+                inset 0 0 30px rgba(0, 0, 0, 1);
+    position: relative;
+    overflow: visible;
+}
+
+.card.skin-darkness::before {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    background: rgba(255, 0, 0, 0.1);
+    z-index: -1;
+    filter: blur(20px);
+    border-radius: 20px;
+    animation: darkness-aura 3s infinite alternate;
+}
+
+.card.skin-darkness::after {
+    border-color: #8b0000;
+    filter: drop-shadow(0 0 8px #ff0000);
+}
+
+.card.skin-darkness h2 {
+    color: #ff3333 !important;
+    text-shadow: 0 0 20px #ff0000;
+    font-family: 'Metal Mania', cursive;
+    letter-spacing: 4px;
+}
+
+.card.skin-darkness .hp-fill {
+    background: linear-gradient(90deg, #300, #900, #f00);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.card.skin-darkness .mana-fill {
+    background: linear-gradient(90deg, #111, #444, #888);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+@keyframes darkness-aura {
+    0% { opacity: 0.3; transform: scale(1); }
+    100% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.card.skin-darkness.active-turn {
+    border-color: #ff0000;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+    transform: scale(1.02);
+}

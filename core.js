@@ -23,10 +23,14 @@ function updateGoldDisplay() {
 
 // SKIN SHOP LOGIC
 
+// >> REMINDER UPDATED KALO SKIN BARU
 const SKINS_DATA = [
     { id: 'default', name: 'ORIGINAL', price: 0, class: '' },
     { id: 'lovely', name: 'LOVELY PINK', price: 500, class: 'skin-lovely' },
-    { id: 'void', name: 'VOID WALKER', price: 1500, class: 'skin-void' }
+    { id: 'digital', name: 'DIGITAL CODE', price: 1000, class: 'skin-digital' },
+    { id: 'retro', name: 'RETRO 8-BIT', price: 1200, class: 'skin-retro' },
+    { id: 'void', name: 'VOID WALKER', price: 1500, class: 'skin-void' },
+    { id: 'darkness', name: 'THE DARKNESS', price: 1500, class: 'skin-darkness' }
 ];
 
 let ownedSkins = JSON.parse(localStorage.getItem("ownedSkins")) || ['default'];
@@ -68,6 +72,26 @@ function renderSkins() {
     SKINS_DATA.forEach(skin => {
         const isOwned = ownedSkins.includes(skin.id);
         const isEquipped = equippedSkin === skin.id;
+
+        // >> ICON SKIN
+        let skinIcon = '🛡️';
+        if (skin.id === 'lovely') {
+            skinIcon = '💖';
+        } else if (skin.id === 'digital') {
+            skinIcon = '📟';
+            iconColor = '#00ff41';
+        } else if (skin.id === 'retro') {
+            skinIcon = '🕹️';
+            iconColor = '#ffff00';
+        } else if (skin.id === 'void') {
+            skinIcon = '🌌';
+            iconColor = '#8a2be2';
+        } else if (skin.id === 'darkness') {
+            skinIcon = '💀';
+            iconColor = '#ff0000';
+        }
+
+        // >> ICON SKIN
         
         let buttonText = `BUY ${skin.price}G`;
         let btnClass = "buy-btn";
@@ -84,13 +108,16 @@ function renderSkins() {
         }
 
         list.innerHTML += `
-            <div class="skin-item ${isEquipped ? 'equiped' : ''}">
-                <h3 style="font-family: Cinzel; font-size: 14px;">${skin.name}</h3>
-                <button class="${btnClass}" onclick="${onClick}" ${isEquipped ? 'disabled' : ''}>
-                    ${buttonText}
-                </button>
-            </div>
-        `;
+          <div class="skin-item ${isEquipped ? 'equiped' : ''}">
+              <div style="font-size: 2.5rem; filter: drop-shadow(0 0 10px ${skin.id === 'void' ? '#8a2be2' : 'transparent'});">
+                  ${skinIcon}
+              </div>
+              <h3 style="font-family: Cinzel; margin: 5px 0; color: #fff; font-size: 1rem;">${skin.name}</h3>
+              <button class="${btnClass}" onclick="${onClick}" ${isEquipped ? 'disabled' : ''}>
+                  ${buttonText}
+              </button>
+          </div>
+      `;
     });
 }
 
@@ -405,21 +432,23 @@ function init() {
 
     SKILLS.forEach((s, index) => {
       const keyLabel = keys[index];
-
       const hintClass = isPVP ? "visible-hint" : "hidden-hint";
       const displayKey = isPVP ? `[${keyLabel}]` : "";
 
       cont.innerHTML += `
         <div class="skill-box" style="display: flex; flex-direction: column; align-items: center; position: relative;">
-            <div class="key-hint ${hintClass}" style="font-size: 9px; font-family: monospace;">
+            <div class="key-hint ${hintClass}" style="font-size: 9px; font-family: monospace; color: var(--gold);">
                 ${displayKey}
             </div>
             <div id="${p}-${s.id}-txt" class="cd-text"></div>
+            
             <button id="${p}-${s.id}-btn" 
+                    class="skill-btn" 
                     onclick="useSkill('${s.id}','${p}')" 
-                    style="border-bottom:2px solid ${s.color}; width: 100%; font-size: 10px; padding: 5px 0;">
+                    style="border-bottom:2px solid ${s.color};">
                 ${s.name}
             </button>
+            
             <div id="${p}-${s.id}-cd" class="cd-overlay"></div>
         </div>`;
     });
